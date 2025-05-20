@@ -1,16 +1,34 @@
 {
   "name": "@jzone-mcp/antd-components-mcp",
-  "version": "1.0.11",
+  "version": "1.0.24",
   "type": "module",
-  "description": "An MCP service for Ant Design components query | 一个 Ant Design 组件查询的 MCP 服务，包含组件文档、API 文档、代码示例和更新日志查询",
+  "description": "An MCP service for Ant Design components query | 一个减少 Ant Design 组件代码生成幻觉的 MCP 服务，包含系统提示词、组件文档、API 文档、代码示例和更新日志查询",
   "bin": "dist/cli.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/zhixiaoqiang/antd-components-mcp"
   },
-  "publishConfig": {
-    "access": "public"
+  "homepage": "https://github.com/zhixiaoqiang/antd-components-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/zhixiaoqiang/antd-components-mcp/issues",
+    "email": "xdnazi1985@gmail.com"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "author": {
+    "name": "zhixiaoqiang",
+    "email": "xdnazi1985@gmail.com",
+    "url": "https://github.com/zhixiaoqiang"
+  },
+  "contributors": [
+    {
+      "name": "zhixiaoqiang",
+      "email": "xdnazi1985@gmail.com",
+      "url": "https://github.com/zhixiaoqiang"
+    }
+  ],
   "scripts": {
     "start": "node dist/cli.js",
     "build": "tsup",
@@ -29,13 +47,11 @@
     "ui components"
   ],
   "files": [
-    "assets",
     "dist",
     "componentData",
     "README.md",
     "README.zh-CN.md"
   ],
-  "author": "zhixiaoqiang",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",
