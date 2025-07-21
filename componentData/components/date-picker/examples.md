@@ -331,6 +331,10 @@ const disabledDate: RangePickerProps['disabledDate'] = (current) => {
   // Can not select days before today and today
   return current && current < dayjs().endOf('day');
 };
+const disabledDateForMonth: RangePickerProps['disabledDate'] = (current) => {
+  // Can not select months before this month
+  return current && current < dayjs().startOf('month');
+};
 const disabledDateTime = () => ({
   disabledHours: () => range(0, 24).splice(4, 20),
   disabledMinutes: () => range(30, 60),
@@ -358,7 +362,7 @@ const App: React.FC = () => (
       disabledTime={disabledDateTime}
       showTime={{ defaultValue: dayjs('00:00:00', 'HH:mm:ss') }}
     />
-    <DatePicker picker="month" disabledDate={disabledDate} />
+    <DatePicker picker="month" disabledDate={disabledDateForMonth} />
     <RangePicker disabledDate={disabledDate} />
     <RangePicker
       disabledDate={disabledDate}
@@ -381,7 +385,7 @@ import React from 'react';
 import { DatePicker } from 'antd';
 const App: React.FC = () => (
   <DatePicker.RangePicker
-    placeholder={['Allow Empty', 'Till Now']}
+    placeholder={['Start Date', 'Till Now']}
     allowEmpty={[false, true]}
     onChange={(date, dateString) => {
       console.log(date, dateString);
@@ -666,11 +670,11 @@ export default App;
 import React from 'react';
 import { DownOutlined } from '@ant-design/icons';
 import { DatePicker, Dropdown, Space } from 'antd';
-import dayjs from 'dayjs';
-const App: React.FC = () => {
+import dayjs, { Dayjs } from 'dayjs';
+const DatePickerDemo: React.FC = () => {
   const [visible, setVisible] = React.useState(false);
   const [panelVisible, setPanelVisible] = React.useState(false);
-  const [date, setDate] = React.useState(dayjs());
+  const [date, setDate] = React.useState<Dayjs | null>(() => dayjs());
   return (
     <Dropdown
       arrow
@@ -705,7 +709,7 @@ const App: React.FC = () => {
             key: 'custom-date',
             label: (
               <div
-                style={{ position: 'relative' }}
+                style={{ position: 'relative', overflow: 'hidden' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setPanelVisible(true);
@@ -716,17 +720,18 @@ const App: React.FC = () => {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  style={{
-                    height: 0,
-                    width: 0,
-                    overflow: 'hidden',
-                    position: 'absolute',
-                    top: 0,
-                    insetInlineStart: 0,
-                  }}
                 >
                   <DatePicker
                     open={panelVisible}
+                    styles={{
+                      root: {
+                        pointerEvents: 'none',
+                        opacity: 0,
+                        position: 'absolute',
+                        bottom: -12,
+                        insetInlineStart: 0,
+                      },
+                    }}
                     onChange={(date) => {
                       setDate(date);
                       setVisible(false);
@@ -741,13 +746,119 @@ const App: React.FC = () => {
       }}
     >
       <Space>
-        <span>{date.format('YYYY-MM-DD')}</span>
+        <span>{date?.format('YYYY-MM-DD')}</span>
         <DownOutlined />
       </Space>
     </Dropdown>
   );
 };
-export default App;
+const RangePickerDemo: React.FC = () => {
+  const [visible, setVisible] = React.useState(false);
+  const [panelVisible, setPanelVisible] = React.useState(false);
+  const [dates, setDates] = React.useState<[Dayjs, Dayjs] | null>(() => [
+    dayjs(),
+    dayjs().add(1, 'day'),
+  ]);
+  return (
+    <Dropdown
+      arrow
+      open={visible}
+      trigger={['click']}
+      destroyOnHidden
+      onOpenChange={(open) => {
+        setVisible(open);
+        if (!open) {
+          setPanelVisible(false);
+        }
+      }}
+      menu={{
+        items: [
+          {
+            key: '7',
+            label: '7 days',
+            onClick() {
+              setDates([dayjs(), dayjs().add(7, 'day')]);
+              setVisible(false);
+            },
+          },
+          {
+            key: '30',
+            label: '30 days',
+            onClick() {
+              setDates([dayjs(), dayjs().add(30, 'day')]);
+              setVisible(false);
+            },
+          },
+          {
+            key: 'custom-date',
+            label: (
+              <div
+                style={{ position: 'relative', overflow: 'hidden' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPanelVisible(true);
+                }}
+              >
+                <div>Customize</div>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <DatePicker.RangePicker
+                    open={panelVisible}
+                    styles={{
+                      root: {
+                        pointerEvents: 'none',
+                        opacity: 0,
+                        position: 'absolute',
+                        bottom: 0, // RangePicker use this style
+                        insetInlineStart: 0,
+                      },
+                    }}
+                    onChange={(ranges) => {
+                      if (ranges?.[0] && ranges?.[1]) {
+                        setDates([ranges[0], ranges[1]]);
+                      } else {
+                        setDates(null);
+                      }
+                      setVisible(false);
+                      setPanelVisible(false);
+                    }}
+                  />
+                </div>
+              </div>
+            ),
+          },
+        ],
+      }}
+    >
+      <Space>
+        <span>
+          {dates
+            ? `${dates[0].format('YYYY-MM-DD')} ~ ${dates[1].format('YYYY-MM-DD')}`
+            : 'Select range'}
+        </span>
+        <DownOutlined />
+      </Space>
+    </Dropdown>
+  );
+};
+const Demo = () => {
+  return (
+    <div style={{ display: 'flex', gap: '20%' }}>
+      <div>
+        <div style={{ marginBottom: 12 }}>DatePicker</div>
+        <DatePickerDemo />
+      </div>
+      <div>
+        <div style={{ marginBottom: 12 }}>RangePicker</div>
+        <RangePickerDemo />
+      </div>
+    </div>
+  );
+};
+export default Demo;
 ```
 ### 佛历格式
 通过 `locale` 配置支持特殊的年历格式。
