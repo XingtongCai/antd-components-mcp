@@ -193,37 +193,32 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Form, Input } from 'antd';
+import { Divider, Form, Input } from 'antd';
 const App: React.FC = () => (
   <>
-    <Form
-      name="layout-multiple-horizontal"
-      layout="horizontal"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
-      <Form.Item label="horizontal" name="horizontal" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
+    <Form name="layout-multiple-horizontal" layout="horizontal">
       <Form.Item
-        layout="vertical"
-        label="vertical"
-        name="vertical"
+        label="horizontal"
+        name="horizontal"
         rules={[{ required: true }]}
-        labelCol={{ span: 24 }}
-        wrapperCol={{ span: 24 }}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
+      <Form.Item layout="vertical" label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item layout="vertical" label="vertical2" name="vertical2" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
     </Form>
-    <br />
-    <Form
-      name="layout-multiple-vertical"
-      layout="vertical"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
+    <Divider />
+    <Form name="layout-multiple-vertical" layout="vertical">
       <Form.Item label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="vertical2" name="vertical2" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
       <Form.Item
@@ -231,6 +226,8 @@ const App: React.FC = () => (
         label="horizontal"
         name="horizontal"
         rules={[{ required: true }]}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
@@ -3096,7 +3093,7 @@ export default App;
 ```tsx
 import React from 'react';
 import { AlertFilled, CloseSquareFilled } from '@ant-design/icons';
-import { Button, Form, Input, Tooltip } from 'antd';
+import { Button, Form, Input, Tooltip, Mentions } from 'antd';
 import { createStyles, css } from 'antd-style';
 import uniqueId from 'lodash/uniqueId';
 const useStyle = createStyles(() => ({
@@ -3158,6 +3155,28 @@ const App: React.FC = () => {
         }}
       >
         <Input />
+      </Form.Item>
+      <Form.Item
+        name="custom-feedback-test-item3"
+        label="Test"
+        className={styles['custom-feedback-icons']}
+        hasFeedback
+        validateStatus="success"
+        initialValue="@mention1"
+      >
+        <Mentions
+          allowClear
+          options={[
+            {
+              value: 'mention1',
+              label: 'mention1',
+            },
+            {
+              value: 'mention2',
+              label: 'mention2',
+            },
+          ]}
+        />
       </Form.Item>
       <Form.Item>
         <Button htmlType="submit">Submit</Button>
