@@ -1536,6 +1536,87 @@ const App: React.FC = () => (
 );
 export default App;
 ```
+### 可自定义展开位置
+使用 `expandedRowOffset` 自定义展开子表格偏移列数
+
+```tsx
+import React from 'react';
+import { Table } from 'antd';
+import type { TableColumnsType } from 'antd';
+interface DataType {
+  key: React.Key;
+  team: string;
+  name: string;
+  age: number;
+  address: string;
+  description: string;
+}
+const columns: TableColumnsType<DataType> = [
+  {
+    title: 'Team',
+    dataIndex: 'team',
+    key: 'team',
+    onCell: (__, index = 0) => (index % 2 === 0 ? { rowSpan: 2 } : { rowSpan: 0 }),
+    width: 100,
+  },
+  Table.EXPAND_COLUMN,
+  { title: 'Name', dataIndex: 'name', key: 'name', width: 150 },
+  { title: 'Age', dataIndex: 'age', key: 'age' },
+  { title: 'Address', dataIndex: 'address', key: 'address' },
+  {
+    title: 'Action',
+    dataIndex: '',
+    key: 'x',
+    render: () => <a>Delete</a>,
+  },
+];
+const data: DataType[] = [
+  {
+    key: 1,
+    team: 'Team A',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+    description: 'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.',
+  },
+  {
+    key: 2,
+    team: 'Team A',
+    name: 'Jim Green',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+    description: 'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.',
+  },
+  {
+    key: 3,
+    team: 'Team B',
+    name: 'Not Expandable',
+    age: 29,
+    address: 'Jiangsu No. 1 Lake Park',
+    description: 'This not expandable',
+  },
+  {
+    key: 4,
+    team: 'Team B',
+    name: 'Joe Black',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+    description: 'My name is Joe Black, I am 32 years old, living in Sydney No. 1 Lake Park.',
+  },
+];
+const App: React.FC = () => (
+  <Table<DataType>
+    bordered
+    columns={columns}
+    expandable={{
+      expandedRowOffset: 3,
+      expandedRowRender: (record) => <div>{record.description}</div>,
+    }}
+    dataSource={data}
+  />
+);
+export default App;
+```
 ### 特殊列排序
 你可以通过 `Table.EXPAND_COLUMN` 和 `Table.SELECTION_COLUMN` 来控制选择和展开列的顺序。
 
@@ -3283,18 +3364,13 @@ interface DragIndexState {
 }
 const DragIndexContext = createContext<DragIndexState>({ active: -1, over: -1 });
 const dragActiveStyle = (dragState: DragIndexState, id: string) => {
-  const { active, over, direction } = dragState;
+  const { active, over } = dragState;
   // drag active style
   let style: React.CSSProperties = {};
   if (active && active === id) {
     style = { backgroundColor: 'gray', opacity: 0.5 };
-  }
-  // dragover dashed style
-  else if (over && id === over && active !== over) {
-    style =
-      direction === 'right'
-        ? { borderRight: '1px dashed gray' }
-        : { borderLeft: '1px dashed gray' };
+  } else if (over && id === over && active !== over) {
+    style = { borderInlineStart: '1px dashed gray' };
   }
   return style;
 };
@@ -5264,6 +5340,194 @@ const App: React.FC = () => {
       </ConfigProvider>
     </>
   );
+};
+export default App;
+```
+### measureRowRender
+用 `measureRowRender` 修复 https://github.com/ant-design/ant-design/issues/54906 。
+
+```tsx
+import React, { useRef, useState } from 'react';
+import { SearchOutlined } from '@ant-design/icons';
+import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
+import { Button, Input, Space, Table } from 'antd';
+import type { FilterDropdownProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
+interface DataType {
+  key: string;
+  name: string;
+  age: number;
+  address: string;
+}
+type DataIndex = keyof DataType;
+const data: DataType[] = [
+  {
+    key: '1',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+  },
+  {
+    key: '2',
+    name: 'Joe Black',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+  },
+  {
+    key: '3',
+    name: 'Jim Green',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+  },
+  {
+    key: '4',
+    name: 'Jim Red',
+    age: 32,
+    address: 'London No. 2 Lake Park',
+  },
+];
+const App: React.FC = () => {
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef<InputRef>(null);
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps['confirm'],
+    dataIndex: DataIndex,
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<DataType> => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText((selectedKeys as string[])[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    filterDropdownProps: {
+      onOpenChange(open) {
+        if (open) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
+  const columns: TableColumnsType<DataType> = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      width: '30%',
+      ...getColumnSearchProps('name'),
+      filterDropdownProps: {
+        open: true,
+      },
+    },
+    {
+      title: 'Age',
+      dataIndex: 'age',
+      key: 'age',
+      width: '20%',
+      filters: [
+        {
+          text: 'Joe',
+          value: 'Joe',
+        },
+        {
+          text: 'Category 1',
+          value: 'Category 1',
+        },
+        {
+          text: 'Category 2',
+          value: 'Category 2',
+        },
+      ],
+      filterDropdownProps: {
+        open: true,
+      },
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
+      ...getColumnSearchProps('address'),
+      sorter: (a, b) => a.address.length - b.address.length,
+      sortDirections: ['descend', 'ascend'],
+      showSorterTooltip: {
+        open: true,
+      },
+    },
+  ];
+  return <Table<DataType> sticky columns={columns} dataSource={data} />;
 };
 export default App;
 ```
