@@ -296,7 +296,7 @@ const cascaderOptions = [
         children: [
           {
             value: 'saadat-abad',
-            label: 'سعادت آیاد',
+            label: 'سعادت آباد',
           },
         ],
       },
@@ -311,7 +311,7 @@ const cascaderOptions = [
         label: 'اردبیل',
         children: [
           {
-            value: 'primadar',
+            value: 'pirmadar',
             label: 'پیرمادر',
           },
         ],
@@ -945,7 +945,7 @@ type WaveConfig = GetProp<ConfigProviderProps, 'wave'>;
 // Prepare effect holder
 const createHolder = (node: HTMLElement) => {
   const { borderWidth } = getComputedStyle(node);
-  const borderWidthNum = parseInt(borderWidth, 10);
+  const borderWidthNum = Number.parseInt(borderWidth, 10);
   const div = document.createElement('div');
   div.style.position = 'absolute';
   div.style.inset = `-${borderWidthNum}px`;

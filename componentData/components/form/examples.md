@@ -193,37 +193,32 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Form, Input } from 'antd';
+import { Divider, Form, Input } from 'antd';
 const App: React.FC = () => (
   <>
-    <Form
-      name="layout-multiple-horizontal"
-      layout="horizontal"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
-      <Form.Item label="horizontal" name="horizontal" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
+    <Form name="layout-multiple-horizontal" layout="horizontal">
       <Form.Item
-        layout="vertical"
-        label="vertical"
-        name="vertical"
+        label="horizontal"
+        name="horizontal"
         rules={[{ required: true }]}
-        labelCol={{ span: 24 }}
-        wrapperCol={{ span: 24 }}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
+      <Form.Item layout="vertical" label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item layout="vertical" label="vertical2" name="vertical2" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
     </Form>
-    <br />
-    <Form
-      name="layout-multiple-vertical"
-      layout="vertical"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
+    <Divider />
+    <Form name="layout-multiple-vertical" layout="vertical">
       <Form.Item label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="vertical2" name="vertical2" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
       <Form.Item
@@ -231,6 +226,8 @@ const App: React.FC = () => (
         label="horizontal"
         name="horizontal"
         rules={[{ required: true }]}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
@@ -1354,7 +1351,7 @@ const PriceInput: React.FC<PriceInputProps> = (props) => {
     onChange?.({ number, currency, ...value, ...changedValue });
   };
   const onNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newNumber = parseInt(e.target.value || '0', 10);
+    const newNumber = Number.parseInt(e.target.value || '0', 10);
     if (Number.isNaN(number)) {
       return;
     }
@@ -1708,7 +1705,7 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import type { CascaderProps } from 'antd';
+import type { CascaderProps, FormItemProps, FormProps } from 'antd';
 import {
   AutoComplete,
   Button,
@@ -1721,13 +1718,14 @@ import {
   Row,
   Select,
 } from 'antd';
+import type { DefaultOptionType } from 'antd/es/select';
 const { Option } = Select;
-interface DataNodeType {
+interface FormCascaderOption {
   value: string;
   label: string;
-  children?: DataNodeType[];
+  children?: FormCascaderOption[];
 }
-const residences: CascaderProps<DataNodeType>['options'] = [
+const residences: CascaderProps<FormCascaderOption>['options'] = [
   {
     value: 'zhejiang',
     label: 'Zhejiang',
@@ -1761,7 +1759,7 @@ const residences: CascaderProps<DataNodeType>['options'] = [
     ],
   },
 ];
-const formItemLayout = {
+const formItemLayout: FormProps = {
   labelCol: {
     xs: { span: 24 },
     sm: { span: 8 },
@@ -1771,7 +1769,7 @@ const formItemLayout = {
     sm: { span: 16 },
   },
 };
-const tailFormItemLayout = {
+const tailFormItemLayout: FormItemProps = {
   wrapperCol: {
     xs: {
       span: 24,
@@ -1806,13 +1804,11 @@ const App: React.FC = () => {
   );
   const [autoCompleteResult, setAutoCompleteResult] = useState<string[]>([]);
   const onWebsiteChange = (value: string) => {
-    if (!value) {
-      setAutoCompleteResult([]);
-    } else {
-      setAutoCompleteResult(['.com', '.org', '.net'].map((domain) => `${value}${domain}`));
-    }
+    setAutoCompleteResult(
+      value ? ['.com', '.org', '.net'].map((domain) => `${value}${domain}`) : [],
+    );
   };
-  const websiteOptions = autoCompleteResult.map((website) => ({
+  const websiteOptions = autoCompleteResult.map<DefaultOptionType>((website) => ({
     label: website,
     value: website,
   }));
@@ -3096,7 +3092,7 @@ export default App;
 ```tsx
 import React from 'react';
 import { AlertFilled, CloseSquareFilled } from '@ant-design/icons';
-import { Button, Form, Input, Tooltip } from 'antd';
+import { Button, Form, Input, Tooltip, Mentions } from 'antd';
 import { createStyles, css } from 'antd-style';
 import uniqueId from 'lodash/uniqueId';
 const useStyle = createStyles(() => ({
@@ -3158,6 +3154,28 @@ const App: React.FC = () => {
         }}
       >
         <Input />
+      </Form.Item>
+      <Form.Item
+        name="custom-feedback-test-item3"
+        label="Test"
+        className={styles['custom-feedback-icons']}
+        hasFeedback
+        validateStatus="success"
+        initialValue="@mention1"
+      >
+        <Mentions
+          allowClear
+          options={[
+            {
+              value: 'mention1',
+              label: 'mention1',
+            },
+            {
+              value: 'mention2',
+              label: 'mention2',
+            },
+          ]}
+        />
       </Form.Item>
       <Form.Item>
         <Button htmlType="submit">Submit</Button>

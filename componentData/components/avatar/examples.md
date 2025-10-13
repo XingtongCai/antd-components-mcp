@@ -40,7 +40,7 @@ const App: React.FC = () => (
     <Avatar>U</Avatar>
     <Avatar size={40}>USER</Avatar>
     <Avatar src={url} />
-    <Avatar src={<img src={url} alt="avatar" />} />
+    <Avatar src={<img draggable={false} src={url} alt="avatar" />} />
     <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }}>U</Avatar>
     <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
   </Space>
@@ -288,9 +288,12 @@ const App: React.FC = () => (
           containerSize: 60,
           containerSizeLG: 30,
           containerSizeSM: 16,
-          textFontSize: 18,
-          textFontSizeLG: 28,
-          textFontSizeSM: 12,
+          textFontSize: 14,
+          textFontSizeLG: 14,
+          textFontSizeSM: 14,
+          iconFontSize: 18,
+          iconFontSizeLG: 28,
+          iconFontSizeSM: 12,
           borderRadius: 10,
           groupOverlapping: -10,
           groupBorderColor: '#eee',
