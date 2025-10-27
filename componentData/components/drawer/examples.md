@@ -641,7 +641,7 @@ const useStyle = createStyles(({ token }) => ({
     color: token.colorPrimary,
   },
   'my-drawer-content': {
-    borderLeft: '2px dotted #333',
+    borderInlineStart: '2px dotted #333',
   },
 }));
 const App: React.FC = () => {
@@ -719,6 +719,40 @@ const App: React.FC = () => {
           <p>Some contents...</p>
         </Drawer>
       </ConfigProvider>
+    </>
+  );
+};
+export default App;
+```
+### 关闭按钮位置
+自定义抽屉的关闭按钮位置，放到右侧，默认为左侧。
+
+```tsx
+import React, { useState } from 'react';
+import { Button, Drawer } from 'antd';
+const App: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const showDrawer = () => {
+    setOpen(true);
+  };
+  const onClose = () => {
+    setOpen(false);
+  };
+  return (
+    <>
+      <Button type="primary" onClick={showDrawer}>
+        Open
+      </Button>
+      <Drawer
+        title="Drawer Closable Placement"
+        closable={{ placement: 'end' }}
+        onClose={onClose}
+        open={open}
+      >
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Take a look at the top-right corner...</p>
+      </Drawer>
     </>
   );
 };

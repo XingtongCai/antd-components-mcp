@@ -126,20 +126,25 @@ export default App;
 import React from 'react';
 import { SettingOutlined } from '@ant-design/icons';
 import { Cascader, Input, Select, Space } from 'antd';
-const { Option } = Select;
 const selectBefore = (
-  <Select defaultValue="http://">
-    <Option value="http://">http://</Option>
-    <Option value="https://">https://</Option>
-  </Select>
+  <Select
+    defaultValue="http://"
+    options={[
+      { value: 'http://', label: 'http://' },
+      { value: 'https://', label: 'https://' },
+    ]}
+  />
 );
 const selectAfter = (
-  <Select defaultValue=".com">
-    <Option value=".com">.com</Option>
-    <Option value=".jp">.jp</Option>
-    <Option value=".cn">.cn</Option>
-    <Option value=".org">.org</Option>
-  </Select>
+  <Select
+    defaultValue=".com"
+    options={[
+      { value: '.com', label: '.com' },
+      { value: '.jp', label: '.jp' },
+      { value: '.cn', label: '.cn' },
+      { value: '.org', label: '.org' },
+    ]}
+  />
 );
 const App: React.FC = () => (
   <Space direction="vertical">
@@ -340,8 +345,8 @@ const App: React.FC = () => (
         className="site-input-split"
         style={{
           width: 30,
-          borderLeft: 0,
-          borderRight: 0,
+          borderInlineStart: 0,
+          borderInlineEnd: 0,
           pointerEvents: 'none',
         }}
         placeholder="~"
@@ -597,11 +602,11 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 前缀和后缀
-在输入框上添加前缀或后缀图标。
+在输入框上添加前缀或后缀图标。注意：Input.Password 的 `suffix` 属性在 `>=5.27.0` 版本支持。
 
 ```tsx
 import React from 'react';
-import { InfoCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Input, Tooltip } from 'antd';
 const App: React.FC = () => (
   <>
@@ -620,6 +625,12 @@ const App: React.FC = () => (
     <br />
     <br />
     <Input prefix="￥" suffix="RMB" disabled />
+    <br />
+    <br />
+    <Input.Password
+      suffix={<LockOutlined />} // `suffix` available since `5.27.0`
+      placeholder="input password support suffix"
+    />
   </>
 );
 export default App;

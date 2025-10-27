@@ -56,7 +56,7 @@ export default App;
 ```
 ### 表单方法调用
 通过 `Form.useForm` 对表单数据域进行交互。
-> 注意 `useForm` 是 [React Hooks](https://reactjs.org/docs/hooks-intro.html) 的实现，只能用于函数组件。如果是在 Class Component 下，你也可以通过 `ref` 获取数据域：https://codesandbox.io/p/sandbox/ngtjtm
+> 注意 `useForm` 是 [React Hooks](https://zh-hans.react.dev/reference/react/hooks) 的实现，只能用于函数组件。如果是在 Class Component 下，你也可以通过 `ref` 获取数据域：https://codesandbox.io/p/sandbox/ngtjtm
 
 ```tsx
 import React from 'react';
@@ -193,37 +193,32 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Form, Input } from 'antd';
+import { Divider, Form, Input } from 'antd';
 const App: React.FC = () => (
   <>
-    <Form
-      name="layout-multiple-horizontal"
-      layout="horizontal"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
-      <Form.Item label="horizontal" name="horizontal" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
+    <Form name="layout-multiple-horizontal" layout="horizontal">
       <Form.Item
-        layout="vertical"
-        label="vertical"
-        name="vertical"
+        label="horizontal"
+        name="horizontal"
         rules={[{ required: true }]}
-        labelCol={{ span: 24 }}
-        wrapperCol={{ span: 24 }}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
+      <Form.Item layout="vertical" label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item layout="vertical" label="vertical2" name="vertical2" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
     </Form>
-    <br />
-    <Form
-      name="layout-multiple-vertical"
-      layout="vertical"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
+    <Divider />
+    <Form name="layout-multiple-vertical" layout="vertical">
       <Form.Item label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="vertical2" name="vertical2" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
       <Form.Item
@@ -231,6 +226,8 @@ const App: React.FC = () => (
         label="horizontal"
         name="horizontal"
         rules={[{ required: true }]}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
@@ -254,11 +251,14 @@ import {
   Form,
   Input,
   InputNumber,
+  Mentions,
   Radio,
   Rate,
   Select,
   Slider,
   Switch,
+  Transfer,
+  Tree,
   TreeSelect,
   Upload,
 } from 'antd';
@@ -364,6 +364,60 @@ const FormDisabledDemo: React.FC = () => {
         </Form.Item>
         <Form.Item label="Rate">
           <Rate />
+        </Form.Item>
+        <Form.Item label="Mentions">
+          <Mentions defaultValue="@afc163" />
+        </Form.Item>
+        <Form.Item label="Transfer">
+          <Transfer
+            dataSource={Array.from({ length: 20 }, (_, i) => ({
+              key: i.toString(),
+              title: `Content ${i + 1}`,
+              description: `Description of content ${i + 1}`,
+            }))}
+            targetKeys={['1', '3', '5']}
+            render={(item) => item.title}
+          />
+        </Form.Item>
+        <Form.Item label="Tree">
+          <Tree
+            checkable
+            defaultExpandedKeys={['0-0', '0-1']}
+            defaultSelectedKeys={['0-0-0', '0-1-0']}
+            defaultCheckedKeys={['0-0-0-0', '0-1-0']}
+            treeData={[
+              {
+                title: 'Parent 1',
+                key: '0-0',
+                children: [
+                  {
+                    title: 'Child 1-1',
+                    key: '0-0-0',
+                    children: [
+                      {
+                        title: 'Grandchild 1-1-1',
+                        key: '0-0-0-0',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Child 1-2',
+                    key: '0-0-1',
+                  },
+                ],
+              },
+              {
+                title: 'Parent 2',
+                key: '0-1',
+                children: [
+                  {
+                    title: 'Child 2-1',
+                    key: '0-1-0',
+                  },
+                ],
+              },
+            ]}
+          />
         </Form.Item>
       </Form>
     </>
@@ -1354,7 +1408,7 @@ const PriceInput: React.FC<PriceInputProps> = (props) => {
     onChange?.({ number, currency, ...value, ...changedValue });
   };
   const onNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newNumber = parseInt(e.target.value || '0', 10);
+    const newNumber = Number.parseInt(e.target.value || '0', 10);
     if (Number.isNaN(number)) {
       return;
     }
@@ -1708,7 +1762,7 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import type { CascaderProps } from 'antd';
+import type { CascaderProps, FormItemProps, FormProps } from 'antd';
 import {
   AutoComplete,
   Button,
@@ -1721,13 +1775,14 @@ import {
   Row,
   Select,
 } from 'antd';
+import type { DefaultOptionType } from 'antd/es/select';
 const { Option } = Select;
-interface DataNodeType {
+interface FormCascaderOption {
   value: string;
   label: string;
-  children?: DataNodeType[];
+  children?: FormCascaderOption[];
 }
-const residences: CascaderProps<DataNodeType>['options'] = [
+const residences: CascaderProps<FormCascaderOption>['options'] = [
   {
     value: 'zhejiang',
     label: 'Zhejiang',
@@ -1761,7 +1816,7 @@ const residences: CascaderProps<DataNodeType>['options'] = [
     ],
   },
 ];
-const formItemLayout = {
+const formItemLayout: FormProps = {
   labelCol: {
     xs: { span: 24 },
     sm: { span: 8 },
@@ -1771,7 +1826,7 @@ const formItemLayout = {
     sm: { span: 16 },
   },
 };
-const tailFormItemLayout = {
+const tailFormItemLayout: FormItemProps = {
   wrapperCol: {
     xs: {
       span: 24,
@@ -1806,13 +1861,11 @@ const App: React.FC = () => {
   );
   const [autoCompleteResult, setAutoCompleteResult] = useState<string[]>([]);
   const onWebsiteChange = (value: string) => {
-    if (!value) {
-      setAutoCompleteResult([]);
-    } else {
-      setAutoCompleteResult(['.com', '.org', '.net'].map((domain) => `${value}${domain}`));
-    }
+    setAutoCompleteResult(
+      value ? ['.com', '.org', '.net'].map((domain) => `${value}${domain}`) : [],
+    );
   };
-  const websiteOptions = autoCompleteResult.map((website) => ({
+  const websiteOptions = autoCompleteResult.map<DefaultOptionType>((website) => ({
     label: website,
     value: website,
   }));
@@ -3096,7 +3149,7 @@ export default App;
 ```tsx
 import React from 'react';
 import { AlertFilled, CloseSquareFilled } from '@ant-design/icons';
-import { Button, Form, Input, Tooltip } from 'antd';
+import { Button, Form, Input, Tooltip, Mentions } from 'antd';
 import { createStyles, css } from 'antd-style';
 import uniqueId from 'lodash/uniqueId';
 const useStyle = createStyles(() => ({
@@ -3158,6 +3211,28 @@ const App: React.FC = () => {
         }}
       >
         <Input />
+      </Form.Item>
+      <Form.Item
+        name="custom-feedback-test-item3"
+        label="Test"
+        className={styles['custom-feedback-icons']}
+        hasFeedback
+        validateStatus="success"
+        initialValue="@mention1"
+      >
+        <Mentions
+          allowClear
+          options={[
+            {
+              value: 'mention1',
+              label: 'mention1',
+            },
+            {
+              value: 'mention2',
+              label: 'mention2',
+            },
+          ]}
+        />
       </Form.Item>
       <Form.Item>
         <Button htmlType="submit">Submit</Button>
