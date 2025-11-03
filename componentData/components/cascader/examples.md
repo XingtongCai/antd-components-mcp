@@ -608,6 +608,12 @@ const App: React.FC = () => (
     defaultValue={['zhejiang', 'hangzhou', 'xihu']}
     displayRender={displayRender}
     style={{ width: '100%' }}
+    // `optionRender` is supported since 5.16.0
+    optionRender={(option) => (
+      <>
+        {option.label} ({option.value})
+      </>
+    )}
   />
 );
 export default App;
@@ -670,9 +676,7 @@ const onChange: CascaderProps<Option>['onChange'] = (value, selectedOptions) => 
   console.log(value, selectedOptions);
 };
 const filter = (inputValue: string, path: DefaultOptionType[]) =>
-  path.some(
-    (option) => (option.label as string).toLowerCase().indexOf(inputValue.toLowerCase()) > -1,
-  );
+  path.some((option) => (option.label as string).toLowerCase().includes(inputValue.toLowerCase()));
 const App: React.FC = () => (
   <Cascader
     options={options}
