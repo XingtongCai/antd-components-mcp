@@ -432,7 +432,7 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 静态方法（不推荐）
-静态方法无法消费 Context，推荐优先使用 Hooks 版本。
+静态方法无法消费 Context，不能动态响应 ConfigProvider 提供的各项配置，启用 `layer` 时还可能导致样式异常。请优先使用 hooks 版本或者 App 组件提供的 `notification` 实例。
 
 ```tsx
 import React from 'react';
@@ -451,6 +451,62 @@ const App: React.FC = () => (
   <Button type="primary" onClick={openNotification}>
     Open the notification box
   </Button>
+);
+export default App;
+```
+### 组件 Token---
+debug: true
+title:
+  zh-CN: 组件 Token
+  en-US: Component Token
+---
+展示新的组件 Token 功能，支持为不同类型的通知设置不同的背景色。可以通过 `colorSuccessBg`、`colorErrorBg`、`colorInfoBg`、`colorWarningBg` 来自定义各种类型通知的背景色。
+
+```tsx
+import React from 'react';
+import { Button, notification, Space, ConfigProvider } from 'antd';
+type NotificationType = 'success' | 'info' | 'warning' | 'error';
+const CustomThemeDemo: React.FC = () => {
+  const [api, contextHolder] = notification.useNotification();
+  const openNotificationWithIcon = (type: NotificationType) => {
+    api[type]({
+      message: `${type.charAt(0).toUpperCase() + type.slice(1)} Notification`,
+      description: 'This notification uses custom component tokens for enhanced background colors.',
+      duration: 0,
+    });
+  };
+  return (
+    <>
+      <h4>Custom Theme (Enhanced Colors)</h4>
+      <Space>
+        <Button type="primary" onClick={() => openNotificationWithIcon('success')}>
+          Custom Success
+        </Button>
+        <Button onClick={() => openNotificationWithIcon('info')}>Custom Info</Button>
+        <Button onClick={() => openNotificationWithIcon('warning')}>Custom Warning</Button>
+        <Button danger onClick={() => openNotificationWithIcon('error')}>
+          Custom Error
+        </Button>
+      </Space>
+      {contextHolder}
+    </>
+  );
+};
+const App: React.FC = () => (
+  <ConfigProvider
+    theme={{
+      components: {
+        Notification: {
+          colorSuccessBg: '#d9f7be', // Custom light green for success
+          colorErrorBg: '#ffccc7', // Custom light red for error
+          colorInfoBg: '#bae0ff', // Custom light blue for info
+          colorWarningBg: '#ffffb8', // Custom light yellow for warning
+        },
+      },
+    }}
+  >
+    <CustomThemeDemo />
+  </ConfigProvider>
 );
 export default App;
 ```

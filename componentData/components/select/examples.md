@@ -421,10 +421,9 @@ export default App;
 import React, { useState } from 'react';
 import { Select } from 'antd';
 import type { SelectProps } from 'antd';
-import type { AnyObject } from 'antd/es/_util/type';
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
-const toURLSearchParams = <T extends AnyObject>(record: T) => {
+const toURLSearchParams = <T extends Record<string, any>>(record: T) => {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(record)) {
     params.append(key, value);
@@ -1282,7 +1281,7 @@ const App: React.FC = () => {
 };
 export default App;
 ```
-### 4.0 Debug
+### Debug 专用
 调试使用。
 
 ```tsx
@@ -1299,39 +1298,55 @@ const handleChange = (value: string | string[]) => {
   console.log(`selected ${value}`);
 };
 const App: React.FC = () => (
-  <Space style={style} wrap>
-    <Input style={{ width: 100 }} value="222" />
-    <Select
-      style={{ width: 120 }}
-      onChange={handleChange}
-      showSearch
-      placeholder="233"
-      options={[
-        { value: 'jack', label: 'Jack' },
-        { value: 'lucy', label: 'Lucy' },
-        { value: 'disabled', disabled: true, label: 'Disabled' },
-        { value: 'Yiminghe', label: 'yiminghe' },
-        { value: 'long', label: 'I am super super long!' },
-      ]}
-    />
-    <Select
-      mode="multiple"
-      style={{ width: 120 }}
-      defaultValue={['lucy']}
-      onChange={handleChange}
-      showSearch
-      placeholder="233"
-      options={[
-        { value: 'jack', label: 'Jack' },
-        { value: 'lucy', label: 'Lucy' },
-        { value: 'disabled', disabled: true, label: 'Disabled' },
-        { value: 'Yiminghe', label: 'yiminghe' },
-        { value: 'long', label: 'I am super super long!' },
-      ]}
-    />
-    <span className="debug-align">AntDesign</span>
-    <Button>222</Button>
-  </Space>
+  <>
+    <Space style={style} wrap>
+      <Input style={{ width: 100 }} value="222" />
+      <Select
+        style={{ width: 120 }}
+        onChange={handleChange}
+        showSearch
+        placeholder="233"
+        options={[
+          { value: 'jack', label: 'Jack' },
+          { value: 'lucy', label: 'Lucy' },
+          { value: 'disabled', disabled: true, label: 'Disabled' },
+          { value: 'Yiminghe', label: 'yiminghe' },
+          { value: 'long', label: 'I am super super long!' },
+        ]}
+      />
+      <Select
+        mode="multiple"
+        style={{ width: 120 }}
+        defaultValue={['lucy']}
+        onChange={handleChange}
+        showSearch
+        placeholder="233"
+        options={[
+          { value: 'jack', label: 'Jack' },
+          { value: 'lucy', label: 'Lucy' },
+          { value: 'disabled', disabled: true, label: 'Disabled' },
+          { value: 'Yiminghe', label: 'yiminghe' },
+          { value: 'long', label: 'I am super super long!' },
+        ]}
+      />
+      <span className="debug-align">AntDesign</span>
+      <Button>222</Button>
+    </Space>
+    <div style={{ width: 200, marginTop: 24 }}>
+      {/* https://github.com/ant-design/ant-design/issues/54179 */}
+      <Select
+        mode="multiple"
+        style={{ width: '100%' }}
+        defaultValue={[1]}
+        options={[
+          {
+            value: 1,
+            label: '哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈',
+          },
+        ]}
+      />
+    </div>
+  </>
 );
 export default App;
 ```

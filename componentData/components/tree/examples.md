@@ -374,7 +374,7 @@ const App: React.FC = () => {
     const { value } = e.target;
     const newExpandedKeys = dataList
       .map((item) => {
-        if (item.title.indexOf(value) > -1) {
+        if (item.title.includes(value)) {
           return getParentKey(item.key, defaultData);
         }
         return null;
@@ -523,11 +523,15 @@ const App: React.FC = () => {
         <br />
         <br />
         showLeafIcon:{' '}
-        <Select defaultValue="true" onChange={handleLeafIconChange}>
-          <Select.Option value="true">True</Select.Option>
-          <Select.Option value="false">False</Select.Option>
-          <Select.Option value="custom">Custom icon</Select.Option>
-        </Select>
+        <Select
+          defaultValue="true"
+          onChange={handleLeafIconChange}
+          options={[
+            { label: 'True', value: 'true' },
+            { label: 'False', value: 'false' },
+            { label: 'Custom icon', value: 'custom' },
+          ]}
+        />
       </div>
       <Tree
         showLine={showLine ? { showLeafIcon } : false}

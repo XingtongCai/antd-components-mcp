@@ -90,7 +90,11 @@ const App: React.FC = () => {
         beforeUpload={beforeUpload}
         onChange={handleChange}
       >
-        {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+        {imageUrl ? (
+          <img draggable={false} src={imageUrl} alt="avatar" style={{ width: '100%' }} />
+        ) : (
+          uploadButton
+        )}
       </Upload>
       <Upload
         name="avatar"
@@ -101,7 +105,11 @@ const App: React.FC = () => {
         beforeUpload={beforeUpload}
         onChange={handleChange}
       >
-        {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+        {imageUrl ? (
+          <img draggable={false} src={imageUrl} alt="avatar" style={{ width: '100%' }} />
+        ) : (
+          uploadButton
+        )}
       </Upload>
     </Flex>
   );
@@ -1176,7 +1184,7 @@ const props: UploadProps = {
       '100%': '#87d068',
     },
     strokeWidth: 3,
-    format: (percent) => percent && `${parseFloat(percent.toFixed(2))}%`,
+    format: (percent) => percent && `${Number.parseFloat(percent.toFixed(2))}%`,
   },
 };
 const App: React.FC = () => (
