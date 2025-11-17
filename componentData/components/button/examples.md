@@ -400,6 +400,7 @@ import { Button, Flex } from 'antd';
 const App: React.FC = () => {
   const [loadings, setLoadings] = useState<boolean[]>([]);
   const enterLoading = (index: number) => {
+    console.log('Start loading:', index);
     setLoadings((prevLoadings) => {
       const newLoadings = [...prevLoadings];
       newLoadings[index] = true;
@@ -721,6 +722,24 @@ const App: React.FC = () => (
         </Button>
         <Button color="primary" variant="link">
           Primary Link
+        </Button>
+      </Flex>
+    </ConfigProvider>
+    <ConfigProvider
+      theme={{
+        components: { Button: { paddingInline: 100, paddingInlineLG: 150, paddingInlineSM: 50 } },
+      }}
+    >
+      <Flex gap="small" vertical align="start">
+        <Button>Default Button</Button>
+        <Button shape="round">Default Button</Button>
+        <Button size="large">Default Button</Button>
+        <Button shape="round" size="large">
+          Default Button
+        </Button>
+        <Button size="small">Default Button</Button>
+        <Button shape="round" size="small">
+          Default Button
         </Button>
       </Flex>
     </ConfigProvider>

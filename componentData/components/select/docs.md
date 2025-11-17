@@ -8,13 +8,22 @@
 在 5.11.0 版本后，我们提供了 `<Select options={[...]} />` 的简写方式，有更好的性能和更方便的数据组织方式，开发者不再需要自行拼接 JSX。
 同时我们废弃了原先的写法，你还是可以在 5.x 继续使用，但会在控制台看到警告，并会在 6.0 后移除。
 :::
-```jsx
+```tsx
 // >=5.11.0 可用，推荐的写法 ✅
-return <Select options={[{ value: 'sample', label: <span>sample</span> }]} />;
-// 5.x 都可用，>=5.11.0 时不推荐 🙅🏻‍♀️
+return (
+  <Select
+    onChange={onChange}
+    options={[
+      { value: '1', label: <span>Option 1</span> },
+      { value: '2', label: <span>Option 2</span> },
+    ]}
+  />
+);
+// 5.x 可用，但是 >=5.11.0 时不推荐 🙅🏻‍♀️
 return (
   <Select onChange={onChange}>
-    <Select.Option value="sample">Sample</Select.Option>
+    <Select.Option value="1">Option 1</Select.Option>
+    <Select.Option value="2">Option 2</Select.Option>
   </Select>
 );
 ```
@@ -131,3 +140,26 @@ Select 当失去焦点时会关闭下拉框，如果你可以通过阻止默认�
 ### 为何无障碍测试会报缺失 `aria-` 属性？
 Select 无障碍辅助元素仅在弹窗展开时创建，因而当你在进行无障碍检测时请先打开下拉后再进行测试。对于 `aria-label` 与 `aria-labelledby` 属性缺失警告，请自行为 Select 组件添加相应无障碍属性。
 Select 虚拟滚动会模拟无障碍绑定元素。如果需要读屏器完整获取全部列表，你可以设置 `virtual={false}` 关闭虚拟滚动，无障碍选项将会绑定到真实元素上。
+### 使用 `tagRender` 生成的自定义标签，点击关闭时会呼出下拉框
+如果你不希望点击某个元素后下拉框自动出现（例如关闭按钮），可以在其上阻止 `MouseDown` 事件的传播。
+```tsx
+<Select
+  tagRender={(props) => {
+    const { closable, label, onClose } = props;
+    return (
+      <span className="border">
+        {label}
+        {closable ? (
+          <span
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={onClose}
+            className="cursor-pointer"
+          >
+            ❎
+          </span>
+        ) : null}
+      </span>
+    );
+  }}
+/>
+```
