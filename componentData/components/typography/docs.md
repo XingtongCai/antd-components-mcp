@@ -127,7 +127,7 @@ interface EllipsisConfig {
 | onEllipsis | 触发省略时的回调 | function(ellipsis) | - | 4.2.0 |
 | onExpand | 点击展开或收起时的回调 | function(event, { expanded: boolean }) | - | `info`: 5.16.0 |
 ## FAQ
-### Typography.Link 如何与 react-router 库集成？
+### Typography.Link 如何与 react-router 库集成？ {#faq-link-react-router}
 `react-router` 支持[自定义](https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/docs/api/Link.md#component-reactcomponent)渲染组件：
 ```tsx
 <Link to="/" component={Typography.Link} />

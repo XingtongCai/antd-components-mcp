@@ -144,6 +144,49 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 遮罩
+遮罩效果，默认 `blur`。
+
+```tsx
+import React from 'react';
+import { Button, Modal, Space } from 'antd';
+const modalConfig = {
+  title: 'Title',
+  content: 'Some contents...',
+};
+const App: React.FC = () => {
+  const [modal, contextHolder] = Modal.useModal();
+  return (
+    <>
+      <Space>
+        <Button
+          onClick={() => {
+            modal.confirm({ ...modalConfig });
+          }}
+        >
+          Default blur
+        </Button>
+        <Button
+          onClick={() => {
+            modal.confirm({ ...modalConfig, mask: { blur: false } });
+          }}
+        >
+          Dimmed mask
+        </Button>
+        <Button
+          onClick={() => {
+            modal.confirm({ ...modalConfig, mask: false });
+          }}
+        >
+          No mask
+        </Button>
+      </Space>
+      {contextHolder}
+    </>
+  );
+};
+export default App;
+```
 ### 加载中
 设置对话框加载状态。
 
@@ -618,8 +661,8 @@ const nestDataSource = Array.from({ length: 3 }).map<NestDataType>((_, i) => ({
   createdAt: '2014-12-24 23:12:00',
 }));
 const columnsFixed: TableProps<FixedDataType>['columns'] = [
-  { title: 'Full Name', width: 100, dataIndex: 'name', key: 'name', fixed: 'left' },
-  { title: 'Age', width: 100, dataIndex: 'age', key: 'age', fixed: 'left' },
+  { title: 'Full Name', width: 100, dataIndex: 'name', key: 'name', fixed: 'start' },
+  { title: 'Age', width: 100, dataIndex: 'age', key: 'age', fixed: 'start' },
   { title: 'Column 1', dataIndex: 'address', key: '1' },
   { title: 'Column 2', dataIndex: 'address', key: '2' },
   { title: 'Column 3', dataIndex: 'address', key: '3' },
@@ -628,7 +671,7 @@ const columnsFixed: TableProps<FixedDataType>['columns'] = [
   { title: 'Column 6', dataIndex: 'address', key: '6' },
   { title: 'Column 7', dataIndex: 'address', key: '7' },
   { title: 'Column 8', dataIndex: 'address', key: '8' },
-  { title: 'Action', key: 'operation', fixed: 'right', width: 100, render: () => <a>action</a> },
+  { title: 'Action', key: 'operation', fixed: 'end', width: 100, render: () => <a>action</a> },
 ];
 const fixedDataSource: FixedDataType[] = [
   { key: '1', name: 'John Brown', age: 32, address: 'New York Park' },
@@ -653,14 +696,15 @@ const TableTransfer: React.FC<
         const columns = (direction === 'left' ? leftColumns : rightColumns) ?? [];
         const rowSelection: TableProps<DataType>['rowSelection'] = {
           getCheckboxProps: (item) => ({ disabled: listDisabled || item.disabled }),
-          onSelectAll(selected, selectedRows) {
+          onChange(_selectedKeys, selectedRows, info) {
             const treeSelectedKeys = selectedRows
               .filter((item) => !item.disabled)
               .map(({ key }) => key);
-            const diffKeys = selected
-              ? difference(treeSelectedKeys, listSelectedKeys)
-              : difference(listSelectedKeys, treeSelectedKeys);
-            onItemSelectAll(diffKeys, selected);
+            const diffKeys =
+              info.type === 'all'
+                ? difference(treeSelectedKeys, listSelectedKeys)
+                : difference(listSelectedKeys, treeSelectedKeys);
+            onItemSelectAll(diffKeys, info.type === 'all');
           },
           onSelect({ key }, selected) {
             onItemSelect(key, selected);
@@ -1140,7 +1184,7 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 静态方法
-在绝大多数场景，都不需要静态方法。它无法消费 context，例如无法响应动态主题。请优先使用 hooks 版本或者 `App` 组件提供的 Modal 实例。
+静态方法无法消费 Context，不能动态响应 ConfigProvider 提供的各项配置，启用 `layer` 时还可能导致样式异常。请优先使用 hooks 版本或者 App 组件提供的 `modal` 实例。
 
 ```tsx
 import React from 'react';
@@ -1311,7 +1355,7 @@ const App: React.FC = () => {
   };
   const modalStyles = {
     header: {
-      borderLeft: `5px solid ${token.colorPrimary}`,
+      borderInlineStart: `5px solid ${token.colorPrimary}`,
       borderRadius: 0,
       paddingInlineStart: 5,
     },
@@ -1405,6 +1449,124 @@ const showConfirm = () => {
 const App: React.FC = () => <Button onClick={showConfirm}>Confirm</Button>;
 export default App;
 ```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象或者函数可以自定义 Modal 组件的 [语义化结构](#semantic-dom) 样式。
+
+```tsx
+import React, { useState } from 'react';
+import { Button, Flex, Modal } from 'antd';
+import type { ModalProps } from 'antd';
+import { createStyles } from 'antd-style';
+const lineStyle: React.CSSProperties = {
+  lineHeight: '28px',
+};
+const sharedContent = (
+  <>
+    <div style={lineStyle}>
+      Following the Ant Design specification, we developed a React UI library antd that contains a
+      set of high quality components and demos for building rich, interactive user interfaces.
+    </div>
+    <div style={lineStyle}>🌈 Enterprise-class UI designed for web applications.</div>
+    <div style={lineStyle}>📦 A set of high-quality React components out of the box.</div>
+    <div style={lineStyle}>🛡 Written in TypeScript with predictable static types.</div>
+    <div style={lineStyle}>⚙️ Whole package of design resources and development tools.</div>
+    <div style={lineStyle}>🌍 Internationalization support for dozens of languages.</div>
+    <div style={lineStyle}>🎨 Powerful theme customization in every detail.</div>
+  </>
+);
+const useStyles = createStyles(() => ({
+  container: {
+    borderRadius: 10,
+    padding: 10,
+  },
+}));
+const styles: ModalProps['styles'] = {
+  mask: {
+    backgroundImage: `linear-gradient(to top, #18181b 0, rgba(21, 21, 22, 0.2) 100%)`,
+  },
+};
+const stylesFn: ModalProps['styles'] = (info) => {
+  if (info.props.footer) {
+    return {
+      container: {
+        borderRadius: 14,
+        border: '1px solid #ccc',
+        padding: 0,
+        overflow: 'hidden',
+      },
+      header: {
+        padding: 16,
+      },
+      body: {
+        padding: 16,
+      },
+      footer: {
+        padding: '16px 10px',
+        backgroundColor: '#fafafa',
+      },
+    } satisfies ModalProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const [modalOpen, setOpen] = useState(false);
+  const [modalFnOpen, setFnOpen] = useState(false);
+  const { styles: classNames } = useStyles();
+  const sharedProps: ModalProps = {
+    centered: true,
+    classNames,
+  };
+  const footer: React.ReactNode = (
+    <>
+      <Button
+        onClick={() => setFnOpen(false)}
+        styles={{ root: { borderColor: '#ccc', color: '#171717', backgroundColor: '#fff' } }}
+      >
+        Cancel
+      </Button>
+      <Button
+        type="primary"
+        styles={{ root: { backgroundColor: '#171717' } }}
+        onClick={() => setOpen(true)}
+      >
+        Submit
+      </Button>
+    </>
+  );
+  return (
+    <Flex gap="middle">
+      <Button onClick={() => setOpen(true)}>Open Style Modal</Button>
+      <Button type="primary" onClick={() => setFnOpen(true)}>
+        Open Function Modal
+      </Button>
+      <Modal
+        {...sharedProps}
+        footer={null}
+        title="Custom Style Modal"
+        styles={styles}
+        open={modalOpen}
+        onOk={() => setOpen(false)}
+        onCancel={() => setOpen(false)}
+      >
+        {sharedContent}
+      </Modal>
+      <Modal
+        {...sharedProps}
+        footer={footer}
+        title="Custom Function Modal"
+        styles={stylesFn}
+        mask={{ enabled: true, blur: true }}
+        open={modalFnOpen}
+        onOk={() => setFnOpen(false)}
+        onCancel={() => setFnOpen(false)}
+      >
+        {sharedContent}
+      </Modal>
+    </Flex>
+  );
+};
+export default App;
+```
 ### 嵌套弹框
 嵌套弹框
 
@@ -1448,7 +1610,7 @@ const Demo: React.FC = () => {
         maskClosable={false}
         closable={false}
         styles={{
-          content: {
+          container: {
             marginBlockStart: 100,
           },
         }}
@@ -1464,7 +1626,7 @@ const Demo: React.FC = () => {
           maskClosable={false}
           closable={false}
           styles={{
-            content: {
+            container: {
               marginBlockStart: 250,
             },
             body: {
@@ -1484,7 +1646,7 @@ const Demo: React.FC = () => {
             onCancel={() => setIsModalOpen(false)}
             closable={false}
             styles={{
-              content: {
+              container: {
                 marginBlockStart: 400,
               },
               body: {
@@ -1508,7 +1670,7 @@ const Demo: React.FC = () => {
                 onClick={() => {
                   message.success('Hello World');
                   notification.success({
-                    message: 'Hello World',
+                    title: 'Hello World',
                   });
                 }}
               >
@@ -1518,7 +1680,7 @@ const Demo: React.FC = () => {
                 onClick={() => {
                   messageInstance.success('Hello World');
                   notificationInstance.success({
-                    message: 'Hello World',
+                    title: 'Hello World',
                   });
                 }}
               >
@@ -1546,7 +1708,7 @@ import type { ModalFuncProps } from 'antd';
 /** Test usage. Do not use in your production. */
 const { _InternalPanelDoNotUseOrYouWillBeFired: InternalPanel } = Modal;
 const customFooterFn: ModalFuncProps['footer'] = (originNode, { OkBtn, CancelBtn }) => (
-  <Space direction="vertical">
+  <Space vertical>
     <Space>{originNode}</Space>
     <Space>
       <CancelBtn />

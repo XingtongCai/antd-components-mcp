@@ -6,23 +6,30 @@
 import React from 'react';
 import type { CascaderProps } from 'antd';
 import { Cascader } from 'antd';
-interface Option {
+import type { HTMLAriaDataAttributes } from 'antd/es/_util/aria-data-attrs';
+type Option = {
   value: string;
   label: string;
   children?: Option[];
-}
+} & HTMLAriaDataAttributes;
 const options: Option[] = [
   {
     value: 'zhejiang',
     label: 'Zhejiang',
+    'aria-label': 'Zhejiang',
+    'data-title': 'Zhejiang',
     children: [
       {
         value: 'hangzhou',
         label: 'Hangzhou',
+        'aria-label': 'Hangzhou',
+        'data-title': 'Hangzhou',
         children: [
           {
             value: 'xihu',
             label: 'West Lake',
+            'aria-label': 'West Lake',
+            'data-title': 'West Lake',
           },
         ],
       },
@@ -31,14 +38,20 @@ const options: Option[] = [
   {
     value: 'jiangsu',
     label: 'Jiangsu',
+    'aria-label': 'Jiangsu',
+    'data-title': 'Jiangsu',
     children: [
       {
         value: 'nanjing',
         label: 'Nanjing',
+        'aria-label': 'Nanjing',
+        'data-title': 'Nanjing',
         children: [
           {
             value: 'zhonghuamen',
             label: 'Zhong Hua Men',
+            'aria-label': 'Zhong Hua Men',
+            'data-title': 'Zhong Hua Men',
           },
         ],
       },
@@ -608,6 +621,12 @@ const App: React.FC = () => (
     defaultValue={['zhejiang', 'hangzhou', 'xihu']}
     displayRender={displayRender}
     style={{ width: '100%' }}
+    // `optionRender` is supported since 5.16.0
+    optionRender={(option) => (
+      <>
+        {option.label} ({option.value})
+      </>
+    )}
   />
 );
 export default App;
@@ -670,16 +689,13 @@ const onChange: CascaderProps<Option>['onChange'] = (value, selectedOptions) => 
   console.log(value, selectedOptions);
 };
 const filter = (inputValue: string, path: DefaultOptionType[]) =>
-  path.some(
-    (option) => (option.label as string).toLowerCase().indexOf(inputValue.toLowerCase()) > -1,
-  );
+  path.some((option) => (option.label as string).toLowerCase().includes(inputValue.toLowerCase()));
 const App: React.FC = () => (
   <Cascader
     options={options}
     onChange={onChange}
     placeholder="Please select"
-    showSearch={{ filter }}
-    onSearch={(value) => console.log(value)}
+    showSearch={{ filter, onSearch: (value) => console.log(value) }}
   />
 );
 export default App;
@@ -1028,11 +1044,120 @@ export default App;
 import React from 'react';
 import { Cascader, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <Cascader status="error" placeholder="Error" />
     <Cascader status="warning" multiple placeholder="Warning multiple" />
   </Space>
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Cascader 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Cascader, Flex } from 'antd';
+import type { CascaderProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles(({ token }) => {
+  return {
+    root: {
+      borderRadius: token.borderRadiusLG,
+    },
+  };
+});
+interface Option {
+  value: string;
+  label: string;
+  children?: Option[];
+}
+const options: Option[] = [
+  {
+    value: 'meet-student',
+    label: 'meet-student',
+    children: [
+      {
+        value: 'hangzhou',
+        label: 'Hangzhou',
+        children: [
+          {
+            value: 'xihu',
+            label: 'West Lake',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    value: 'jiangsu',
+    label: 'Jiangsu',
+    children: [
+      {
+        value: 'nanjing',
+        label: 'Nanjing',
+        children: [
+          {
+            value: 'zhonghuamen',
+            label: 'Zhong Hua Men',
+          },
+        ],
+      },
+    ],
+  },
+];
+const stylesObject: CascaderProps['styles'] = {
+  prefix: {
+    color: '#ccc',
+  },
+  suffix: {
+    color: '#ccc',
+  },
+};
+const stylesFn: CascaderProps['styles'] = (info) => {
+  if (info.props.variant === 'filled') {
+    return {
+      prefix: {
+        color: '#1890ff',
+      },
+      suffix: {
+        color: '#1890ff',
+      },
+      popup: {
+        listItem: {
+          color: '#1890ff',
+        },
+      },
+    } satisfies CascaderProps['styles'];
+  }
+  return {};
+};
+const onChange: CascaderProps<Option>['onChange'] = (value) => {
+  console.log(value);
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyles();
+  return (
+    <Flex vertical gap="middle">
+      <Cascader
+        options={options}
+        onChange={onChange}
+        placeholder="Object styles"
+        classNames={classNames}
+        styles={stylesObject}
+        prefix="🏠"
+      />
+      <Cascader
+        options={options}
+        onChange={onChange}
+        placeholder="Function  styles"
+        variant="filled"
+        classNames={classNames}
+        styles={stylesFn}
+        prefix="✅"
+      />
+    </Flex>
+  );
+};
 export default App;
 ```
 ### = 5.10.0">面板使用
