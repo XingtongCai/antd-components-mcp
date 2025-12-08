@@ -243,6 +243,8 @@ const App: React.FC = () => (
           itemSize: 20,
           itemSizeSM: 12,
           itemActiveBg: '#e7cc87',
+          itemActiveColor: '#eee',
+          itemActiveColorHover: '#fff',
           itemLinkBg: '#344324',
           itemActiveBgDisabled: '#9c1515',
           itemInputBg: '#9c1515',
@@ -264,5 +266,45 @@ const App: React.FC = () => (
     <Pagination showSizeChanger defaultCurrent={3} total={500} disabled />
   </ConfigProvider>
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Pagination 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Pagination } from 'antd';
+import type { PaginationProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyle = createStyles(({ css }) => ({
+  root: css`
+    border: 2px dashed #ccc;
+    padding: 8px;
+  `,
+}));
+const styleFn: PaginationProps['styles'] = ({ props }) => {
+  if (props.size === 'small') {
+    return {
+      item: {
+        backgroundColor: `rgba(200, 200, 200, 0.3)`,
+        marginInlineEnd: 4,
+      },
+    } satisfies PaginationProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const { styles } = useStyle();
+  const paginationSharedProps: PaginationProps = {
+    total: 500,
+    classNames: { root: styles.root },
+  };
+  return (
+    <Flex vertical gap="middle">
+      <Pagination {...paginationSharedProps} styles={{ item: { borderRadius: 999 } }} />
+      <Pagination {...paginationSharedProps} size="small" styles={styleFn} />
+    </Flex>
+  );
+};
 export default App;
 ```
