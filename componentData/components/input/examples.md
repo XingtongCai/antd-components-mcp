@@ -14,17 +14,13 @@ export default App;
 ```tsx
 import React from 'react';
 import { UserOutlined } from '@ant-design/icons';
-import { Input } from 'antd';
+import { Flex, Input } from 'antd';
 const App: React.FC = () => (
-  <>
+  <Flex vertical gap="middle">
     <Input size="large" placeholder="large size" prefix={<UserOutlined />} />
-    <br />
-    <br />
     <Input placeholder="default size" prefix={<UserOutlined />} />
-    <br />
-    <br />
     <Input size="small" placeholder="small size" prefix={<UserOutlined />} />
-  </>
+  </Flex>
 );
 export default App;
 ```
@@ -126,23 +122,28 @@ export default App;
 import React from 'react';
 import { SettingOutlined } from '@ant-design/icons';
 import { Cascader, Input, Select, Space } from 'antd';
-const { Option } = Select;
 const selectBefore = (
-  <Select defaultValue="http://">
-    <Option value="http://">http://</Option>
-    <Option value="https://">https://</Option>
-  </Select>
+  <Select
+    defaultValue="http://"
+    options={[
+      { value: 'http://', label: 'http://' },
+      { value: 'https://', label: 'https://' },
+    ]}
+  />
 );
 const selectAfter = (
-  <Select defaultValue=".com">
-    <Option value=".com">.com</Option>
-    <Option value=".jp">.jp</Option>
-    <Option value=".cn">.cn</Option>
-    <Option value=".org">.org</Option>
-  </Select>
+  <Select
+    defaultValue=".com"
+    options={[
+      { value: '.com', label: '.com' },
+      { value: '.jp', label: '.jp' },
+      { value: '.cn', label: '.cn' },
+      { value: '.org', label: '.org' },
+    ]}
+  />
 );
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <Input addonBefore="http://" addonAfter=".com" defaultValue="mysite" />
     <Input addonBefore={selectBefore} addonAfter={selectAfter} defaultValue="mysite" />
     <Input addonAfter={<SettingOutlined />} defaultValue="mysite" />
@@ -156,7 +157,7 @@ const App: React.FC = () => (
 export default App;
 ```
 ### 紧凑模式
-使用 `Space.Compact` 创建紧凑模式，更多请查看 [Space.Compact](/components/space-cn#spacecompact) 文档。
+使用 Space.Compact 创建紧凑模式，更多请查看 [Space.Compact](/components/space-cn#spacecompact) 文档。
 
 ```tsx
 import React from 'react';
@@ -174,7 +175,7 @@ const options = [
   },
 ];
 const App: React.FC = () => (
-  <Space direction="vertical" size="middle">
+  <Space vertical size="middle">
     <Space.Compact>
       <Input defaultValue="26888888" />
     </Space.Compact>
@@ -183,7 +184,8 @@ const App: React.FC = () => (
       <Input style={{ width: '80%' }} defaultValue="26888888" />
     </Space.Compact>
     <Space.Compact>
-      <Search addonBefore="https://" placeholder="input search text" allowClear />
+      <Space.Addon>https://</Space.Addon>
+      <Search placeholder="input search text" allowClear />
     </Space.Compact>
     <Space.Compact style={{ width: '100%' }}>
       <Input defaultValue="Combine input and button" />
@@ -194,7 +196,10 @@ const App: React.FC = () => (
       <Input defaultValue="Xihu District, Hangzhou" />
     </Space.Compact>
     <Space.Compact size="large">
-      <Input addonBefore={<SearchOutlined />} placeholder="large size" />
+      <Space.Addon>
+        <SearchOutlined />
+      </Space.Addon>
+      <Input placeholder="large size" />
       <Input placeholder="another input" />
     </Space.Compact>
   </Space>
@@ -219,7 +224,6 @@ import {
   Select,
   Tooltip,
 } from 'antd';
-const { Option } = Select;
 const options = [
   {
     value: 'zhejiang',
@@ -288,10 +292,14 @@ const App: React.FC = () => (
     </Input.Group>
     <br />
     <Input.Group compact>
-      <Select defaultValue="Zhejiang">
-        <Option value="Zhejiang">Zhejiang</Option>
-        <Option value="Jiangsu">Jiangsu</Option>
-      </Select>
+      <Select
+        defaultValue="Zhejiang"
+        options={[
+          { label: 'Zhejiang', value: 'Zhejiang' },
+          { label: 'Jiangsu', value: 'Jiangsu' },
+          { label: 'Other', value: 'Other' },
+        ]}
+      />
       <Input style={{ width: '50%' }} defaultValue="Xihu District, Hangzhou" />
     </Input.Group>
     <br />
@@ -301,10 +309,13 @@ const App: React.FC = () => (
     </Input.Group>
     <br />
     <Input.Group compact>
-      <Select defaultValue="Option1">
-        <Option value="Option1">Option1</Option>
-        <Option value="Option2">Option2</Option>
-      </Select>
+      <Select
+        defaultValue="Option1"
+        options={[
+          { label: 'Option1', value: 'Option1' },
+          { label: 'Option2', value: 'Option2' },
+        ]}
+      />
       <Input style={{ width: '50%' }} defaultValue="input content" />
       <InputNumber prefix="@" />
     </Input.Group>
@@ -320,28 +331,37 @@ const App: React.FC = () => (
     </Input.Group>
     <br />
     <Input.Group compact>
-      <Select defaultValue="Option1-1">
-        <Option value="Option1-1">Option1-1</Option>
-        <Option value="Option1-2">Option1-2</Option>
-      </Select>
-      <Select defaultValue="Option2-2">
-        <Option value="Option2-1">Option2-1</Option>
-        <Option value="Option2-2">Option2-2</Option>
-      </Select>
+      <Select
+        defaultValue="Option1-1"
+        options={[
+          { label: 'Option1-1', value: 'Option1-1' },
+          { label: 'Option1-2', value: 'Option1-2' },
+        ]}
+      />
+      <Select
+        defaultValue="Option2-2"
+        options={[
+          { label: 'Option2-1', value: 'Option2-1' },
+          { label: 'Option2-2', value: 'Option2-2' },
+        ]}
+      />
     </Input.Group>
     <br />
     <Input.Group compact>
-      <Select defaultValue="1">
-        <Option value="1">Between</Option>
-        <Option value="2">Except</Option>
-      </Select>
+      <Select
+        defaultValue="1"
+        options={[
+          { label: 'Between', value: '1' },
+          { label: 'Except', value: '2' },
+        ]}
+      />
       <Input style={{ width: 100, textAlign: 'center' }} placeholder="Minimum" />
       <Input
         className="site-input-split"
         style={{
           width: 30,
-          borderLeft: 0,
-          borderRight: 0,
+          borderInlineStart: 0,
+          borderInlineEnd: 0,
           pointerEvents: 'none',
         }}
         placeholder="~"
@@ -349,19 +369,20 @@ const App: React.FC = () => (
       />
       <Input
         className="site-input-right"
-        style={{
-          width: 100,
-          textAlign: 'center',
-        }}
+        style={{ width: 100, textAlign: 'center' }}
         placeholder="Maximum"
       />
     </Input.Group>
     <br />
     <Input.Group compact>
-      <Select defaultValue="Sign Up" style={{ width: '30%' }}>
-        <Option value="Sign Up">Sign Up</Option>
-        <Option value="Sign In">Sign In</Option>
-      </Select>
+      <Select
+        defaultValue="Sign Up"
+        style={{ width: '30%' }}
+        options={[
+          { label: 'Sign Up', value: 'Sign Up' },
+          { label: 'Sign In', value: 'Sign In' },
+        ]}
+      />
       <AutoComplete
         style={{ width: '70%' }}
         placeholder="Email"
@@ -370,10 +391,14 @@ const App: React.FC = () => (
     </Input.Group>
     <br />
     <Input.Group compact>
-      <Select style={{ width: '30%' }} defaultValue="Home">
-        <Option value="Home">Home</Option>
-        <Option value="Company">Company</Option>
-      </Select>
+      <Select
+        style={{ width: '30%' }}
+        defaultValue="Home"
+        options={[
+          { label: 'Home', value: 'Home' },
+          { label: 'Company', value: 'Company' },
+        ]}
+      />
       <Cascader style={{ width: '70%' }} options={options} placeholder="Select Address" />
     </Input.Group>
   </div>
@@ -390,26 +415,16 @@ import { Input, Space } from 'antd';
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
-const suffix = (
-  <AudioOutlined
-    style={{
-      fontSize: 16,
-      color: '#1677ff',
-    }}
-  />
-);
+const suffix = <AudioOutlined style={{ fontSize: 16, color: '#1677ff' }} />;
 const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <Search placeholder="input search text" onSearch={onSearch} style={{ width: 200 }} />
     <Search placeholder="input search text" allowClear onSearch={onSearch} style={{ width: 200 }} />
-    <Search
-      addonBefore="https://"
-      placeholder="input search text"
-      allowClear
-      onSearch={onSearch}
-      style={{ width: 304 }}
-    />
+    <Space.Compact>
+      <Space.Addon>https://</Space.Addon>
+      <Search placeholder="input search text" allowClear onSearch={onSearch} />
+    </Space.Compact>
     <Search placeholder="input search text" onSearch={onSearch} enterButton />
     <Search
       placeholder="input search text"
@@ -597,11 +612,11 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 前缀和后缀
-在输入框上添加前缀或后缀图标。
+在输入框上添加前缀或后缀图标。注意：Input.Password 的 `suffix` 属性在 `>=5.27.0` 版本支持。
 
 ```tsx
 import React from 'react';
-import { InfoCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Input, Tooltip } from 'antd';
 const App: React.FC = () => (
   <>
@@ -620,6 +635,12 @@ const App: React.FC = () => (
     <br />
     <br />
     <Input prefix="￥" suffix="RMB" disabled />
+    <br />
+    <br />
+    <Input.Password
+      suffix={<LockOutlined />} // `suffix` available since `5.27.0`
+      placeholder="input password support suffix"
+    />
   </>
 );
 export default App;
@@ -634,13 +655,13 @@ import { Button, Input, Space } from 'antd';
 const App: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   return (
-    <Space direction="vertical">
+    <Space vertical>
       <Input.Password placeholder="input password" />
       <Input.Password
         placeholder="input password"
         iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
       />
-      <Space direction="horizontal">
+      <Space>
         <Input.Password
           placeholder="input password"
           visibilityToggle={{ visible: passwordVisible, onVisibleChange: setPasswordVisible }}
@@ -753,7 +774,7 @@ import React from 'react';
 import ClockCircleOutlined from '@ant-design/icons/ClockCircleOutlined';
 import { Input, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical" style={{ width: '100%' }}>
+  <Space vertical style={{ width: '100%' }}>
     <Input status="error" placeholder="Error" />
     <Input status="warning" placeholder="Warning" />
     <Input status="error" prefix={<ClockCircleOutlined />} placeholder="Error with prefix" />
@@ -778,7 +799,7 @@ const App: React.FC = () => {
     ref: inputRef,
   };
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
+    <Space vertical style={{ width: '100%' }}>
       <Space wrap>
         <Button
           onClick={() => {
@@ -828,6 +849,134 @@ const App: React.FC = () => {
       <br />
       {input ? <Input {...sharedProps} /> : <Input.TextArea {...sharedProps} />}
     </Space>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Input 的[语义化结构](#semantic-input)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Input } from 'antd';
+import type { GetProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles(({ css, cssVar }) => ({
+  focusEffect: css`
+    border-width: ${cssVar.lineWidth};
+    border-radius: ${cssVar.borderRadius};
+    transition: box-shadow ${cssVar.motionDurationMid};
+    &:hover {
+      border: 1px solid #d9d9d9;
+    }
+    &:focus-visible {
+      border-color: lab(66.128% 0 0);
+      box-shadow: 0 0 0 4px color-mix(in oklab, lab(66.128% 0 0) 50%, transparent);
+    }
+  `,
+}));
+type InputProps = GetProps<typeof Input>;
+type PasswordProps = GetProps<typeof Input.Password>;
+type TextAreaProps = GetProps<typeof Input.TextArea>;
+type OTPProps = GetProps<typeof Input.OTP>;
+type SearchProps = GetProps<typeof Input.Search>;
+const { Search, TextArea, OTP, Password } = Input;
+const stylesFn: InputProps['styles'] = (info) => {
+  if (info.props.size === 'middle') {
+    return {
+      root: {
+        borderColor: '#696FC7',
+      },
+    } satisfies InputProps['styles'];
+  }
+  return {};
+};
+const stylesFnTextArea: TextAreaProps['styles'] = (info) => {
+  if (info.props.showCount) {
+    return {
+      root: { borderColor: '#BDE3C3' },
+      textarea: { resize: 'none' },
+      count: { color: '#BDE3C3' },
+    } satisfies TextAreaProps['styles'];
+  }
+  return {};
+};
+const stylesFnPassword: PasswordProps['styles'] = (info) => {
+  if (info.props.size === 'middle') {
+    return {
+      root: {
+        borderColor: '#F5D3C4',
+      },
+    } satisfies PasswordProps['styles'];
+  }
+  return {};
+};
+const stylesFnOTP: OTPProps['styles'] = (info) => {
+  if (info.props.size === 'middle') {
+    return {
+      input: {
+        borderColor: '#6E8CFB',
+        width: 32,
+      },
+    } satisfies OTPProps['styles'];
+  }
+  return {};
+};
+const stylesFnSearch: SearchProps['styles'] = (info) => {
+  if (info.props.size === 'large') {
+    return {
+      root: { color: '#4DA8DA' },
+      input: { color: '#4DA8DA', borderColor: '#4DA8DA' },
+      prefix: { color: '#4DA8DA' },
+      suffix: { color: '#4DA8DA' },
+      count: { color: '#4DA8DA' },
+      button: {
+        root: { color: '#4DA8DA', borderColor: '#4DA8DA' },
+        icon: { color: '#4DA8DA' },
+      },
+    } satisfies SearchProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyles();
+  return (
+    <Flex vertical gap="large">
+      <Input
+        classNames={{ root: classNames.focusEffect }}
+        placeholder="Object"
+        name="input-object"
+      />
+      <Input
+        classNames={classNames}
+        styles={stylesFn}
+        placeholder="Function"
+        size="middle"
+        name="input-fn"
+      />
+      <TextArea
+        classNames={classNames}
+        styles={stylesFnTextArea}
+        value="TextArea"
+        showCount
+        name="textarea-fn"
+      />
+      <Password
+        classNames={classNames}
+        styles={stylesFnPassword}
+        value="Password"
+        size="middle"
+        name="password-fn"
+      />
+      <OTP classNames={classNames} styles={stylesFnOTP} size="middle" length={6} separator="*" />
+      <Search
+        classNames={classNames}
+        styles={stylesFnSearch}
+        size="large"
+        placeholder="Search"
+        name="search-fn"
+      />
+    </Flex>
   );
 };
 export default App;
