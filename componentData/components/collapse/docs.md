@@ -1,44 +1,6 @@
 ## 何时使用
 - 对复杂区域进行分组和隐藏，保持页面的整洁。
 - `手风琴` 是一种特殊的折叠面板，只允许单个内容区域展开。
-```tsx | pure
-// >= 5.6.0 可用，推荐的写法 ✅
-const text = `
-  A dog is a type of domesticated animal.
-  Known for its loyalty and faithfulness,
-  it can be found as a welcome guest in many households across the world.
-`;
-const items: CollapseProps['items'] = [
-  {
-    key: '1',
-    label: 'This is panel header 1',
-    children: <p>{text}</p>,
-  },
-  {
-    key: '2',
-    label: 'This is panel header 2',
-    children: <p>{text}</p>,
-  },
-  {
-    key: '3',
-    label: 'This is panel header 3',
-    children: <p>{text}</p>,
-  },
-];
-<Collapse items={items} defaultActiveKey={['1']} />;
-// <5.6.0 可用，>=5.6.0 时不推荐 🙅🏻‍♀️
-<Collapse defaultActiveKey={['1']} onChange={onChange}>
-  <Panel header="This is panel header 1" key="1">
-    <p>{text}</p>
-  </Panel>
-  <Panel header="This is panel header 2" key="2">
-    <p>{text}</p>
-  </Panel>
-  <Panel header="This is panel header 3" key="3">
-    <p>{text}</p>
-  </Panel>
-</Collapse>;
-```
 ## API
 ### Collapse
 | 参数 | 说明 | 类型 | 默认值 | 版本 |
@@ -46,14 +8,17 @@ const items: CollapseProps['items'] = [
 | accordion | 手风琴模式 | boolean | false |  |
 | activeKey | 当前激活 tab 面板的 key | string\[] \| string <br/> number\[] \| number | [手风琴模式](#collapse-demo-accordion)下默认第一个元素 |  |
 | bordered | 带边框风格的折叠面板 | boolean | true |  |
+| classNames | 用于自定义组件内部各语义化结构的 class，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - |  |
 | collapsible | 所有子面板是否可折叠或指定可折叠触发区域 | `header` \| `icon` \| `disabled` | - | 4.9.0 |
 | defaultActiveKey | 初始化选中面板的 key | string\[] \| string<br/> number\[] \| number | - |  |
 | ~~destroyInactivePanel~~ | 销毁折叠隐藏的面板 | boolean | false |  |
 | destroyOnHidden | 销毁折叠隐藏的面板 | boolean | false | 5.25.0 |
 | expandIcon | 自定义切换图标 | (panelProps) => ReactNode | - |  |
-| expandIconPosition | 设置图标位置 | `start` \| `end` | - | 4.21.0 |
+| expandIconPlacement | 设置图标位置 | `start` \| `end` | `start` | - |
+| ~~expandIconPosition~~ | 设置图标位置，请使用 `expandIconPlacement` 替换 | `start` \| `end` | - | 4.21.0 |
 | ghost | 使折叠面板透明且无边框 | boolean | false | 4.4.0 |
 | size | 设置折叠面板大小 | `large` \| `middle` \| `small` | `middle` | 5.2.0 |
+| styles | 用于自定义组件内部各语义化结构的行内 style，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - |  |
 | onChange | 切换面板的回调 | function | - |  |
 | items | 折叠项目内容 | [ItemType](#itemtype) | - | 5.6.0 |
 ### ItemType

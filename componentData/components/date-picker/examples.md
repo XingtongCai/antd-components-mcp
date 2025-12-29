@@ -10,7 +10,7 @@ const onChange: DatePickerProps['onChange'] = (date, dateString) => {
   console.log(date, dateString);
 };
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <DatePicker onChange={onChange} />
     <DatePicker onChange={onChange} picker="week" />
     <DatePicker onChange={onChange} picker="month" />
@@ -28,7 +28,7 @@ import React from 'react';
 import { DatePicker, Space } from 'antd';
 const { RangePicker } = DatePicker;
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <RangePicker />
     <RangePicker showTime />
     <RangePicker picker="week" />
@@ -60,7 +60,7 @@ import type { DatePickerProps } from 'antd';
 import { DatePicker, Flex } from 'antd';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-const onChange: DatePickerProps<Dayjs[]>['onChange'] = (date, dateString) => {
+const onChange: DatePickerProps<Dayjs, true>['onChange'] = (date, dateString) => {
   console.log(date, dateString);
 };
 const defaultValue = [dayjs('2000-01-01'), dayjs('2000-01-03'), dayjs('2000-01-05')];
@@ -111,7 +111,7 @@ import React from 'react';
 import type { DatePickerProps } from 'antd';
 import { DatePicker } from 'antd';
 import type { Dayjs } from 'dayjs';
-const onChange: DatePickerProps<Dayjs[]>['onChange'] = (date, dateString) => {
+const onChange: DatePickerProps<Dayjs, false>['onChange'] = (date, dateString) => {
   console.log(date, dateString);
 };
 const App: React.FC = () => <DatePicker onChange={onChange} needConfirm />;
@@ -124,31 +124,38 @@ export default App;
 import React, { useState } from 'react';
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import { DatePicker, Select, Space, TimePicker } from 'antd';
-const { Option } = Select;
+import type { Dayjs } from 'dayjs';
 type PickerType = 'time' | 'date';
-const PickerWithType = ({
-  type,
-  onChange,
-}: {
+interface PickerWithTypeProps {
   type: PickerType;
-  onChange: TimePickerProps['onChange'] | DatePickerProps['onChange'];
-}) => {
-  if (type === 'time') return <TimePicker onChange={onChange} />;
-  if (type === 'date') return <DatePicker onChange={onChange} />;
+  onChange: TimePickerProps['onChange'] | DatePickerProps<Dayjs, false>['onChange'];
+}
+const PickerWithType: React.FC<PickerWithTypeProps> = ({ type, onChange }) => {
+  if (type === 'time') {
+    return <TimePicker onChange={onChange} />;
+  }
+  if (type === 'date') {
+    return <DatePicker onChange={onChange} />;
+  }
   return <DatePicker picker={type} onChange={onChange} />;
 };
 const App: React.FC = () => {
   const [type, setType] = useState<PickerType>('time');
   return (
     <Space>
-      <Select aria-label="Picker Type" value={type} onChange={setType}>
-        <Option value="time">Time</Option>
-        <Option value="date">Date</Option>
-        <Option value="week">Week</Option>
-        <Option value="month">Month</Option>
-        <Option value="quarter">Quarter</Option>
-        <Option value="year">Year</Option>
-      </Select>
+      <Select
+        aria-label="Picker Type"
+        value={type}
+        onChange={setType}
+        options={[
+          { label: 'Time', value: 'time' },
+          { label: 'Date', value: 'date' },
+          { label: 'Week', value: 'week' },
+          { label: 'Month', value: 'month' },
+          { label: 'Quarter', value: 'quarter' },
+          { label: 'Year', value: 'year' },
+        ]}
+      />
       <PickerWithType type={type} onChange={(value) => console.log(value)} />
     </Space>
   );
@@ -178,7 +185,7 @@ const customWeekStartEndFormat: DatePickerProps['format'] = (value) =>
     .endOf('week')
     .format(weekFormat)}`;
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker defaultValue={dayjs('2015/01/01', dateFormat)} format={dateFormat} />
     <DatePicker defaultValue={dayjs('01/01/2015', dateFormatList[0])} format={dateFormatList} />
     <DatePicker defaultValue={dayjs('2015/01', monthFormat)} format={monthFormat} picker="month" />
@@ -205,7 +212,7 @@ const onOk = (value: DatePickerProps['value'] | RangePickerProps['value']) => {
   console.log('onOk: ', value);
 };
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker
       showTime
       onChange={(value, dateString) => {
@@ -238,7 +245,7 @@ const onChange: DatePickerProps['onChange'] = (date, dateString) => {
   console.log(date, dateString);
 };
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <DatePicker
       format={{
         format: 'YYYY-MM-DD',
@@ -288,7 +295,7 @@ dayjs.extend(customParseFormat);
 const { RangePicker } = DatePicker;
 const dateFormat = 'YYYY-MM-DD';
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker defaultValue={dayjs('2015-06-06', dateFormat)} disabled />
     <DatePicker picker="month" defaultValue={dayjs('2015-06', 'YYYY-MM')} disabled />
     <RangePicker
@@ -321,7 +328,7 @@ type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 dayjs.extend(customParseFormat);
 const { RangePicker } = DatePicker;
 const range = (start: number, end: number) => {
-  const result = [];
+  const result: number[] = [];
   for (let i = start; i < end; i++) {
     result.push(i);
   }
@@ -330,6 +337,10 @@ const range = (start: number, end: number) => {
 const disabledDate: RangePickerProps['disabledDate'] = (current) => {
   // Can not select days before today and today
   return current && current < dayjs().endOf('day');
+};
+const disabledDateForMonth: RangePickerProps['disabledDate'] = (current) => {
+  // Can not select months before this month
+  return current && current < dayjs().startOf('month');
 };
 const disabledDateTime = () => ({
   disabledHours: () => range(0, 24).splice(4, 20),
@@ -351,21 +362,21 @@ const disabledRangeTime: RangePickerProps['disabledTime'] = (_, type) => {
   };
 };
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker
       format="YYYY-MM-DD HH:mm:ss"
       disabledDate={disabledDate}
       disabledTime={disabledDateTime}
-      showTime={{ defaultValue: dayjs('00:00:00', 'HH:mm:ss') }}
+      showTime={{ defaultOpenValue: dayjs('00:00:00', 'HH:mm:ss') }}
     />
-    <DatePicker picker="month" disabledDate={disabledDate} />
+    <DatePicker picker="month" disabledDate={disabledDateForMonth} />
     <RangePicker disabledDate={disabledDate} />
     <RangePicker
       disabledDate={disabledDate}
       disabledTime={disabledRangeTime}
       showTime={{
         hideDisabledOptions: true,
-        defaultValue: [dayjs('00:00:00', 'HH:mm:ss'), dayjs('11:59:59', 'HH:mm:ss')],
+        defaultOpenValue: [dayjs('00:00:00', 'HH:mm:ss'), dayjs('11:59:59', 'HH:mm:ss')],
       }}
       format="YYYY-MM-DD HH:mm:ss"
     />
@@ -381,7 +392,7 @@ import React from 'react';
 import { DatePicker } from 'antd';
 const App: React.FC = () => (
   <DatePicker.RangePicker
-    placeholder={['Allow Empty', 'Till Now']}
+    placeholder={['Start Date', 'Till Now']}
     allowEmpty={[false, true]}
     onChange={(date, dateString) => {
       console.log(date, dateString);
@@ -437,7 +448,7 @@ const disabled6MonthsDate: DatePickerProps['disabledDate'] = (current, { from, t
   return false;
 };
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <Typography.Title level={5}>7 days range</Typography.Title>
     <RangePicker disabledDate={disabled7DaysDate} />
     <Typography.Title level={5}>6 months range</Typography.Title>
@@ -456,7 +467,7 @@ import { DatePicker, Space } from 'antd';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 const { RangePicker } = DatePicker;
-const onChange = (date: Dayjs) => {
+const onChange = (date: Dayjs | null) => {
   if (date) {
     console.log('Date: ', date);
   } else {
@@ -478,7 +489,7 @@ const rangePresets: TimeRangePickerProps['presets'] = [
   { label: 'Last 90 Days', value: [dayjs().add(-90, 'd'), dayjs()] },
 ];
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker
       presets={[
         { label: 'Yesterday', value: dayjs().add(-1, 'd') },
@@ -512,7 +523,7 @@ import React from 'react';
 import { DatePicker, Space } from 'antd';
 const { RangePicker } = DatePicker;
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker renderExtraFooter={() => 'extra footer'} />
     <DatePicker renderExtraFooter={() => 'extra footer'} showTime />
     <RangePicker renderExtraFooter={() => 'extra footer'} />
@@ -537,7 +548,7 @@ const App: React.FC = () => {
     setSize(e.target.value);
   };
   return (
-    <Space direction="vertical" size={12}>
+    <Space vertical size={12}>
       <Radio.Group value={size} onChange={handleSizeChange}>
         <Radio.Button value="large">Large</Radio.Button>
         <Radio.Button value="middle">middle</Radio.Button>
@@ -580,7 +591,7 @@ const App: React.FC = () => {
     );
   };
   return (
-    <Space size={12} direction="vertical">
+    <Space size={12} vertical>
       <DatePicker cellRender={cellRender} />
       <DatePicker.RangePicker cellRender={cellRender} />
     </Space>
@@ -647,7 +658,7 @@ const MyDatePanel = (props: GetProps<DateComponent>) => {
   );
 };
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <DatePicker
       showNow={false}
       onChange={onChange}
@@ -667,10 +678,11 @@ import React from 'react';
 import { DownOutlined } from '@ant-design/icons';
 import { DatePicker, Dropdown, Space } from 'antd';
 import dayjs from 'dayjs';
-const App: React.FC = () => {
+import type { Dayjs } from 'dayjs';
+const DatePickerDemo: React.FC = () => {
   const [visible, setVisible] = React.useState(false);
   const [panelVisible, setPanelVisible] = React.useState(false);
-  const [date, setDate] = React.useState(dayjs());
+  const [date, setDate] = React.useState<Dayjs | null>(() => dayjs());
   return (
     <Dropdown
       arrow
@@ -705,7 +717,7 @@ const App: React.FC = () => {
             key: 'custom-date',
             label: (
               <div
-                style={{ position: 'relative' }}
+                style={{ position: 'relative', overflow: 'hidden' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setPanelVisible(true);
@@ -716,17 +728,18 @@ const App: React.FC = () => {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  style={{
-                    height: 0,
-                    width: 0,
-                    overflow: 'hidden',
-                    position: 'absolute',
-                    top: 0,
-                    insetInlineStart: 0,
-                  }}
                 >
                   <DatePicker
                     open={panelVisible}
+                    styles={{
+                      root: {
+                        pointerEvents: 'none',
+                        opacity: 0,
+                        position: 'absolute',
+                        bottom: -12,
+                        insetInlineStart: 0,
+                      },
+                    }}
                     onChange={(date) => {
                       setDate(date);
                       setVisible(false);
@@ -741,13 +754,119 @@ const App: React.FC = () => {
       }}
     >
       <Space>
-        <span>{date.format('YYYY-MM-DD')}</span>
+        <span>{date?.format('YYYY-MM-DD')}</span>
         <DownOutlined />
       </Space>
     </Dropdown>
   );
 };
-export default App;
+const RangePickerDemo: React.FC = () => {
+  const [visible, setVisible] = React.useState(false);
+  const [panelVisible, setPanelVisible] = React.useState(false);
+  const [dates, setDates] = React.useState<[Dayjs, Dayjs] | null>(() => [
+    dayjs(),
+    dayjs().add(1, 'day'),
+  ]);
+  return (
+    <Dropdown
+      arrow
+      open={visible}
+      trigger={['click']}
+      destroyOnHidden
+      onOpenChange={(open) => {
+        setVisible(open);
+        if (!open) {
+          setPanelVisible(false);
+        }
+      }}
+      menu={{
+        items: [
+          {
+            key: '7',
+            label: '7 days',
+            onClick() {
+              setDates([dayjs(), dayjs().add(7, 'day')]);
+              setVisible(false);
+            },
+          },
+          {
+            key: '30',
+            label: '30 days',
+            onClick() {
+              setDates([dayjs(), dayjs().add(30, 'day')]);
+              setVisible(false);
+            },
+          },
+          {
+            key: 'custom-date',
+            label: (
+              <div
+                style={{ position: 'relative', overflow: 'hidden' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPanelVisible(true);
+                }}
+              >
+                <div>Customize</div>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <DatePicker.RangePicker
+                    open={panelVisible}
+                    styles={{
+                      root: {
+                        pointerEvents: 'none',
+                        opacity: 0,
+                        position: 'absolute',
+                        bottom: 0, // RangePicker use this style
+                        insetInlineStart: 0,
+                      },
+                    }}
+                    onChange={(ranges) => {
+                      if (ranges?.[0] && ranges?.[1]) {
+                        setDates([ranges[0], ranges[1]]);
+                      } else {
+                        setDates(null);
+                      }
+                      setVisible(false);
+                      setPanelVisible(false);
+                    }}
+                  />
+                </div>
+              </div>
+            ),
+          },
+        ],
+      }}
+    >
+      <Space>
+        <span>
+          {dates
+            ? `${dates[0].format('YYYY-MM-DD')} ~ ${dates[1].format('YYYY-MM-DD')}`
+            : 'Select range'}
+        </span>
+        <DownOutlined />
+      </Space>
+    </Dropdown>
+  );
+};
+const Demo = () => {
+  return (
+    <div style={{ display: 'flex', gap: '20%' }}>
+      <div>
+        <div style={{ marginBottom: 12 }}>DatePicker</div>
+        <DatePickerDemo />
+      </div>
+      <div>
+        <div style={{ marginBottom: 12 }}>RangePicker</div>
+        <RangePickerDemo />
+      </div>
+    </div>
+  );
+};
+export default Demo;
 ```
 ### 佛历格式
 通过 `locale` 配置支持特殊的年历格式。
@@ -787,7 +906,7 @@ const App: React.FC = () => {
     console.log('onChange:', dateStr);
   };
   return (
-    <Space direction="vertical">
+    <Space vertical>
       <Title level={4}>By locale props</Title>
       <DatePicker defaultValue={defaultValue} locale={buddhistLocale} onChange={onChange} />
       <DatePicker
@@ -798,7 +917,7 @@ const App: React.FC = () => {
       />
       <Title level={4}>By ConfigProvider</Title>
       <ConfigProvider locale={globalBuddhistLocale}>
-        <Space direction="vertical">
+        <Space vertical>
           <DatePicker defaultValue={defaultValue} onChange={onChange} />
           <DatePicker defaultValue={defaultValue} showTime onChange={onChange} />
         </Space>
@@ -815,7 +934,7 @@ export default App;
 import React from 'react';
 import { DatePicker, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical" style={{ width: '100%' }}>
+  <Space vertical style={{ width: '100%' }}>
     <DatePicker status="error" style={{ width: '100%' }} />
     <DatePicker status="warning" style={{ width: '100%' }} />
     <DatePicker.RangePicker status="error" style={{ width: '100%' }} />
@@ -853,6 +972,47 @@ const App: React.FC = () => (
 );
 export default App;
 ```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 DatePicker 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { DatePicker, Flex } from 'antd';
+import type { DatePickerProps } from 'antd';
+import { createStyles } from 'antd-style';
+import type { Dayjs } from 'dayjs';
+const useStyles = createStyles(({ token }) => ({
+  root: {
+    border: `1px solid ${token.colorPrimary}`,
+    width: 200,
+  },
+}));
+const stylesObject: DatePickerProps<Dayjs>['styles'] = {
+  input: { fontStyle: 'italic' },
+  suffix: { opacity: 0.85 },
+};
+const stylesFn: DatePickerProps<Dayjs>['styles'] = (info) => {
+  if (info.props.size === 'large') {
+    return {
+      root: { borderColor: '#722ed1' },
+      popup: {
+        container: { border: '1px solid #722ed1', borderRadius: 8 },
+      },
+    } satisfies DatePickerProps<Dayjs>['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyles();
+  return (
+    <Flex vertical gap="middle">
+      <DatePicker classNames={classNames} styles={stylesObject} placeholder="Object" />
+      <DatePicker classNames={classNames} styles={stylesFn} placeholder="Function" size="large" />
+    </Flex>
+  );
+};
+export default App;
+```
 ### Filled Debug
 Filled Debug
 
@@ -865,7 +1025,7 @@ dayjs.extend(customParseFormat);
 const { RangePicker } = DatePicker;
 const dateFormat = 'YYYY-MM-DD';
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker variant="filled" defaultValue={dayjs('2015-06-06', dateFormat)} disabled />
     <DatePicker
       variant="filled"
@@ -888,6 +1048,7 @@ const App: React.FC = () => (
       variant="filled"
       status="error"
       style={{ width: '100%' }}
+      previewValue={false}
     />
     <DatePicker variant="filled" status="warning" style={{ width: '100%' }} />
     <RangePicker variant="filled" status="error" style={{ width: '100%' }} />
@@ -980,7 +1141,7 @@ const ControlledRangePicker = () => {
   );
 };
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <ControlledDatePicker />
     <ControlledRangePicker />
   </Space>
@@ -1056,11 +1217,11 @@ import { DatePicker, Space } from 'antd';
 import type { Dayjs } from 'dayjs';
 const smileIcon = <SmileOutlined />;
 const { RangePicker } = DatePicker;
-const onChange = (date: Dayjs | (Dayjs | null)[] | null, dateString: string | string[]) => {
+const onChange = (date: Dayjs | (Dayjs | null)[] | null, dateString: string | string[] | null) => {
   console.log(date, dateString);
 };
 const App: React.FC = () => (
-  <Space direction="vertical" size={12}>
+  <Space vertical size={12}>
     <DatePicker suffixIcon={smileIcon} onChange={onChange} />
     <DatePicker suffixIcon={smileIcon} onChange={onChange} picker="month" />
     <RangePicker suffixIcon={smileIcon} onChange={onChange} />
@@ -1118,7 +1279,7 @@ const App: React.FC = () => (
         },
       }}
     >
-      <Space direction="vertical">
+      <Space vertical>
         <DatePicker
           presets={[
             { label: 'Yesterday', value: dayjs().add(-1, 'd') },
@@ -1149,6 +1310,23 @@ const App: React.FC = () => (
       </Flex>
     </ConfigProvider>
   </>
+);
+export default App;
+```
+### suffixIcon
+suffixIcon 测试。
+
+```tsx
+import React from 'react';
+import { DatePicker, Space } from 'antd';
+const App: React.FC = () => (
+  <Space orientation="vertical">
+    <DatePicker suffixIcon />
+    <DatePicker suffixIcon={false} />
+    <DatePicker />
+    <DatePicker suffixIcon={null} />
+    <DatePicker suffixIcon={'123'} />
+  </Space>
 );
 export default App;
 ```

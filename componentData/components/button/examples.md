@@ -196,7 +196,7 @@ const App: React.FC = () => (
 export default App;
 ```
 ### 按钮图标位置
-通过设置 `iconPosition` 为 `start` 或 `end` 分别设置按钮图标的位置。
+通过设置 `iconPlacement` 为 `start` 或 `end` 分别设置按钮图标的位置。
 
 ```tsx
 import React, { useState } from 'react';
@@ -212,7 +212,7 @@ const App: React.FC = () => {
           <Radio.Button value="end">end</Radio.Button>
         </Radio.Group>
       </Space>
-      <Divider orientation="left" plain>
+      <Divider titlePlacement="start" plain>
         Preview
       </Divider>
       <Flex gap="small" vertical>
@@ -223,13 +223,13 @@ const App: React.FC = () => {
           <Button type="primary" shape="circle">
             A
           </Button>
-          <Button type="primary" icon={<SearchOutlined />} iconPosition={position}>
+          <Button type="primary" icon={<SearchOutlined />} iconPlacement={position}>
             Search
           </Button>
           <Tooltip title="search">
             <Button shape="circle" icon={<SearchOutlined />} />
           </Tooltip>
-          <Button icon={<SearchOutlined />} iconPosition={position}>
+          <Button icon={<SearchOutlined />} iconPlacement={position}>
             Search
           </Button>
         </Flex>
@@ -237,22 +237,22 @@ const App: React.FC = () => {
           <Tooltip title="search">
             <Button shape="circle" icon={<SearchOutlined />} />
           </Tooltip>
-          <Button icon={<SearchOutlined />} type="text" iconPosition={position}>
+          <Button icon={<SearchOutlined />} type="text" iconPlacement={position}>
             Search
           </Button>
           <Tooltip title="search">
             <Button type="dashed" shape="circle" icon={<SearchOutlined />} />
           </Tooltip>
-          <Button type="dashed" icon={<SearchOutlined />} iconPosition={position}>
+          <Button type="dashed" icon={<SearchOutlined />} iconPlacement={position}>
             Search
           </Button>
           <Button
             icon={<SearchOutlined />}
             href="https://www.google.com"
             target="_blank"
-            iconPosition={position}
+            iconPlacement={position}
           />
-          <Button type="primary" loading iconPosition={position}>
+          <Button type="primary" loading iconPlacement={position}>
             Loading
           </Button>
         </Flex>
@@ -281,7 +281,7 @@ const App: React.FC = () => {
         <Radio.Button value="default">Default</Radio.Button>
         <Radio.Button value="small">Small</Radio.Button>
       </Radio.Group>
-      <Divider orientation="left" plain>
+      <Divider titlePlacement="start" plain>
         Preview
       </Divider>
       <Flex gap="small" align="flex-start" vertical>
@@ -400,6 +400,7 @@ import { Button, Flex } from 'antd';
 const App: React.FC = () => {
   const [loadings, setLoadings] = useState<boolean[]>([]);
   const enterLoading = (index: number) => {
+    console.log('Start loading:', index);
     setLoadings((prevLoadings) => {
       const newLoadings = [...prevLoadings];
       newLoadings[index] = true;
@@ -435,7 +436,7 @@ const App: React.FC = () => {
           type="primary"
           loading={loadings[2]}
           onClick={() => enterLoading(2)}
-          iconPosition="end"
+          iconPlacement="end"
         >
           Icon End
         </Button>
@@ -468,12 +469,13 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 多个按钮组合
-按钮组合使用时，推荐使用 1 个主操作 + n 个次操作，3 个以上操作时把更多操作放到 [Dropdown.Button](/components/dropdown-cn/#dropdown-demo-dropdown-button) 中组合使用。
+按钮组合使用时，推荐使用 1 个主操作 + n 个次操作，3 个以上操作时把更多操作放到 [Dropdown](/components/dropdown-cn/#dropdown-demo-dropdown-button) 中组合使用。
 
 ```tsx
 import React from 'react';
+import { EllipsisOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Button, Dropdown, Flex } from 'antd';
+import { Button, Dropdown, Flex, Space } from 'antd';
 const onMenuClick: MenuProps['onClick'] = (e) => {
   console.log('click', e);
 };
@@ -495,7 +497,12 @@ const App: React.FC = () => (
   <Flex align="flex-start" gap="small" vertical>
     <Button type="primary">primary</Button>
     <Button>secondary</Button>
-    <Dropdown.Button menu={{ items, onClick: onMenuClick }}>Actions</Dropdown.Button>
+    <Space.Compact>
+      <Button>Actions</Button>
+      <Dropdown menu={{ items, onClick: onMenuClick }} placement="bottomRight">
+        <Button icon={<EllipsisOutlined />} />
+      </Dropdown>
+    </Space.Compact>
   </Flex>
 );
 export default App;
@@ -687,7 +694,7 @@ const App: React.FC = () => (
           theme={{
             components: {
               Button: {
-                borderColorDisabled: 'rgba(0, 0, 0, 0.12)',
+                colorBorderDisabled: 'rgba(0, 0, 0, 0.12)',
                 colorBgContainerDisabled: 'transparent',
               },
             },
@@ -706,6 +713,14 @@ const App: React.FC = () => (
         <Button size="small">OUTLINED</Button>
       </Flex>
     </ConfigProvider>
+    <Flex gap="small" wrap>
+      <ConfigProvider theme={{ components: { Button: { colorBorderDisabled: 'red' } } }}>
+        <Button disabled>Custom Red Disabled</Button>
+      </ConfigProvider>
+      <ConfigProvider theme={{ components: { Button: { borderColorDisabled: 'blue' } } }}>
+        <Button disabled>Legacy Blue Disabled</Button>
+      </ConfigProvider>
+    </Flex>
     <ConfigProvider
       theme={{
         token: {
@@ -721,6 +736,24 @@ const App: React.FC = () => (
         </Button>
         <Button color="primary" variant="link">
           Primary Link
+        </Button>
+      </Flex>
+    </ConfigProvider>
+    <ConfigProvider
+      theme={{
+        components: { Button: { paddingInline: 100, paddingInlineLG: 150, paddingInlineSM: 50 } },
+      }}
+    >
+      <Flex gap="small" vertical align="start">
+        <Button>Default Button</Button>
+        <Button shape="round">Default Button</Button>
+        <Button size="large">Default Button</Button>
+        <Button shape="round" size="large">
+          Default Button
+        </Button>
+        <Button size="small">Default Button</Button>
+        <Button shape="round" size="small">
+          Default Button
         </Button>
       </Flex>
     </ConfigProvider>
@@ -776,6 +809,112 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 自定义按钮波纹
+波纹效果带来了灵动性，你也可以使用 [`@ant-design/happy-work-theme`](https://github.com/ant-design/happy-work-theme) 提供的 HappyProvider 实现动态波纹效果。
+
+```tsx
+import React from 'react';
+import { HappyProvider } from '@ant-design/happy-work-theme';
+import { Button, ConfigProvider, Flex } from 'antd';
+import type { ConfigProviderProps, GetProp } from 'antd';
+type WaveConfig = GetProp<ConfigProviderProps, 'wave'>;
+// Prepare effect holder
+const createHolder = (node: HTMLElement) => {
+  const { borderWidth } = getComputedStyle(node);
+  const borderWidthNum = Number.parseInt(borderWidth, 10);
+  const div = document.createElement('div');
+  div.style.position = 'absolute';
+  div.style.inset = `-${borderWidthNum}px`;
+  div.style.borderRadius = 'inherit';
+  div.style.background = 'transparent';
+  div.style.zIndex = '999';
+  div.style.pointerEvents = 'none';
+  div.style.overflow = 'hidden';
+  node.appendChild(div);
+  return div;
+};
+const createDot = (holder: HTMLElement, color: string, left: number, top: number, size = 0) => {
+  const dot = document.createElement('div');
+  dot.style.position = 'absolute';
+  dot.style.left = `${left}px`;
+  dot.style.top = `${top}px`;
+  dot.style.width = `${size}px`;
+  dot.style.height = `${size}px`;
+  dot.style.borderRadius = '50%';
+  dot.style.background = color;
+  dot.style.transform = 'translate3d(-50%, -50%, 0)';
+  dot.style.transition = 'all 1s ease-out';
+  holder.appendChild(dot);
+  return dot;
+};
+// Inset Effect
+const showInsetEffect: WaveConfig['showEffect'] = (node, { event, component }) => {
+  if (component !== 'Button') {
+    return;
+  }
+  const holder = createHolder(node);
+  const rect = holder.getBoundingClientRect();
+  const left = event.clientX - rect.left;
+  const top = event.clientY - rect.top;
+  const dot = createDot(holder, 'rgba(255, 255, 255, 0.65)', left, top);
+  // Motion
+  requestAnimationFrame(() => {
+    dot.ontransitionend = () => {
+      holder.remove();
+    };
+    dot.style.width = '200px';
+    dot.style.height = '200px';
+    dot.style.opacity = '0';
+  });
+};
+// Shake Effect
+const showShakeEffect: WaveConfig['showEffect'] = (node, { component }) => {
+  if (component !== 'Button') {
+    return;
+  }
+  const seq = [0, -15, 15, -5, 5, 0];
+  const itv = 10;
+  let steps = 0;
+  const loop = () => {
+    cancelAnimationFrame((node as any).effectTimeout);
+    (node as any).effectTimeout = requestAnimationFrame(() => {
+      const currentStep = Math.floor(steps / itv);
+      const current = seq[currentStep];
+      const next = seq[currentStep + 1];
+      if (next === undefined || next === null) {
+        node.style.transform = '';
+        node.style.transition = '';
+        return;
+      }
+      // Trans from current to next by itv
+      const angle = current + ((next - current) / itv) * (steps % itv);
+      node.style.transform = `rotate(${angle}deg)`;
+      node.style.transition = 'none';
+      steps += 1;
+      loop();
+    });
+  };
+  loop();
+};
+// Component
+const Wrapper: React.FC<WaveConfig & { name: string }> = ({ name, ...wave }) => (
+  <ConfigProvider wave={wave}>
+    <Button type="primary">{name}</Button>
+  </ConfigProvider>
+);
+const Demo: React.FC = () => (
+  <Flex gap="large" wrap>
+    <Wrapper name="Disabled" disabled />
+    <Wrapper name="Default" />
+    <Wrapper name="Inset" showEffect={showInsetEffect} />
+    <Wrapper name="Shake" showEffect={showShakeEffect} />
+    <HappyProvider>
+      <Button type="primary">Happy Work</Button>
+    </HappyProvider>
+  </Flex>
+);
+export default Demo;
+```
 ### 移除两个汉字之间的空格
 我们默认在两个汉字之间添加空格，可以通过设置 `autoInsertSpace` 为 `false` 关闭。
 
@@ -792,5 +931,87 @@ const App: React.FC = () => (
     </Button>
   </Flex>
 );
+export default App;
+```
+### 自定义禁用样式背景
+自定义disable下的背景颜色(适用 `default` 和 `dashed` 类型)
+
+```tsx
+import React from 'react';
+import { Button, ConfigProvider, Flex } from 'antd';
+const App: React.FC = () => (
+  <Flex gap="small" wrap>
+    <ConfigProvider
+      theme={{
+        components: {
+          Button: {
+            defaultBgDisabled: 'rgba(0,0,0,0.1)',
+            dashedBgDisabled: 'rgba(0,0,0,0.4)',
+          },
+        },
+      }}
+    >
+      <Button type="primary" disabled>
+        Primary Button
+      </Button>
+      <Button disabled>Default Button</Button>
+      <Button type="dashed" disabled>
+        Dashed Button
+      </Button>
+    </ConfigProvider>
+  </Flex>
+);
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Button 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Button, Flex } from 'antd';
+import type { ButtonProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles(({ token }) => ({
+  root: {
+    border: `1px solid ${token.colorBorder}`,
+    borderRadius: token.borderRadius,
+    padding: `${token.paddingXS}px ${token.padding}px`,
+    height: 'auto',
+  },
+  content: {
+    color: token.colorText,
+  },
+}));
+const stylesObject: ButtonProps['styles'] = {
+  root: {
+    boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)',
+  },
+};
+const stylesFn: ButtonProps['styles'] = (info) => {
+  if (info.props.type === 'primary') {
+    return {
+      root: {
+        backgroundColor: '#171717',
+      },
+      content: {
+        color: '#fff',
+      },
+    } satisfies ButtonProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyles();
+  return (
+    <Flex gap="small">
+      <Button type="default" classNames={classNames} styles={stylesObject}>
+        Object
+      </Button>
+      <Button type="primary" classNames={classNames} styles={stylesFn}>
+        Function
+      </Button>
+    </Flex>
+  );
+};
 export default App;
 ```
