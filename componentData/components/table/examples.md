@@ -4,7 +4,7 @@
 
 ```tsx
 import React from 'react';
-import { Space, Table, Tag } from 'antd';
+import { Flex, Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
 interface DataType {
   key: string;
@@ -35,7 +35,7 @@ const columns: TableProps<DataType>['columns'] = [
     key: 'tags',
     dataIndex: 'tags',
     render: (_, { tags }) => (
-      <>
+      <Flex gap="small" align="center" wrap>
         {tags.map((tag) => {
           let color = tag.length > 5 ? 'geekblue' : 'green';
           if (tag === 'loser') {
@@ -47,7 +47,7 @@ const columns: TableProps<DataType>['columns'] = [
             </Tag>
           );
         })}
-      </>
+      </Flex>
     ),
   },
   {
@@ -93,7 +93,7 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Space, Table, Tag } from 'antd';
+import { Flex, Space, Table, Tag } from 'antd';
 const { Column, ColumnGroup } = Table;
 interface DataType {
   key: React.Key;
@@ -142,7 +142,7 @@ const App: React.FC = () => (
       dataIndex="tags"
       key="tags"
       render={(tags: string[]) => (
-        <>
+        <Flex gap="small" align="center" wrap>
           {tags.map((tag) => {
             let color = tag.length > 5 ? 'geekblue' : 'green';
             if (tag === 'loser') {
@@ -154,7 +154,7 @@ const App: React.FC = () => (
               </Tag>
             );
           })}
-        </>
+        </Flex>
       )}
     />
     <Column
@@ -1175,7 +1175,6 @@ export default App;
 import React, { useEffect, useState } from 'react';
 import type { GetProp, TableProps } from 'antd';
 import { Table } from 'antd';
-import type { AnyObject } from 'antd/es/_util/type';
 import type { SorterResult } from 'antd/es/table/interface';
 type ColumnsType<T extends object = object> = TableProps<T>['columns'];
 type TablePaginationConfig = Exclude<GetProp<TableProps, 'pagination'>, boolean>;
@@ -1212,7 +1211,10 @@ const columns: ColumnsType<DataType> = [
     dataIndex: 'email',
   },
 ];
-const toURLSearchParams = <T extends AnyObject>(record: T) => {
+const isNonNullable = <T,>(val: T): val is NonNullable<T> => {
+  return val !== undefined && val !== null;
+};
+const toURLSearchParams = <T extends Record<PropertyKey, any>>(record: T) => {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(record)) {
     params.append(key, value);
@@ -1228,7 +1230,7 @@ const getRandomuserParams = (params: TableParams) => {
   // https://github.com/mockapi-io/docs/wiki/Code-examples#filtering
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      if (isNonNullable(value)) {
         result[key] = value;
       }
     });
@@ -1240,7 +1242,7 @@ const getRandomuserParams = (params: TableParams) => {
   }
   // 处理其他参数
   Object.entries(restParams).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
+    if (isNonNullable(value)) {
       result[key] = value;
     }
   });
@@ -1272,6 +1274,9 @@ const App: React.FC = () => {
             // total: data.totalCount,
           },
         });
+      })
+      .catch(() => {
+        console.log('fetch mock data failed');
       });
   };
   useEffect(fetchData, [
@@ -1530,6 +1535,87 @@ const App: React.FC = () => (
     expandable={{
       expandedRowRender: (record) => <p style={{ margin: 0 }}>{record.description}</p>,
       rowExpandable: (record) => record.name !== 'Not Expandable',
+    }}
+    dataSource={data}
+  />
+);
+export default App;
+```
+### 可自定义展开位置
+使用 `expandedRowOffset` 自定义展开子表格偏移列数
+
+```tsx
+import React from 'react';
+import { Table } from 'antd';
+import type { TableColumnsType } from 'antd';
+interface DataType {
+  key: React.Key;
+  team: string;
+  name: string;
+  age: number;
+  address: string;
+  description: string;
+}
+const columns: TableColumnsType<DataType> = [
+  {
+    title: 'Team',
+    dataIndex: 'team',
+    key: 'team',
+    onCell: (__, index = 0) => (index % 2 === 0 ? { rowSpan: 2 } : { rowSpan: 0 }),
+    width: 100,
+  },
+  Table.EXPAND_COLUMN,
+  { title: 'Name', dataIndex: 'name', key: 'name', width: 150 },
+  { title: 'Age', dataIndex: 'age', key: 'age' },
+  { title: 'Address', dataIndex: 'address', key: 'address' },
+  {
+    title: 'Action',
+    dataIndex: '',
+    key: 'x',
+    render: () => <a>Delete</a>,
+  },
+];
+const data: DataType[] = [
+  {
+    key: 1,
+    team: 'Team A',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+    description: 'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.',
+  },
+  {
+    key: 2,
+    team: 'Team A',
+    name: 'Jim Green',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+    description: 'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.',
+  },
+  {
+    key: 3,
+    team: 'Team B',
+    name: 'Not Expandable',
+    age: 29,
+    address: 'Jiangsu No. 1 Lake Park',
+    description: 'This not expandable',
+  },
+  {
+    key: 4,
+    team: 'Team B',
+    name: 'Joe Black',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+    description: 'My name is Joe Black, I am 32 years old, living in Sydney No. 1 Lake Park.',
+  },
+];
+const App: React.FC = () => (
+  <Table<DataType>
+    bordered
+    columns={columns}
+    expandable={{
+      expandedRowOffset: 3,
+      expandedRowRender: (record) => <div>{record.description}</div>,
     }}
     dataSource={data}
   />
@@ -1818,14 +1904,17 @@ const data: DataType[] = [
 ];
 // rowSelection objects indicates the need for row selection
 const rowSelection: TableRowSelection<DataType> = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  onChange: (selectedRowKeys, selectedRows, info) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      'selectedRows: ',
+      selectedRows,
+      'info',
+      info,
+    );
   },
   onSelect: (record, selected, selectedRows) => {
     console.log(record, selected, selectedRows);
-  },
-  onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
   },
 };
 const App: React.FC = () => {
@@ -2019,14 +2108,17 @@ const dataSource = Array.from({ length: 15 }).map<DataType>((_, i) => ({
 }));
 // rowSelection objects indicates the need for row selection
 const rowSelection: TableRowSelection<DataType> = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  onChange: (selectedRowKeys, selectedRows, info) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      'selectedRows: ',
+      selectedRows,
+      'info',
+      info,
+    );
   },
   onSelect: (record, selected, selectedRows) => {
     console.log(record, selected, selectedRows);
-  },
-  onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
   },
 };
 const App: React.FC = () => {
@@ -2069,7 +2161,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2140,7 +2231,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2159,14 +2249,14 @@ const columns: TableColumnsType<DataType> = [
     width: 100,
     dataIndex: 'name',
     key: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
     key: 'age',
-    fixed: 'left',
+    fixed: 'start',
     sorter: true,
   },
   { title: 'Column 1', dataIndex: 'address', key: '1' },
@@ -2192,7 +2282,7 @@ const columns: TableColumnsType<DataType> = [
   {
     title: 'Action',
     key: 'operation',
-    fixed: 'right',
+    fixed: 'end',
     width: 100,
     render: () => <a>action</a>,
   },
@@ -2233,7 +2323,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2251,14 +2340,14 @@ const columns: TableColumnsType<DataType> = [
     title: 'Full Name',
     width: 100,
     dataIndex: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
   },
-  { title: 'Column 1', dataIndex: 'address', key: '1', fixed: 'left' },
+  { title: 'Column 1', dataIndex: 'address', key: '1', fixed: 'start' },
   { title: 'Column 2', dataIndex: 'address', key: '2' },
   { title: 'Column 3', dataIndex: 'address', key: '3' },
   { title: 'Column 4', dataIndex: 'address', key: '4' },
@@ -2280,7 +2369,7 @@ const columns: TableColumnsType<DataType> = [
   { title: 'Column 20', dataIndex: 'address', key: '20' },
   {
     title: 'Action 1',
-    fixed: 'right',
+    fixed: 'end',
     width: 90,
     render: () => <a>action</a>,
   },
@@ -2291,7 +2380,7 @@ const columns: TableColumnsType<DataType> = [
   },
   {
     title: 'Action 3',
-    fixed: 'right',
+    fixed: 'end',
     width: 90,
     render: () => <a>action</a>,
   },
@@ -2336,7 +2425,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2355,14 +2443,14 @@ const columns: TableColumnsType<DataType> = [
     width: 100,
     dataIndex: 'name',
     key: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
     key: 'age',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Column 1',
@@ -2422,7 +2510,7 @@ const columns: TableColumnsType<DataType> = [
   {
     title: 'Action',
     key: 'operation',
-    fixed: 'right',
+    fixed: 'end',
     width: 100,
     render: () => <a>action</a>,
   },
@@ -2528,7 +2616,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2552,7 +2639,7 @@ const columns: TableColumnsType<DataType> = [
     dataIndex: 'name',
     key: 'name',
     width: 100,
-    fixed: 'left',
+    fixed: 'start',
     filters: [
       {
         text: 'Joe',
@@ -2626,7 +2713,7 @@ const columns: TableColumnsType<DataType> = [
     dataIndex: 'gender',
     key: 'gender',
     width: 80,
-    fixed: 'right',
+    fixed: 'end',
   },
 ];
 const dataSource = Array.from({ length: 100 }).map<DataType>((_, i) => ({
@@ -3283,18 +3370,13 @@ interface DragIndexState {
 }
 const DragIndexContext = createContext<DragIndexState>({ active: -1, over: -1 });
 const dragActiveStyle = (dragState: DragIndexState, id: string) => {
-  const { active, over, direction } = dragState;
+  const { active, over } = dragState;
   // drag active style
   let style: React.CSSProperties = {};
   if (active && active === id) {
     style = { backgroundColor: 'gray', opacity: 0.5 };
-  }
-  // dragover dashed style
-  else if (over && id === over && active !== over) {
-    style =
-      direction === 'right'
-        ? { borderRight: '1px dashed gray' }
-        : { borderLeft: '1px dashed gray' };
+  } else if (over && id === over && active !== over) {
+    style = { borderInlineStart: '1px dashed gray' };
   }
   return style;
 };
@@ -3527,123 +3609,6 @@ const App: React.FC = () => {
         />
       </SortableContext>
     </DndContext>
-  );
-};
-export default App;
-```
-### 可伸缩列
-集成 [react-resizable](https://github.com/STRML/react-resizable) 来实现可伸缩列。如果有排序需要，可以通过[额外标记](https://codesandbox.io/s/zrj8xvyzxx)阻止触发排序。
-
-```tsx
-import React, { useState } from 'react';
-import { Table } from 'antd';
-import type { TableColumnsType } from 'antd';
-import type { ResizeCallbackData } from 'react-resizable';
-import { Resizable } from 'react-resizable';
-interface DataType {
-  key: React.Key;
-  date: string;
-  amount: number;
-  type: string;
-  note: string;
-}
-interface TitlePropsType {
-  width: number;
-  onResize: (e: React.SyntheticEvent<Element>, data: ResizeCallbackData) => void;
-}
-const ResizableTitle: React.FC<Readonly<React.HTMLAttributes<any> & TitlePropsType>> = (props) => {
-  const { onResize, width, ...restProps } = props;
-  if (!width) {
-    return <th {...restProps} />;
-  }
-  return (
-    <Resizable
-      width={width}
-      height={0}
-      handle={<span className="react-resizable-handle" onClick={(e) => e.stopPropagation()} />}
-      onResize={onResize}
-      draggableOpts={{ enableUserSelectHack: false }}
-    >
-      <th {...restProps} />
-    </Resizable>
-  );
-};
-const data: DataType[] = [
-  {
-    key: 0,
-    date: '2018-02-11',
-    amount: 120,
-    type: 'income',
-    note: 'transfer',
-  },
-  {
-    key: 1,
-    date: '2018-03-11',
-    amount: 243,
-    type: 'income',
-    note: 'transfer',
-  },
-  {
-    key: 2,
-    date: '2018-04-11',
-    amount: 98,
-    type: 'income',
-    note: 'transfer',
-  },
-];
-const App: React.FC = () => {
-  const [columns, setColumns] = useState<TableColumnsType<DataType>>([
-    {
-      title: 'Date',
-      dataIndex: 'date',
-      width: 200,
-    },
-    {
-      title: 'Amount',
-      dataIndex: 'amount',
-      width: 100,
-      sorter: (a, b) => a.amount - b.amount,
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      width: 100,
-    },
-    {
-      title: 'Note',
-      dataIndex: 'note',
-      width: 100,
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: () => <a>Delete</a>,
-    },
-  ]);
-  const handleResize =
-    (index: number) =>
-    (_: React.SyntheticEvent<Element>, { size }: ResizeCallbackData) => {
-      const newColumns = [...columns];
-      newColumns[index] = {
-        ...newColumns[index],
-        width: size.width,
-      };
-      setColumns(newColumns);
-    };
-  const mergedColumns = columns.map<TableColumnsType<DataType>[number]>((col, index) => ({
-    ...col,
-    onHeaderCell: (column: TableColumnsType<DataType>[number]) => ({
-      width: column.width,
-      onResize: handleResize(index) as React.ReactEventHandler<any>,
-    }),
-  }));
-  return (
-    <Table<DataType>
-      bordered
-      components={{ header: { cell: ResizableTitle } }}
-      columns={mergedColumns}
-      dataSource={data}
-    />
   );
 };
 export default App;
@@ -3921,7 +3886,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -4077,19 +4041,19 @@ const fixedColumns: TableProps<RecordType>['columns'] = [
     title: 'ID',
     dataIndex: 'id',
     width: 100,
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'FistName',
     dataIndex: 'firstName',
     width: 120,
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'LastName',
     dataIndex: 'lastName',
     width: 120,
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Group',
@@ -4125,7 +4089,7 @@ const fixedColumns: TableProps<RecordType>['columns'] = [
   {
     title: 'Action',
     width: 150,
-    fixed: 'right',
+    fixed: 'end',
     render: () => (
       <Space>
         <Typography.Link>Action1</Typography.Link>
@@ -4189,7 +4153,7 @@ const App: React.FC = () => {
   }, [expanded]);
   return (
     <div style={{ padding: 64 }}>
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space vertical style={{ width: '100%' }}>
         <Space>
           <Switch
             checked={bordered}
@@ -4413,12 +4377,12 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import { Radio, Space, Table, Tag } from 'antd';
+import { Flex, Radio, Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
 type ColumnsType<T extends object> = TableProps<T>['columns'];
 type TablePagination<T extends object> = NonNullable<Exclude<TableProps<T>['pagination'], boolean>>;
-type TablePaginationPosition<T extends object> = NonNullable<
-  TablePagination<T>['position']
+type TablePaginationPlacement<T extends object> = NonNullable<
+  TablePagination<T>['placement']
 >[number];
 interface DataType {
   key: string;
@@ -4428,15 +4392,15 @@ interface DataType {
   tags: string[];
 }
 const topOptions = [
-  { label: 'topLeft', value: 'topLeft' },
+  { label: 'topStart', value: 'topStart' },
   { label: 'topCenter', value: 'topCenter' },
-  { label: 'topRight', value: 'topRight' },
+  { label: 'topEnd', value: 'topEnd' },
   { label: 'none', value: 'none' },
 ];
 const bottomOptions = [
-  { label: 'bottomLeft', value: 'bottomLeft' },
+  { label: 'bottomStart', value: 'bottomStart' },
   { label: 'bottomCenter', value: 'bottomCenter' },
-  { label: 'bottomRight', value: 'bottomRight' },
+  { label: 'bottomEnd', value: 'bottomEnd' },
   { label: 'none', value: 'none' },
 ];
 const columns: ColumnsType<DataType> = [
@@ -4461,7 +4425,7 @@ const columns: ColumnsType<DataType> = [
     key: 'tags',
     dataIndex: 'tags',
     render: (tags: string[]) => (
-      <span>
+      <Flex gap="small" align="center" wrap>
         {tags.map((tag) => {
           let color = tag.length > 5 ? 'geekblue' : 'green';
           if (tag === 'loser') {
@@ -4473,7 +4437,7 @@ const columns: ColumnsType<DataType> = [
             </Tag>
           );
         })}
-      </span>
+      </Flex>
     ),
   },
   {
@@ -4511,8 +4475,8 @@ const data: DataType[] = [
   },
 ];
 const App: React.FC = () => {
-  const [top, setTop] = useState<TablePaginationPosition<DataType>>('topLeft');
-  const [bottom, setBottom] = useState<TablePaginationPosition<DataType>>('bottomRight');
+  const [top, setTop] = useState<TablePaginationPlacement<DataType>>('topStart');
+  const [bottom, setBottom] = useState<TablePaginationPlacement<DataType>>('bottomEnd');
   return (
     <div>
       <div>
@@ -4535,7 +4499,7 @@ const App: React.FC = () => {
       />
       <Table<DataType>
         columns={columns}
-        pagination={{ position: [top, bottom] }}
+        pagination={{ placement: [top, bottom] }}
         dataSource={data}
       />
     </div>
@@ -4599,14 +4563,14 @@ const columns: TableColumnsType<DataType> = [
     width: 100,
     dataIndex: 'name',
     key: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
     key: 'age',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Column 1',
@@ -4654,7 +4618,7 @@ const columns: TableColumnsType<DataType> = [
   {
     title: 'Action',
     key: 'operation',
-    fixed: 'right',
+    fixed: 'end',
     width: 100,
     render: () => <a>action</a>,
   },
@@ -4710,7 +4674,7 @@ import { Form, Radio, Space, Switch, Table } from 'antd';
 type SizeType = TableProps['size'];
 type ColumnsType<T extends object> = GetProp<TableProps<T>, 'columns'>;
 type TablePagination<T extends object> = NonNullable<Exclude<TableProps<T>['pagination'], boolean>>;
-type TablePaginationPosition = NonNullable<TablePagination<any>['position']>[number];
+type TablePaginationPlacement = NonNullable<TablePagination<any>['placement']>[number];
 type ExpandableConfig<T extends object> = TableProps<T>['expandable'];
 type TableRowSelection<T extends object> = TableProps<T>['rowSelection'];
 interface DataType {
@@ -4785,8 +4749,8 @@ const App: React.FC = () => {
   const [rowSelection, setRowSelection] = useState<TableRowSelection<DataType> | undefined>({});
   const [hasData, setHasData] = useState(true);
   const [tableLayout, setTableLayout] = useState<string>('unset');
-  const [top, setTop] = useState<TablePaginationPosition>('none');
-  const [bottom, setBottom] = useState<TablePaginationPosition>('bottomRight');
+  const [top, setTop] = useState<TablePaginationPlacement>('none');
+  const [bottom, setBottom] = useState<TablePaginationPlacement>('bottomEnd');
   const [ellipsis, setEllipsis] = useState(false);
   const [yScroll, setYScroll] = useState(false);
   const [xScroll, setXScroll] = useState<string>('unset');
@@ -4834,7 +4798,7 @@ const App: React.FC = () => {
     scroll.y = 240;
   }
   if (xScroll !== 'unset') {
-    scroll.x = '100vw';
+    scroll.x = '120vw';
   }
   const tableColumns = columns.map((item) => ({ ...item, ellipsis }));
   if (xScroll === 'fixed') {
@@ -4908,29 +4872,166 @@ const App: React.FC = () => {
         </Form.Item>
         <Form.Item label="Pagination Top">
           <Radio.Group value={top} onChange={(e) => setTop(e.target.value)}>
-            <Radio.Button value="topLeft">TopLeft</Radio.Button>
+            <Radio.Button value="topStart">TopStart</Radio.Button>
             <Radio.Button value="topCenter">TopCenter</Radio.Button>
-            <Radio.Button value="topRight">TopRight</Radio.Button>
+            <Radio.Button value="topEnd">TopEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item label="Pagination Bottom">
           <Radio.Group value={bottom} onChange={(e) => setBottom(e.target.value)}>
-            <Radio.Button value="bottomLeft">BottomLeft</Radio.Button>
+            <Radio.Button value="bottomStart">BottomStart</Radio.Button>
             <Radio.Button value="bottomCenter">BottomCenter</Radio.Button>
-            <Radio.Button value="bottomRight">BottomRight</Radio.Button>
+            <Radio.Button value="bottomEnd">BottomEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
       </Form>
       <Table<DataType>
         {...tableProps}
-        pagination={{ position: [top, bottom] }}
+        pagination={{ placement: [top, bottom] }}
         columns={tableColumns}
         dataSource={hasData ? data : []}
         scroll={scroll}
       />
     </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Table 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Table } from 'antd';
+import type { TableProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles(() => ({
+  root: {
+    color: '#e0e0e0',
+    borderRadius: 12,
+    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+  },
+}));
+interface DataType {
+  key?: string;
+  name?: string;
+  age?: number;
+  address?: string;
+  description?: string;
+}
+const columns: TableProps<DataType>['columns'] = [
+  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Age', dataIndex: 'age', key: 'age' },
+  { title: 'Address', dataIndex: 'address', key: 'address' },
+  { title: 'Description', dataIndex: 'description', key: 'description' },
+];
+const dataSource: DataType[] = [
+  {
+    key: '1',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+    description: 'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.',
+  },
+  {
+    key: '2',
+    name: 'Jim Green',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+    description: 'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.',
+  },
+  {
+    key: '3',
+    name: 'Joe Black',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+    description: 'My name is Joe Black, I am 32 years old, living in Sydney No. 1 Lake Park.',
+  },
+  {
+    key: '4',
+    name: 'Disabled User',
+    age: 99,
+    address: 'Sydney No. 2 Lake Park',
+    description: 'This user is disabled.',
+  },
+];
+const styles: TableProps<DataType>['styles'] = {
+  root: {
+    padding: 10,
+    borderRadius: 8,
+  },
+  pagination: {
+    root: {
+      padding: 10,
+    },
+  },
+};
+const stylesFn: TableProps<DataType>['styles'] = (info) => {
+  if (info?.props?.size === 'middle') {
+    return {
+      root: {
+        color: '#e0e0e0',
+        borderRadius: 8,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+      },
+      title: {
+        backgroundImage: 'linear-gradient(90deg, #6a5acd, #836fff)',
+        color: '#fff',
+        fontSize: '1.25rem',
+        fontWeight: 600,
+        padding: '12px 16px',
+      },
+      footer: {
+        color: '#9ca3af',
+      },
+      header: {
+        cell: {
+          fontWeight: 600,
+          fontSize: '0.95rem',
+          color: '#b8bdfd',
+          padding: '12px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        },
+      },
+      pagination: {
+        root: {
+          padding: 10,
+        },
+        item: {
+          color: '#b8bdfd',
+        },
+      },
+    } satisfies TableProps<DataType>['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyles();
+  const sharedProps: TableProps<DataType> = {
+    columns,
+    dataSource,
+    classNames,
+    pagination: { pageSize: 3, simple: true },
+  };
+  return (
+    <Flex vertical gap="middle">
+      <Table<DataType>
+        {...sharedProps}
+        styles={styles}
+        title={() => 'Table Object Styles'}
+        footer={() => 'Table Object Footer'}
+        size="small"
+      />
+      <Table<DataType>
+        {...sharedProps}
+        styles={stylesFn}
+        title={() => 'Table Function Styles'}
+        footer={() => 'Table Function Styles'}
+        size="middle"
+      />
+    </Flex>
   );
 };
 export default App;
@@ -5003,7 +5104,7 @@ import { ConfigProvider, Form, Radio, Space, Switch, Table } from 'antd';
 type SizeType = ConfigProviderProps['componentSize'];
 type ColumnsType<T extends object> = GetProp<TableProps<T>, 'columns'>;
 type TablePagination = Exclude<GetProp<TableProps, 'pagination'>, boolean>;
-type TablePaginationPosition = NonNullable<TablePagination['position']>[number];
+type TablePaginationPlacement = NonNullable<TablePagination['placement']>[number];
 type ExpandableConfig<T extends object> = GetProp<TableProps<T>, 'expandable'>;
 type TableRowSelection<T extends object> = GetProp<TableProps<T>, 'rowSelection'>;
 interface DataType {
@@ -5080,8 +5181,8 @@ const App: React.FC = () => {
   const [rowSelection, setRowSelection] = useState<TableRowSelection<DataType> | undefined>({});
   const [hasData, setHasData] = useState(true);
   const [tableLayout, setTableLayout] = useState<string>('unset');
-  const [top, setTop] = useState<TablePaginationPosition>('none');
-  const [bottom, setBottom] = useState<TablePaginationPosition>('bottomRight');
+  const [top, setTop] = useState<TablePaginationPlacement>('none');
+  const [bottom, setBottom] = useState<TablePaginationPlacement>('bottomEnd');
   const [ellipsis, setEllipsis] = useState(false);
   const [yScroll, setYScroll] = useState(false);
   const [xScroll, setXScroll] = useState<string>('unset');
@@ -5203,17 +5304,17 @@ const App: React.FC = () => {
         </Form.Item>
         <Form.Item label="Pagination Top">
           <Radio.Group value={top} onChange={(e) => setTop(e.target.value)}>
-            <Radio.Button value="topLeft">TopLeft</Radio.Button>
+            <Radio.Button value="topStart">TopStart</Radio.Button>
             <Radio.Button value="topCenter">TopCenter</Radio.Button>
-            <Radio.Button value="topRight">TopRight</Radio.Button>
+            <Radio.Button value="topEnd">TopEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item label="Pagination Bottom">
           <Radio.Group value={bottom} onChange={(e) => setBottom(e.target.value)}>
-            <Radio.Button value="bottomLeft">BottomLeft</Radio.Button>
+            <Radio.Button value="bottomStart">BottomStart</Radio.Button>
             <Radio.Button value="bottomCenter">BottomCenter</Radio.Button>
-            <Radio.Button value="bottomRight">BottomRight</Radio.Button>
+            <Radio.Button value="bottomEnd">BottomEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
@@ -5256,7 +5357,7 @@ const App: React.FC = () => {
       >
         <Table<DataType>
           {...tableProps}
-          pagination={{ position: [top, bottom] }}
+          pagination={{ placement: [top, bottom] }}
           columns={tableColumns}
           dataSource={hasData ? dataSource : []}
           scroll={scroll}
@@ -5264,6 +5365,194 @@ const App: React.FC = () => {
       </ConfigProvider>
     </>
   );
+};
+export default App;
+```
+### measureRowRender
+用 `measureRowRender` 修复 https://github.com/ant-design/ant-design/issues/54906 。
+
+```tsx
+import React, { useRef, useState } from 'react';
+import { SearchOutlined } from '@ant-design/icons';
+import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
+import { Button, Input, Space, Table } from 'antd';
+import type { FilterDropdownProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
+interface DataType {
+  key: string;
+  name: string;
+  age: number;
+  address: string;
+}
+type DataIndex = keyof DataType;
+const data: DataType[] = [
+  {
+    key: '1',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+  },
+  {
+    key: '2',
+    name: 'Joe Black',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+  },
+  {
+    key: '3',
+    name: 'Jim Green',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+  },
+  {
+    key: '4',
+    name: 'Jim Red',
+    age: 32,
+    address: 'London No. 2 Lake Park',
+  },
+];
+const App: React.FC = () => {
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef<InputRef>(null);
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps['confirm'],
+    dataIndex: DataIndex,
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<DataType> => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText((selectedKeys as string[])[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    filterDropdownProps: {
+      onOpenChange(open) {
+        if (open) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
+  const columns: TableColumnsType<DataType> = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      width: '30%',
+      ...getColumnSearchProps('name'),
+      filterDropdownProps: {
+        open: true,
+      },
+    },
+    {
+      title: 'Age',
+      dataIndex: 'age',
+      key: 'age',
+      width: '20%',
+      filters: [
+        {
+          text: 'Joe',
+          value: 'Joe',
+        },
+        {
+          text: 'Category 1',
+          value: 'Category 1',
+        },
+        {
+          text: 'Category 2',
+          value: 'Category 2',
+        },
+      ],
+      filterDropdownProps: {
+        open: true,
+      },
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
+      ...getColumnSearchProps('address'),
+      sorter: (a, b) => a.address.length - b.address.length,
+      sortDirections: ['descend', 'ascend'],
+      showSorterTooltip: {
+        open: true,
+      },
+    },
+  ];
+  return <Table<DataType> sticky columns={columns} dataSource={data} />;
 };
 export default App;
 ```

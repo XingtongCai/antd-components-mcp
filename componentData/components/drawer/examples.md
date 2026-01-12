@@ -82,6 +82,56 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 可调整大小
+可调整大小的抽屉，允许通过拖拽边缘来调整抽屉的宽度或高度。
+
+```tsx
+import React, { useState } from 'react';
+import type { DrawerProps, RadioChangeEvent } from 'antd';
+import { Button, Drawer, Radio, Space } from 'antd';
+const App: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState<DrawerProps['placement']>('right');
+  const [size, setSize] = useState(256);
+  const onChange = (e: RadioChangeEvent) => {
+    setSize(256);
+    setPlacement(e.target.value);
+  };
+  return (
+    <>
+      <Space style={{ marginBottom: 16 }}>
+        <Radio.Group
+          value={placement}
+          onChange={onChange}
+          options={['top', 'right', 'bottom', 'left'].map((pos) => ({
+            label: pos,
+            value: pos,
+          }))}
+        />
+        <Button type="primary" onClick={() => setOpen(true)}>
+          Open Drawer
+        </Button>
+      </Space>
+      <div>Current size: {size}px</div>
+      <Drawer
+        title="Resizable Drawer"
+        placement={placement}
+        onClose={() => setOpen(false)}
+        open={open}
+        key={placement}
+        size={size}
+        resizable={{
+          onResize: (newSize) => setSize(newSize),
+        }}
+      >
+        <p>Drag the edge to resize the drawer</p>
+        <p>Current size: {size}px</p>
+      </Drawer>
+    </>
+  );
+};
+export default App;
+```
 ### 加载中
 设置抽屉加载状态。
 
@@ -160,7 +210,7 @@ const App: React.FC = () => {
       <Drawer
         title="Drawer with extra actions"
         placement={placement}
-        width={500}
+        size={500}
         onClose={onClose}
         open={open}
         extra={
@@ -237,7 +287,16 @@ export default App;
 import React, { useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Col, DatePicker, Drawer, Form, Input, Row, Select, Space } from 'antd';
-const { Option } = Select;
+import type { InputProps } from 'antd';
+const UrlInput: React.FC<InputProps> = (props) => {
+  return (
+    <Space.Compact>
+      <Space.Addon>http://</Space.Addon>
+      <Input style={{ width: '100%' }} {...props} />
+      <Space.Addon>.com</Space.Addon>
+    </Space.Compact>
+  );
+};
 const App: React.FC = () => {
   const [open, setOpen] = useState(false);
   const showDrawer = () => {
@@ -253,7 +312,7 @@ const App: React.FC = () => {
       </Button>
       <Drawer
         title="Create a new account"
-        width={720}
+        size={720}
         onClose={onClose}
         open={open}
         styles={{
@@ -270,7 +329,7 @@ const App: React.FC = () => {
           </Space>
         }
       >
-        <Form layout="vertical" hideRequiredMark>
+        <Form layout="vertical" requiredMark={false}>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -287,12 +346,7 @@ const App: React.FC = () => {
                 label="Url"
                 rules={[{ required: true, message: 'Please enter url' }]}
               >
-                <Input
-                  style={{ width: '100%' }}
-                  addonBefore="http://"
-                  addonAfter=".com"
-                  placeholder="Please enter url"
-                />
+                <UrlInput placeholder="Please enter url" />
               </Form.Item>
             </Col>
           </Row>
@@ -303,10 +357,13 @@ const App: React.FC = () => {
                 label="Owner"
                 rules={[{ required: true, message: 'Please select an owner' }]}
               >
-                <Select placeholder="Please select an owner">
-                  <Option value="xiao">Xiaoxiao Fu</Option>
-                  <Option value="mao">Maomao Zhou</Option>
-                </Select>
+                <Select
+                  placeholder="Please select an owner"
+                  options={[
+                    { label: 'Xiaoxiao Fu', value: 'xiao' },
+                    { label: 'Maomao Zhou', value: 'mao' },
+                  ]}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -315,10 +372,13 @@ const App: React.FC = () => {
                 label="Type"
                 rules={[{ required: true, message: 'Please choose the type' }]}
               >
-                <Select placeholder="Please choose the type">
-                  <Option value="private">Private</Option>
-                  <Option value="public">Public</Option>
-                </Select>
+                <Select
+                  placeholder="Please choose the type"
+                  options={[
+                    { label: 'private', value: 'private' },
+                    { label: 'public', value: 'public' },
+                  ]}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -329,10 +389,13 @@ const App: React.FC = () => {
                 label="Approver"
                 rules={[{ required: true, message: 'Please choose the approver' }]}
               >
-                <Select placeholder="Please choose the approver">
-                  <Option value="jack">Jack Ma</Option>
-                  <Option value="tom">Tom Liu</Option>
-                </Select>
+                <Select
+                  placeholder="Please choose the approver"
+                  options={[
+                    { label: 'Jack Ma', value: 'jack' },
+                    { label: 'Tom Liu', value: 'tom' },
+                  ]}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -428,7 +491,7 @@ const App: React.FC = () => {
           </List.Item>
         )}
       />
-      <Drawer width={640} placement="right" closable={false} onClose={onClose} open={open}>
+      <Drawer size={640} placement="right" closable={false} onClose={onClose} open={open}>
         <p className="site-description-item-profile-p" style={{ marginBottom: 24 }}>
           User Profile
         </p>
@@ -545,13 +608,13 @@ const App: React.FC = () => {
       <Button type="primary" onClick={showDrawer}>
         Open drawer
       </Button>
-      <Drawer title="Multi-level drawer" width={520} closable={false} onClose={onClose} open={open}>
+      <Drawer title="Multi-level drawer" size={520} closable={false} onClose={onClose} open={open}>
         <Button type="primary" onClick={showChildrenDrawer}>
           Two-level drawer
         </Button>
         <Drawer
           title="Two-level Drawer"
-          width={320}
+          size={320}
           closable={false}
           onClose={onChildrenDrawerClose}
           open={childrenDrawer}
@@ -569,32 +632,33 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import { Button, Drawer, Space } from 'antd';
+import { Button, Drawer, Radio, Space } from 'antd';
 import type { DrawerProps } from 'antd';
 const App: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [size, setSize] = useState<DrawerProps['size']>();
-  const showDefaultDrawer = () => {
-    setSize('default');
-    setOpen(true);
-  };
-  const showLargeDrawer = () => {
-    setSize('large');
-    setOpen(true);
-  };
   const onClose = () => {
     setOpen(false);
   };
   return (
     <>
-      <Space>
-        <Button type="primary" onClick={showDefaultDrawer}>
-          Open Default Size (378px)
-        </Button>
-        <Button type="primary" onClick={showLargeDrawer}>
-          Open Large Size (736px)
-        </Button>
+      <Space style={{ marginBottom: 16 }}>
+        <Radio.Group
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+          options={[
+            { label: 'Large Size (736px)', value: 'large' },
+            { label: 'Default Size (378px)', value: 'default' },
+            { label: 256, value: 256 },
+            { label: '500px', value: '500px' },
+            { label: '50%', value: '50%' },
+            { label: '20vw', value: '20vw' },
+          ]}
+        />
       </Space>
+      <Button type="primary" onClick={() => setOpen(true)}>
+        Open Drawer
+      </Button>
       <Drawer
         title={`${size} Drawer`}
         placement="right"
@@ -619,14 +683,68 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 遮罩
+遮罩效果，默认 `blur`。
+
+```tsx
+import React, { useState } from 'react';
+import { Button, Drawer, Space } from 'antd';
+type MaskType = 'blur' | 'dimmed' | 'none';
+type DrawerConfig = {
+  type: MaskType;
+  mask: boolean | { blur: boolean };
+  title: string;
+};
+const drawerList: DrawerConfig[] = [
+  { type: 'blur', mask: true, title: 'Default blur' },
+  { type: 'dimmed', mask: { blur: false }, title: 'Dimmed mask' },
+  { type: 'none', mask: false, title: 'No mask' },
+];
+const App: React.FC = () => {
+  const [open, setOpen] = useState<false | MaskType>(false);
+  const showDrawer = (type: MaskType) => {
+    setOpen(type);
+  };
+  const onClose = () => {
+    setOpen(false);
+  };
+  return (
+    <Space wrap>
+      {drawerList.map((item) => (
+        <React.Fragment key={item.type}>
+          <Button
+            onClick={() => {
+              showDrawer(item.type);
+            }}
+          >
+            {item.title}
+          </Button>
+          <Drawer
+            title="Drawer blur"
+            placement="right"
+            mask={item.mask}
+            onClose={onClose}
+            open={open === item.type}
+          >
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+          </Drawer>
+        </React.Fragment>
+      ))}
+    </Space>
+  );
+};
+export default App;
+```
 ### 自定义内部样式
 通过 `classNames` 属性设置抽屉内部区域（header、body、footer、mask、wrapper）的 `className`。
 
 ```tsx
 import React, { useState } from 'react';
 import { Button, ConfigProvider, Drawer, Space } from 'antd';
+import type { DrawerProps } from 'antd';
 import { createStyles, useTheme } from 'antd-style';
-import type { DrawerClassNames, DrawerStyles } from 'antd/es/drawer/DrawerPanel';
 const useStyle = createStyles(({ token }) => ({
   'my-drawer-body': {
     background: token.blue1,
@@ -640,8 +758,8 @@ const useStyle = createStyles(({ token }) => ({
   'my-drawer-footer': {
     color: token.colorPrimary,
   },
-  'my-drawer-content': {
-    borderLeft: '2px dotted #333',
+  'my-drawer-section': {
+    borderInlineStart: '2px dotted #333',
   },
 }));
 const App: React.FC = () => {
@@ -654,18 +772,18 @@ const App: React.FC = () => {
       return [...p];
     });
   };
-  const classNames: DrawerClassNames = {
+  const classNames: DrawerProps['classNames'] = {
     body: styles['my-drawer-body'],
     mask: styles['my-drawer-mask'],
     header: styles['my-drawer-header'],
     footer: styles['my-drawer-footer'],
-    content: styles['my-drawer-content'],
+    section: styles['my-drawer-section'],
   };
-  const drawerStyles: DrawerStyles = {
+  const drawerStyles: DrawerProps['styles'] = {
     mask: {
       backdropFilter: 'blur(10px)',
     },
-    content: {
+    section: {
       boxShadow: '-10px 0 10px #666',
     },
     header: {
@@ -701,12 +819,7 @@ const App: React.FC = () => {
         <p>Some contents...</p>
         <p>Some contents...</p>
       </Drawer>
-      <ConfigProvider
-        drawer={{
-          classNames,
-          styles: drawerStyles,
-        }}
-      >
+      <ConfigProvider drawer={{ classNames, styles: drawerStyles }}>
         <Drawer
           title="Basic Drawer"
           placement="right"
@@ -720,6 +833,150 @@ const App: React.FC = () => {
         </Drawer>
       </ConfigProvider>
     </>
+  );
+};
+export default App;
+```
+### 关闭按钮位置
+自定义抽屉的关闭按钮位置，放到右侧，默认为左侧。
+
+```tsx
+import React, { useState } from 'react';
+import { Button, Drawer } from 'antd';
+const App: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const showDrawer = () => {
+    setOpen(true);
+  };
+  const onClose = () => {
+    setOpen(false);
+  };
+  return (
+    <>
+      <Button type="primary" onClick={showDrawer}>
+        Open
+      </Button>
+      <Drawer
+        title="Drawer Closable Placement"
+        closable={{ placement: 'end' }}
+        onClose={onClose}
+        open={open}
+      >
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Take a look at the top-right corner...</p>
+      </Drawer>
+    </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象或者函数可以自定义 Drawer 组件的 [语义化结构](#semantic-dom) 样式。
+
+```tsx
+import React, { useState } from 'react';
+import { Button, Drawer, Flex } from 'antd';
+import type { DrawerProps } from 'antd';
+import { createStyles } from 'antd-style';
+const lineStyle: React.CSSProperties = {
+  lineHeight: '28px',
+};
+const sharedContent = (
+  <>
+    <div style={lineStyle}>
+      Following the Ant Design specification, we developed a React UI library antd that contains a
+      set of high quality components and demos for building rich, interactive user interfaces.
+    </div>
+    <div style={lineStyle}>🌈 Enterprise-class UI designed for web applications.</div>
+    <div style={lineStyle}>📦 A set of high-quality React components out of the box.</div>
+    <div style={lineStyle}>🛡 Written in TypeScript with predictable static types.</div>
+    <div style={lineStyle}>⚙️ Whole package of design resources and development tools.</div>
+    <div style={lineStyle}>🌍 Internationalization support for dozens of languages.</div>
+    <div style={lineStyle}>🎨 Powerful theme customization in every detail.</div>
+  </>
+);
+const useStyles = createStyles(() => ({
+  container: {
+    borderRadius: 10,
+    padding: 10,
+  },
+}));
+const styles: DrawerProps['styles'] = {
+  mask: {
+    backgroundImage: `linear-gradient(to top, #18181b 0, rgba(21, 21, 22, 0.2) 100%)`,
+  },
+};
+const stylesFn: DrawerProps['styles'] = (info) => {
+  if (info.props.footer) {
+    return {
+      header: {
+        padding: 16,
+      },
+      body: {
+        padding: 16,
+      },
+      footer: {
+        padding: '16px 10px',
+        backgroundColor: '#fafafa',
+      },
+    } satisfies DrawerProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const [drawerOpen, setOpen] = useState(false);
+  const [drawerFnOpen, setFnOpen] = useState(false);
+  const { styles: classNames } = useStyles();
+  const sharedProps: DrawerProps = {
+    classNames,
+    size: 500,
+  };
+  const footer: React.ReactNode = (
+    <Flex gap="middle" justify="flex-end">
+      <Button
+        onClick={() => setFnOpen(false)}
+        styles={{ root: { borderColor: '#ccc', color: '#171717', backgroundColor: '#fff' } }}
+      >
+        Cancel
+      </Button>
+      <Button
+        type="primary"
+        styles={{ root: { backgroundColor: '#171717' } }}
+        onClick={() => setOpen(true)}
+      >
+        Submit
+      </Button>
+    </Flex>
+  );
+  return (
+    <Flex gap="middle">
+      <Button onClick={() => setOpen(true)}>Open Style Drawer</Button>
+      <Button type="primary" onClick={() => setFnOpen(true)}>
+        Open Function Drawer
+      </Button>
+      <Drawer
+        {...sharedProps}
+        footer={null}
+        title="Custom Style Drawer"
+        styles={styles}
+        open={drawerOpen}
+        onClose={() => setOpen(false)}
+      >
+        {sharedContent}
+      </Drawer>
+      <Drawer
+        {...sharedProps}
+        footer={footer}
+        title="Custom Function drawer"
+        styles={stylesFn}
+        mask={{ enabled: true, blur: true }}
+        open={drawerFnOpen}
+        onClose={() => setFnOpen(false)}
+      >
+        {sharedContent}
+      </Drawer>
+    </Flex>
   );
 };
 export default App;
