@@ -16,7 +16,7 @@ const data = [
 ];
 const App: React.FC = () => (
   <>
-    <Divider orientation="left">Default Size</Divider>
+    <Divider titlePlacement="start">Default Size</Divider>
     <List
       header={<div>Header</div>}
       footer={<div>Footer</div>}
@@ -28,7 +28,7 @@ const App: React.FC = () => (
         </List.Item>
       )}
     />
-    <Divider orientation="left">Small Size</Divider>
+    <Divider titlePlacement="start">Small Size</Divider>
     <List
       size="small"
       header={<div>Header</div>}
@@ -37,7 +37,7 @@ const App: React.FC = () => (
       dataSource={data}
       renderItem={(item) => <List.Item>{item}</List.Item>}
     />
-    <Divider orientation="left">Large Size</Divider>
+    <Divider titlePlacement="start">Large Size</Divider>
     <List
       size="large"
       header={<div>Header</div>}
@@ -109,7 +109,12 @@ const App: React.FC = () => {
   const [page, setPage] = useState(1);
   const fetchData = (currentPage: number) => {
     const fakeDataUrl = `https://660d2bd96ddfa2943b33731c.mockapi.io/api/users?page=${currentPage}&limit=${PAGE_SIZE}`;
-    return fetch(fakeDataUrl).then((res) => res.json());
+    return fetch(fakeDataUrl)
+      .then((res) => res.json())
+      .catch(() => {
+        console.log('fetch mock data failed');
+        return [];
+      });
   };
   useEffect(() => {
     fetchData(page).then((res) => {
@@ -223,6 +228,7 @@ const App: React.FC = () => (
         ]}
         extra={
           <img
+            draggable={false}
             width={272}
             alt="logo"
             src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
@@ -270,7 +276,7 @@ const App: React.FC = () => {
   const [align, setAlign] = useState<PaginationAlign>('center');
   return (
     <>
-      <Space direction="vertical" style={{ marginBottom: '20px' }} size="middle">
+      <Space vertical style={{ marginBottom: '20px' }} size="middle">
         <Space>
           <span>Pagination Position:</span>
           <Radio.Group
@@ -534,13 +540,387 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 拖拽排序
+使用自定义元素，我们可以集成 [dnd-kit](https://github.com/clauderic/dnd-kit) 来实现拖拽排序。
+
+```tsx
+import React, { useState } from 'react';
+import type { DragEndEvent } from '@dnd-kit/core';
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { List } from 'antd';
+import type { GetProps } from 'antd';
+const SortableListItem: React.FC<GetProps<typeof List.Item> & { itemKey: number }> = (props) => {
+  const { itemKey, style, children, ...rest } = props;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: itemKey,
+  });
+  const listStyle: React.CSSProperties = {
+    ...style,
+    transform: CSS.Translate.toString(transform),
+    transition,
+    cursor: 'move',
+    ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
+  };
+  return (
+    <List.Item {...rest} ref={setNodeRef} style={listStyle}>
+      <div {...attributes} {...listeners}>
+        {children}
+      </div>
+    </List.Item>
+  );
+};
+const App: React.FC = () => {
+  const [data, setData] = useState([
+    { key: 1, content: 'Racing car sprays burning fuel into crowd.' },
+    { key: 2, content: 'Japanese princess to wed commoner.' },
+    { key: 3, content: 'Australian walks 100km after outback crash.' },
+    { key: 4, content: 'Man charged over missing wedding girl.' },
+    { key: 5, content: 'Los Angeles battles huge wildfires.' },
+  ]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        // https://docs.dndkit.com/api-documentation/sensors/pointer#activation-constraints
+        distance: 1,
+      },
+    }),
+  );
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!active || !over) {
+      return;
+    }
+    if (active.id !== over.id) {
+      setData((prev) => {
+        const activeIndex = prev.findIndex((i) => i.key === active.id);
+        const overIndex = prev.findIndex((i) => i.key === over.id);
+        return arrayMove(prev, activeIndex, overIndex);
+      });
+    }
+  };
+  return (
+    <DndContext
+      sensors={sensors}
+      modifiers={[restrictToVerticalAxis]}
+      onDragEnd={onDragEnd}
+      id="list-drag-sorting"
+    >
+      <SortableContext items={data.map((item) => item.key)} strategy={verticalListSortingStrategy}>
+        <List
+          dataSource={data}
+          renderItem={(item) => (
+            <SortableListItem key={item.key} itemKey={item.key}>
+              {item.key} {item.content}
+            </SortableListItem>
+          )}
+        />
+      </SortableContext>
+    </DndContext>
+  );
+};
+export default App;
+```
+### 拖拽排序（拖拽手柄）
+使用 [dnd-kit](https://github.com/clauderic/dnd-kit) 来实现一个拖拽操作列。
+
+```tsx
+import React, { createContext, useContext, useMemo, useState } from 'react';
+import { HolderOutlined } from '@ant-design/icons';
+import type { DragEndEvent, DraggableAttributes } from '@dnd-kit/core';
+import { DndContext } from '@dnd-kit/core';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Button, List } from 'antd';
+import type { GetProps } from 'antd';
+interface SortableListItemContextProps {
+  setActivatorNodeRef?: (element: HTMLElement | null) => void;
+  listeners?: SyntheticListenerMap;
+  attributes?: DraggableAttributes;
+}
+const SortableListItemContext = createContext<SortableListItemContextProps>({});
+const DragHandle: React.FC = () => {
+  const { setActivatorNodeRef, listeners, attributes } = useContext(SortableListItemContext);
+  return (
+    <Button
+      type="text"
+      size="small"
+      icon={<HolderOutlined />}
+      style={{ cursor: 'move' }}
+      ref={setActivatorNodeRef}
+      {...attributes}
+      {...listeners}
+    />
+  );
+};
+const SortableListItem: React.FC<GetProps<typeof List.Item> & { itemKey: number }> = (props) => {
+  const { itemKey, style, ...rest } = props;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: itemKey });
+  const listStyle: React.CSSProperties = {
+    ...style,
+    transform: CSS.Translate.toString(transform),
+    transition,
+    ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
+  };
+  const memoizedValue = useMemo<SortableListItemContextProps>(
+    () => ({ setActivatorNodeRef, listeners, attributes }),
+    [setActivatorNodeRef, listeners, attributes],
+  );
+  return (
+    <SortableListItemContext.Provider value={memoizedValue}>
+      <List.Item {...rest} ref={setNodeRef} style={listStyle} />
+    </SortableListItemContext.Provider>
+  );
+};
+const App: React.FC = () => {
+  const [data, setData] = useState([
+    { key: 1, content: 'Racing car sprays burning fuel into crowd.' },
+    { key: 2, content: 'Japanese princess to wed commoner.' },
+    { key: 3, content: 'Australian walks 100km after outback crash.' },
+    { key: 4, content: 'Man charged over missing wedding girl.' },
+    { key: 5, content: 'Los Angeles battles huge wildfires.' },
+  ]);
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!active || !over) {
+      return;
+    }
+    if (active.id !== over.id) {
+      setData((prevState) => {
+        const activeIndex = prevState.findIndex((i) => i.key === active.id);
+        const overIndex = prevState.findIndex((i) => i.key === over.id);
+        return arrayMove(prevState, activeIndex, overIndex);
+      });
+    }
+  };
+  return (
+    <DndContext
+      modifiers={[restrictToVerticalAxis]}
+      onDragEnd={onDragEnd}
+      id="list-drag-sorting-handler"
+    >
+      <SortableContext items={data.map((item) => item.key)} strategy={verticalListSortingStrategy}>
+        <List
+          dataSource={data}
+          renderItem={(item) => (
+            <SortableListItem key={item.key} itemKey={item.key}>
+              <DragHandle /> {item.key} {item.content}
+            </SortableListItem>
+          )}
+        />
+      </SortableContext>
+    </DndContext>
+  );
+};
+export default App;
+```
+### 栅格拖拽排序
+使用自定义元素，我们可以集成 [dnd-kit](https://github.com/clauderic/dnd-kit) 来实现网格布局的拖拽排序。
+
+```tsx
+import React, { useState } from 'react';
+import type { DragEndEvent } from '@dnd-kit/core';
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Card, List } from 'antd';
+import type { GetProps } from 'antd';
+const SortableListItem: React.FC<GetProps<typeof List.Item> & { itemKey: number }> = (props) => {
+  const { itemKey, style, ...rest } = props;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: itemKey,
+  });
+  const listStyle: React.CSSProperties = {
+    ...style,
+    transform: CSS.Translate.toString(transform),
+    transition,
+    cursor: 'move',
+    ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
+  };
+  return <List.Item {...rest} ref={setNodeRef} style={listStyle} {...attributes} {...listeners} />;
+};
+const App: React.FC = () => {
+  const [data, setData] = useState([
+    { key: 1, title: 'Title 1' },
+    { key: 2, title: 'Title 2' },
+    { key: 3, title: 'Title 3' },
+    { key: 4, title: 'Title 4' },
+    { key: 5, title: 'Title 5' },
+    { key: 6, title: 'Title 6' },
+  ]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        // https://docs.dndkit.com/api-documentation/sensors/pointer#activation-constraints
+        distance: 1,
+      },
+    }),
+  );
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!active || !over) {
+      return;
+    }
+    if (active.id !== over.id) {
+      setData((prev) => {
+        const activeIndex = prev.findIndex((i) => i.key === active.id);
+        const overIndex = prev.findIndex((i) => i.key === over.id);
+        return arrayMove(prev, activeIndex, overIndex);
+      });
+    }
+  };
+  return (
+    <DndContext sensors={sensors} onDragEnd={onDragEnd} id="list-grid-drag-sorting">
+      <SortableContext items={data.map((item) => item.key)}>
+        <List
+          grid={{ gutter: 16, column: 4 }}
+          dataSource={data}
+          renderItem={(item) => (
+            <SortableListItem key={item.key} itemKey={item.key}>
+              <Card title={item.title}>Card content</Card>
+            </SortableListItem>
+          )}
+        />
+      </SortableContext>
+    </DndContext>
+  );
+};
+export default App;
+```
+### 栅格拖拽排序（拖拽手柄）
+使用自定义元素和拖拽手柄，我们可以集成 [dnd-kit](https://github.com/clauderic/dnd-kit) 来实现网格布局的拖拽排序。
+
+```tsx
+import React, { createContext, useContext, useMemo, useState } from 'react';
+import { HolderOutlined } from '@ant-design/icons';
+import type { DragEndEvent, DraggableAttributes } from '@dnd-kit/core';
+import { DndContext } from '@dnd-kit/core';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Button, Card, List } from 'antd';
+import type { GetProps } from 'antd';
+interface SortableListItemContextProps {
+  setActivatorNodeRef?: (element: HTMLElement | null) => void;
+  listeners?: SyntheticListenerMap;
+  attributes?: DraggableAttributes;
+}
+const SortableListItemContext = createContext<SortableListItemContextProps>({});
+const DragHandle: React.FC = () => {
+  const { setActivatorNodeRef, listeners, attributes } = useContext(SortableListItemContext);
+  return (
+    <Button
+      type="text"
+      size="small"
+      icon={<HolderOutlined />}
+      style={{ cursor: 'move' }}
+      ref={setActivatorNodeRef}
+      {...attributes}
+      {...listeners}
+    />
+  );
+};
+const SortableListItem: React.FC<GetProps<typeof List.Item> & { itemKey: number }> = (props) => {
+  const { itemKey, style, ...rest } = props;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: itemKey });
+  const listStyle: React.CSSProperties = {
+    ...style,
+    transform: CSS.Translate.toString(transform),
+    transition,
+    ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
+  };
+  const memoizedValue = useMemo<SortableListItemContextProps>(
+    () => ({ setActivatorNodeRef, listeners, attributes }),
+    [setActivatorNodeRef, listeners, attributes],
+  );
+  return (
+    <SortableListItemContext.Provider value={memoizedValue}>
+      <List.Item {...rest} ref={setNodeRef} style={listStyle} />
+    </SortableListItemContext.Provider>
+  );
+};
+const App: React.FC = () => {
+  const [data, setData] = useState([
+    { key: 1, title: 'Title 1' },
+    { key: 2, title: 'Title 2' },
+    { key: 3, title: 'Title 3' },
+    { key: 4, title: 'Title 4' },
+    { key: 5, title: 'Title 5' },
+    { key: 6, title: 'Title 6' },
+  ]);
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!active || !over) {
+      return;
+    }
+    if (active.id !== over.id) {
+      setData((prevState) => {
+        const activeIndex = prevState.findIndex((i) => i.key === active.id);
+        const overIndex = prevState.findIndex((i) => i.key === over.id);
+        return arrayMove(prevState, activeIndex, overIndex);
+      });
+    }
+  };
+  return (
+    <DndContext onDragEnd={onDragEnd} id="list-grid-drag-sorting-handler">
+      <SortableContext items={data.map((i) => i.key)}>
+        <List
+          grid={{ gutter: 16, column: 4 }}
+          dataSource={data}
+          renderItem={(item) => (
+            <SortableListItem key={item.key} itemKey={item.key}>
+              <Card
+                title={
+                  <>
+                    <DragHandle />
+                    {item.title}
+                  </>
+                }
+              >
+                Card content
+              </Card>
+            </SortableListItem>
+          )}
+        />
+      </SortableContext>
+    </DndContext>
+  );
+};
+export default App;
+```
 ### 滚动加载无限长列表
-结合 [rc-virtual-list](https://github.com/react-component/virtual-list) 实现滚动加载无限长列表，能够提高数据量大时候长列表的性能。
+结合 [@rc-component/virtual-list](https://github.com/react-component/virtual-list) 实现滚动加载无限长列表，能够提高数据量大时候长列表的性能。
 
 ```tsx
 import React, { useEffect, useState } from 'react';
+import VirtualList from '@rc-component/virtual-list';
 import { Avatar, List, message } from 'antd';
-import VirtualList from 'rc-virtual-list';
 interface UserItem {
   email: string;
   gender: string;
@@ -561,6 +941,9 @@ const App: React.FC = () => {
         setData(data.concat(results));
         setPage(page + 1);
         showMessage && message.success(`${results.length} more items loaded!`);
+      })
+      .catch(() => {
+        console.log('fetch mock data failed');
       });
   };
   useEffect(() => {
@@ -645,7 +1028,7 @@ const App: React.FC = () => (
       },
     }}
   >
-    <Divider orientation="left">Default Size</Divider>
+    <Divider titlePlacement="start">Default Size</Divider>
     <List
       header={<div>Header</div>}
       footer={<div>Footer</div>}
@@ -657,7 +1040,7 @@ const App: React.FC = () => (
         </List.Item>
       )}
     />
-    <Divider orientation="left">Small Size</Divider>
+    <Divider titlePlacement="start">Small Size</Divider>
     <List
       size="small"
       header={<div>Header</div>}
@@ -666,7 +1049,7 @@ const App: React.FC = () => (
       dataSource={data}
       renderItem={(item) => <List.Item>{item}</List.Item>}
     />
-    <Divider orientation="left">Large Size</Divider>
+    <Divider titlePlacement="start">Large Size</Divider>
     <List
       size="large"
       header={<div>Header</div>}
@@ -675,7 +1058,7 @@ const App: React.FC = () => (
       dataSource={data}
       renderItem={(item) => <List.Item>{item}</List.Item>}
     />
-    <Divider orientation="left">Meta</Divider>
+    <Divider titlePlacement="start">Meta</Divider>
     <List
       itemLayout="horizontal"
       dataSource={data1}
@@ -689,7 +1072,7 @@ const App: React.FC = () => (
         </List.Item>
       )}
     />
-    <Divider orientation="left">Vertical</Divider>
+    <Divider titlePlacement="start">Vertical</Divider>
     <List
       itemLayout="vertical"
       dataSource={data1}
@@ -703,7 +1086,7 @@ const App: React.FC = () => (
         </List.Item>
       )}
     />
-    <Divider orientation="left">Empty Text</Divider>
+    <Divider titlePlacement="start">Empty Text</Divider>
     <List />
   </ConfigProvider>
 );
