@@ -206,41 +206,41 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { createStyles } from 'antd-style';
+import { createStaticStyles } from 'antd-style';
 import { Flex, Popover } from 'antd';
 import type { GetProp } from 'antd';
-const useStyle = createStyles(() => ({
-  item: {
-    width: '280px',
-    height: '280px',
-    display: 'inline-flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    border: '1px dashed purple',
-  },
-  box: {
-    width: '40px',
-    height: '40px',
-    backgroundColor: 'deepskyblue',
-  },
-  cross: {
-    position: 'relative',
-    '&::before, &::after': {
-      content: '""',
-      position: 'absolute',
-      inset: 0,
-    },
-    '&::before': {
-      top: '50%',
-      height: '1px',
-      backgroundColor: 'red',
-    },
-    '&::after': {
-      left: '50%',
-      width: '1px',
-      backgroundColor: 'blue',
-    },
-  },
+const classNames = createStaticStyles(({ css }) => ({
+  item: css`
+    width: 280px;
+    height: 280px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px dashed purple;
+  `,
+  box: css`
+    width: 40px;
+    height: 40px;
+    background-color: deepskyblue;
+  `,
+  cross: css`
+    position: relative;
+    &::before, &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    &::before {
+      top: 50%;
+      height: 1px;
+      background-color: red;
+    }
+    &::after {
+      left: 50%;
+      width: 1px;
+      background-color: blue;
+    }
+  `,
 }));
 type Placement = GetProp<typeof Popover, 'placement'>;
 const placements: Placement[] = [
@@ -258,11 +258,10 @@ const placements: Placement[] = [
   'bottomRight',
 ];
 const App = () => {
-  const { styles, cx } = useStyle();
   return (
     <Flex gap={16} wrap>
       {placements.map((placement) => (
-        <div key={placement} className={styles.item}>
+        <div key={placement} className={classNames.item}>
           <Popover
             placement={placement}
             content={
@@ -275,7 +274,7 @@ const App = () => {
             forceRender
             open
           >
-            <div className={cx(styles.box, styles.cross)} />
+            <div className={`${classNames.box} ${classNames.cross}`} />
           </Popover>
         </div>
       ))}
@@ -346,6 +345,8 @@ export default App;
 ```tsx
 import React, { useState } from 'react';
 import { Button, Popover } from 'antd';
+const hoverContent = <div>This is hover content.</div>;
+const clickContent = <div>This is click content.</div>;
 const App: React.FC = () => {
   const [clicked, setClicked] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -361,8 +362,6 @@ const App: React.FC = () => {
     setHovered(false);
     setClicked(open);
   };
-  const hoverContent = <div>This is hover content.</div>;
-  const clickContent = <div>This is click content.</div>;
   return (
     <Popover
       style={{ width: 500 }}
@@ -384,9 +383,60 @@ const App: React.FC = () => {
         open={clicked}
         onOpenChange={handleClickChange}
       >
-        <Button>Hover and click / 悬停并单击</Button>
+        <Button>Hover and click</Button>
       </Popover>
     </Popover>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Popover 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Button, Flex, Popover } from 'antd';
+import type { PopoverProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  container: css`
+    padding: 10px;
+  `,
+}));
+const styles: PopoverProps['styles'] = {
+  container: {
+    background: '#eee',
+    boxShadow: 'inset 5px 5px 3px #fff, inset -5px -5px 3px #ddd, 0 0 3px rgba(0,0,0,0.2)',
+  },
+  content: {
+    color: '#262626',
+  },
+};
+const stylesFn: PopoverProps['styles'] = (info) => {
+  if (!info.props.arrow) {
+    return {
+      container: {
+        backgroundColor: 'rgba(53, 71, 125, 0.8)',
+        padding: 12,
+        borderRadius: 4,
+      },
+      content: {
+        color: '#fff',
+      },
+    } satisfies PopoverProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  return (
+    <Flex gap="middle">
+      <Popover content="Object text" classNames={classNames} styles={styles} arrow={false}>
+        <Button>Object Style</Button>
+      </Popover>
+      <Popover content="Function text" classNames={classNames} styles={stylesFn} arrow={false}>
+        <Button type="primary">Function Style</Button>
+      </Popover>
+    </Flex>
   );
 };
 export default App;

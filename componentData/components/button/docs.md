@@ -3,7 +3,7 @@
 在 Ant Design 中我们提供了五种按钮。
 - 🔵 主按钮：用于主行动点，一个操作区域只能有一个主按钮。
 - ⚪️ 默认按钮：用于没有主次之分的一组行动点。
-- 🫥 虚线按钮：常用于添加操作。
+- 😶 虚线按钮：常用于添加操作。
 - 🔤 文本按钮：用于最次级的行动点。
 - 🔗 链接按钮：一般用于链接，即导航至某位置。
 以及四种状态属性与上面配合使用。
@@ -18,7 +18,7 @@
 | --- | --- | --- | --- | --- |
 | autoInsertSpace | 我们默认提供两个汉字之间的空格，可以设置 `autoInsertSpace` 为 `false` 关闭 | boolean | `true` | 5.17.0 |
 | block | 将按钮宽度调整为其父宽度的选项 | boolean | false |  |
-| classNames | 语义化结构 class | [Record<SemanticDOM, string>](#semantic-dom) | - | 5.4.0 |
+| classNames | 用于自定义组件内部各语义化结构的 class，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - |  |
 | color | 设置按钮的颜色 | `default` \| `primary` \| `danger` \| [PresetColors](#presetcolors) | - | `default`、`primary` 和 `danger`: 5.21.0, `PresetColors`: 5.23.0 |
 | danger | 语法糖，设置危险按钮。当设置 `color` 时会以后者为准 | boolean | false |  |
 | disabled | 设置按钮失效状态 | boolean | false |  |
@@ -26,11 +26,12 @@
 | href | 点击跳转的地址，指定此属性 button 的行为和 a 链接一致 | string | - |  |
 | htmlType | 设置 `button` 原生的 `type` 值，可选值请参考 [HTML 标准](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/button#type) | `submit` \| `reset` \| `button` | `button` |  |
 | icon | 设置按钮的图标组件 | ReactNode | - |  |
-| iconPosition | 设置按钮图标组件的位置 | `start` \| `end` | `start` | 5.17.0 |
+| ~~iconPosition~~ | 设置按钮图标组件的位置,请使用 `iconPlacement` 替换 | `start` \| `end` | `start` | 5.17.0 |
+| iconPlacement | 设置按钮图标组件的位置 | `start` \| `end` | `start` | - |
 | loading | 设置按钮载入状态 | boolean \| { delay: number, icon: ReactNode } | false | icon: 5.23.0 |
 | shape | 设置按钮形状 | `default` \| `circle` \| `round` | `default` |  |
 | size | 设置按钮大小 | `large` \| `middle` \| `small` | `middle` |  |
-| styles | 语义化结构 style | [Record<SemanticDOM, CSSProperties>](#semantic-dom) | - | 5.4.0 |
+| styles | 用于自定义组件内部各语义化结构的行内 style，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - |  |
 | target | 相当于 a 链接的 target 属性，href 存在时生效 | string | - |  |
 | type | 语法糖，设置按钮类型。当设置 `variant` 与 `color` 时以后者为准 | `primary` \| `dashed` \| `link` \| `text` \| `default` | `default` |  |
 | onClick | 点击按钮时的回调 | (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | - |  |
