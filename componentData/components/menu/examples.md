@@ -294,6 +294,88 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 菜单项提示
+折叠状态下可配置 `tooltip`，也可以关闭。
+
+```tsx
+import React, { useState } from 'react';
+import {
+  AppstoreOutlined,
+  ContainerOutlined,
+  DesktopOutlined,
+  MailOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  PieChartOutlined,
+} from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Button, Menu, Space, Switch } from 'antd';
+type MenuItem = Required<MenuProps>['items'][number];
+const items: MenuItem[] = [
+  { key: '1', icon: <PieChartOutlined />, label: 'Option 1' },
+  { key: '2', icon: <DesktopOutlined />, label: 'Option 2' },
+  { key: '3', icon: <ContainerOutlined />, label: 'Option 3' },
+  {
+    key: 'sub1',
+    label: 'Navigation One',
+    icon: <MailOutlined />,
+    children: [
+      { key: '5', label: 'Option 5' },
+      { key: '6', label: 'Option 6' },
+      { key: '7', label: 'Option 7' },
+      { key: '8', label: 'Option 8' },
+    ],
+  },
+  {
+    key: 'sub2',
+    label: 'Navigation Two',
+    icon: <AppstoreOutlined />,
+    children: [
+      { key: '9', label: 'Option 9' },
+      { key: '10', label: 'Option 10' },
+      {
+        key: 'sub3',
+        label: 'Submenu',
+        children: [
+          { key: '11', label: 'Option 11' },
+          { key: '12', label: 'Option 12' },
+        ],
+      },
+    ],
+  },
+];
+const App: React.FC = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [tooltipEnabled, setTooltipEnabled] = useState(true);
+  return (
+    <div style={{ width: 256 }}>
+      <Space style={{ marginBottom: 16 }}>
+        <Button
+          type="primary"
+          onClick={() => setCollapsed((prev) => !prev)}
+          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        />
+        <Switch
+          checked={tooltipEnabled}
+          onChange={setTooltipEnabled}
+          checkedChildren="Tooltip On"
+          unCheckedChildren="Tooltip Off"
+        />
+      </Space>
+      <Menu
+        defaultSelectedKeys={['1']}
+        defaultOpenKeys={['sub1']}
+        mode="inline"
+        theme="dark"
+        inlineCollapsed={collapsed}
+        tooltip={tooltipEnabled ? { placement: 'left' } : false}
+        items={items}
+      />
+    </div>
+  );
+};
+export default App;
+```
 ### 只展开当前父级菜单
 点击菜单，收起其他展开的所有菜单，保持菜单聚焦简洁。
 
@@ -377,7 +459,7 @@ const levelKeys = getLevelKeys(items as LevelKeysProps[]);
 const App: React.FC = () => {
   const [stateOpenKeys, setStateOpenKeys] = useState(['2', '23']);
   const onOpenChange: MenuProps['onOpenChange'] = (openKeys) => {
-    const currentOpenKey = openKeys.find((key) => stateOpenKeys.indexOf(key) === -1);
+    const currentOpenKey = openKeys.find((key) => !stateOpenKeys.includes(key));
     // open
     if (currentOpenKey !== undefined) {
       const repeatIndex = openKeys
@@ -699,7 +781,7 @@ const App: React.FC = () => {
   return (
     <>
       <Switch onChange={changeMode} /> Change Mode
-      <Divider type="vertical" />
+      <Divider vertical />
       <Switch onChange={changeTheme} /> Change Style
       <br />
       <br />
@@ -712,6 +794,70 @@ const App: React.FC = () => {
         items={items}
       />
     </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Menu 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Menu } from 'antd';
+import type { MenuProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    border: 1px solid #f0f0f0;
+    max-width: 600px;
+    padding: 8px;
+    border-radius: 4px;
+  `,
+  item: css`
+    color: #1677ff;
+  `,
+}));
+const items: Required<MenuProps>['items'] = [
+  {
+    key: 'SubMenu',
+    label: 'Navigation One',
+    children: [
+      {
+        key: 'g1',
+        label: 'Item 1',
+        type: 'group',
+        children: [
+          { key: '1', label: 'Option 1' },
+          { key: '2', label: 'Option 2' },
+        ],
+      },
+    ],
+  },
+  { key: 'mail', label: 'Navigation Two' },
+];
+const styles: MenuProps['styles'] = {
+  root: { border: '1px solid #f0f0f0', padding: 8, borderRadius: 4 },
+  item: { color: '#1677ff' },
+  subMenu: { list: { color: '#fa541c' } },
+};
+const stylesFn: MenuProps['styles'] = (info) => {
+  const hasSub = info.props.items?.[0];
+  return {
+    root: {
+      backgroundColor: hasSub ? 'rgba(240,249,255, 0.6)' : 'rgba(255,255,255)',
+    },
+  } satisfies MenuProps['styles'];
+};
+const App: React.FC = () => {
+  const shareProps: MenuProps = {
+    classNames,
+    items,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Menu {...shareProps} styles={styles} />
+      <Menu mode="inline" {...shareProps} styles={stylesFn} />
+    </Flex>
   );
 };
 export default App;
@@ -1035,7 +1181,7 @@ const App: React.FC = () => {
     setCurrent(e.key);
   };
   return (
-    <Space direction="vertical">
+    <Space vertical>
       <ConfigProvider
         theme={{
           algorithm: [theme.darkAlgorithm],
@@ -1144,7 +1290,7 @@ const items2: MenuItem[] = [
   { key: '2', label: 'Profile', extra: '⌘P' },
 ];
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <Menu
       mode="inline"
       defaultOpenKeys={['sub1']}
@@ -1155,5 +1301,142 @@ const App: React.FC = () => (
     <Menu theme="dark" style={{ width: 256 }} items={items2} />
   </Space>
 );
+export default App;
+```
+### 自定义弹出框
+使用 `popupRender` 属性自定义弹出菜单的渲染。
+
+```tsx
+import React from 'react';
+import type { MenuProps } from 'antd';
+import { Col, ConfigProvider, Flex, Menu, Row, Space, Typography } from 'antd';
+import { createStyles } from 'antd-style';
+const { Title, Paragraph } = Typography;
+const useStyles = createStyles(({ token }) => ({
+  navigationPopup: {
+    padding: token.padding,
+    minWidth: 480,
+    background: token.colorBgElevated,
+    borderRadius: token.borderRadiusLG,
+    boxShadow: token.boxShadowSecondary,
+  },
+  menuItem: {
+    borderRadius: token.borderRadius,
+    transition: `all ${token.motionDurationSlow}`,
+    cursor: 'pointer',
+    '&:hover': {
+      background: 'rgba(0, 0, 0, 0.02)',
+    },
+  },
+  menuItemSpace: {
+    padding: token.paddingSM,
+  },
+  leadingHeader: {
+    margin: '0 !important',
+    paddingBottom: token.paddingXS,
+    borderBottom: `1px solid ${token.colorSplit}`,
+  },
+  marginLess: {
+    margin: '0 !important',
+  },
+}));
+const MenuItem = ({ title, description }: { title: string; description: string }) => {
+  const { styles } = useStyles();
+  return (
+    <div className={styles.menuItem}>
+      <Space vertical size={4} className={styles.menuItemSpace}>
+        <Title level={5} className={styles.marginLess}>
+          {title}
+        </Title>
+        <Paragraph type="secondary" className={styles.marginLess}>
+          {description}
+        </Paragraph>
+      </Space>
+    </div>
+  );
+};
+const menuItems = [
+  {
+    key: 'home',
+    label: 'Home',
+  },
+  {
+    key: 'features',
+    label: 'Features',
+    children: [
+      {
+        key: 'getting-started',
+        label: (
+          <MenuItem title="Getting Started" description="Quick start guide and learn the basics." />
+        ),
+      },
+      {
+        key: 'components',
+        label: <MenuItem title="Components" description="Explore our component library." />,
+      },
+      {
+        key: 'templates',
+        label: <MenuItem title="Templates" description="Ready-to-use template designs." />,
+      },
+    ],
+  },
+  {
+    key: 'resources',
+    label: 'Resources',
+    children: [
+      {
+        key: 'blog',
+        label: <MenuItem title="Blog" description="Latest updates and articles." />,
+      },
+      {
+        key: 'community',
+        label: <MenuItem title="Community" description="Join our developer community." />,
+      },
+    ],
+  },
+];
+const App: React.FC = () => {
+  const { styles } = useStyles();
+  const popupRender: MenuProps['popupRender'] = (_, { item }) => {
+    return (
+      <Flex className={styles.navigationPopup} vertical gap="medium">
+        <Typography.Title level={3} className={styles.leadingHeader}>
+          {item.title}
+        </Typography.Title>
+        <Row gutter={16}>
+          {React.Children.map(item.children as React.ReactNode, (child) => {
+            if (!React.isValidElement(child)) {
+              return null;
+            }
+            return (
+              <Col span={12} key={child.key}>
+                {child}
+              </Col>
+            );
+          })}
+        </Row>
+      </Flex>
+    );
+  };
+  return (
+    <ConfigProvider
+      theme={{
+        components: {
+          Menu: {
+            popupBg: '#fff',
+            horizontalItemSelectedColor: '#1677ff',
+            horizontalItemHoverColor: '#1677ff',
+          },
+          Typography: {
+            titleMarginBottom: 0,
+            titleMarginTop: 0,
+          },
+        },
+      }}
+    >
+      <Menu mode="horizontal" items={menuItems} popupRender={popupRender} />
+    </ConfigProvider>
+  );
+};
 export default App;
 ```

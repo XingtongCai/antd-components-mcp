@@ -680,15 +680,75 @@ const App: React.FC = () => {
       <Divider />
       <Descriptions
         title="Root style"
-        styles={{
-          label: labelStyle,
-          content: contentStyle,
-        }}
+        styles={{ label: labelStyle, content: contentStyle }}
         bordered={border}
         layout={layout}
         items={rootStyleItems}
       />
     </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Descriptions 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Descriptions, Flex } from 'antd';
+import type { DescriptionsProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    padding: 10px;
+  `,
+}));
+const items: DescriptionsProps['items'] = [
+  {
+    key: '1',
+    label: 'Product',
+    children: 'Cloud Database',
+  },
+  {
+    key: '2',
+    label: 'Billing Mode',
+    children: 'Prepaid',
+  },
+  {
+    key: '3',
+    label: 'Automatic Renewal',
+    children: 'YES',
+  },
+];
+const styles: DescriptionsProps['styles'] = {
+  label: {
+    color: '#000',
+  },
+};
+const stylesFn: DescriptionsProps['styles'] = (info) => {
+  if (info.props.size === 'default') {
+    return {
+      root: {
+        borderRadius: 8,
+        border: '1px solid #CDC1FF',
+      },
+      label: { color: '#A294F9' },
+    } satisfies DescriptionsProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const descriptionsProps: DescriptionsProps = {
+    title: 'User Info',
+    items,
+    bordered: true,
+    classNames,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Descriptions {...descriptionsProps} styles={styles} size="small" />
+      <Descriptions {...descriptionsProps} styles={stylesFn} size="default" />
+    </Flex>
   );
 };
 export default App;

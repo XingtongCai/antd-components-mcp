@@ -39,7 +39,7 @@ const layoutStyle = {
   maxWidth: 'calc(50% - 8px)',
 };
 const App: React.FC = () => (
-  <Flex gap="middle" wrap>
+  <Flex gap="medium" wrap>
     <Layout style={layoutStyle}>
       <Header style={headerStyle}>Header</Header>
       <Content style={contentStyle}>Content</Content>
@@ -257,7 +257,7 @@ const App: React.FC = () => {
             mode="inline"
             defaultSelectedKeys={['1']}
             defaultOpenKeys={['sub1']}
-            style={{ height: '100%', borderRight: 0 }}
+            style={{ height: '100%', borderInlineEnd: 0 }}
             items={items2}
           />
         </Sider>
@@ -579,7 +579,6 @@ const siderStyle: React.CSSProperties = {
   position: 'sticky',
   insetInlineStart: 0,
   top: 0,
-  bottom: 0,
   scrollbarWidth: 'thin',
   scrollbarGutter: 'stable',
 };
@@ -820,7 +819,7 @@ const App: React.FC = () => {
               mode="inline"
               defaultSelectedKeys={['1']}
               defaultOpenKeys={['sub1']}
-              style={{ borderRight: 0 }}
+              style={{ borderInlineEnd: 0 }}
               items={items2}
             />
           </Sider>

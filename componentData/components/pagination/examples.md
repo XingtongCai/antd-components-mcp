@@ -81,16 +81,17 @@ const App: React.FC = () => (
 );
 export default App;
 ```
-### 迷你
-迷你版本。
+### 尺寸
+小尺寸和大尺寸的分页控件。
 
 ```tsx
 import React from 'react';
 import type { PaginationProps } from 'antd';
-import { Pagination } from 'antd';
+import { Divider, Flex, Pagination } from 'antd';
 const showTotal: PaginationProps['showTotal'] = (total) => `Total ${total} items`;
 const App: React.FC = () => (
-  <>
+  <Flex vertical gap="medium">
+    <Divider titlePlacement="start">Small</Divider>
     <Pagination size="small" total={50} />
     <Pagination size="small" total={50} showSizeChanger showQuickJumper />
     <Pagination size="small" total={50} showTotal={showTotal} />
@@ -102,7 +103,19 @@ const App: React.FC = () => (
       showSizeChanger
       showQuickJumper
     />
-  </>
+    <Divider titlePlacement="start">Large</Divider>
+    <Pagination size="large" total={50} />
+    <Pagination size="large" total={50} showSizeChanger showQuickJumper />
+    <Pagination size="large" total={50} showTotal={showTotal} />
+    <Pagination
+      size="large"
+      total={50}
+      disabled
+      showTotal={showTotal}
+      showSizeChanger
+      showQuickJumper
+    />
+  </Flex>
 );
 export default App;
 ```
@@ -243,6 +256,8 @@ const App: React.FC = () => (
           itemSize: 20,
           itemSizeSM: 12,
           itemActiveBg: '#e7cc87',
+          itemActiveColor: '#eee',
+          itemActiveColorHover: '#fff',
           itemLinkBg: '#344324',
           itemActiveBgDisabled: '#9c1515',
           itemInputBg: '#9c1515',
@@ -264,5 +279,44 @@ const App: React.FC = () => (
     <Pagination showSizeChanger defaultCurrent={3} total={500} disabled />
   </ConfigProvider>
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Pagination 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Pagination } from 'antd';
+import type { PaginationProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    border: 2px dashed #ccc;
+    padding: 8px;
+  `,
+}));
+const styleFn: PaginationProps['styles'] = ({ props }) => {
+  if (props.size === 'small') {
+    return {
+      item: {
+        backgroundColor: `rgba(200, 200, 200, 0.3)`,
+        marginInlineEnd: 4,
+      },
+    } satisfies PaginationProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const paginationSharedProps: PaginationProps = {
+    total: 500,
+    classNames: { root: classNames.root },
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Pagination {...paginationSharedProps} styles={{ item: { borderRadius: 999 } }} />
+      <Pagination {...paginationSharedProps} size="small" styles={styleFn} />
+    </Flex>
+  );
+};
 export default App;
 ```
