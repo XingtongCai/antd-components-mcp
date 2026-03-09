@@ -42,7 +42,6 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 type Locale = ConfigProviderProps['locale'];
 dayjs.locale('en');
-const { Option } = Select;
 const { RangePicker } = DatePicker;
 const columns: TableProps['columns'] = [
   {
@@ -117,16 +116,20 @@ const Page: React.FC = () => {
   ];
   return (
     <Space
-      direction="vertical"
+      vertical
       size={[0, 16]}
       style={{ width: '100%', paddingTop: 16, borderTop: `1px solid ${token.colorBorder}` }}
     >
       <Pagination defaultCurrent={1} total={50} showSizeChanger />
       <Space wrap>
-        <Select showSearch style={{ width: 200 }}>
-          <Option value="jack">jack</Option>
-          <Option value="lucy">lucy</Option>
-        </Select>
+        <Select
+          showSearch
+          style={{ width: 200 }}
+          options={[
+            { label: 'jack', value: 'jack' },
+            { label: 'lucy', value: 'lucy' },
+          ]}
+        />
         <DatePicker />
         <TimePicker />
         <RangePicker />
@@ -179,7 +182,7 @@ const Page: React.FC = () => {
         />
       </Space>
       <Upload listType="picture-card" fileList={fileList} />
-      <Divider orientation="left">Tour</Divider>
+      <Divider titlePlacement="start">Tour</Divider>
       <Button type="primary" onClick={() => setTourOpen(true)}>
         Begin Tour
       </Button>
@@ -212,10 +215,10 @@ const Page: React.FC = () => {
   );
 };
 const App: React.FC = () => {
-  const [locale, setLocal] = useState<Locale>(enUS);
+  const [locale, setLocale] = useState<Locale>(enUS);
   const changeLocale = (e: RadioChangeEvent) => {
     const localeValue = e.target.value;
-    setLocal(localeValue);
+    setLocale(localeValue);
     if (!localeValue) {
       dayjs.locale('en');
     } else {
@@ -282,7 +285,6 @@ import {
 type DirectionType = ConfigProviderProps['direction'];
 const InputGroup = Input.Group;
 const ButtonGroup = Button.Group;
-const { Option } = Select;
 const { TreeNode } = Tree;
 const { Search } = Input;
 const cascaderOptions = [
@@ -296,7 +298,7 @@ const cascaderOptions = [
         children: [
           {
             value: 'saadat-abad',
-            label: 'سعادت آیاد',
+            label: 'سعادت آباد',
           },
         ],
       },
@@ -311,7 +313,7 @@ const cascaderOptions = [
         label: 'اردبیل',
         children: [
           {
-            value: 'primadar',
+            value: 'pirmadar',
             label: 'پیرمادر',
           },
         ],
@@ -342,18 +344,26 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
   const [badgeCount, setBadgeCount] = useState(5);
   const [showBadge, setShowBadge] = useState(true);
   const selectBefore = (
-    <Select defaultValue="Http://" style={{ width: 90 }}>
-      <Option value="Http://">Http://</Option>
-      <Option value="Https://">Https://</Option>
-    </Select>
+    <Select
+      defaultValue="Http://"
+      style={{ width: 90 }}
+      options={[
+        { label: 'Http://', value: 'Http://' },
+        { label: 'Https://', value: 'Https://' },
+      ]}
+    />
   );
   const selectAfter = (
-    <Select defaultValue=".com" style={{ width: 80 }}>
-      <Option value=".com">.com</Option>
-      <Option value=".jp">.jp</Option>
-      <Option value=".cn">.cn</Option>
-      <Option value=".org">.org</Option>
-    </Select>
+    <Select
+      defaultValue=".com"
+      style={{ width: 80 }}
+      options={[
+        { label: '.com', value: '.com' },
+        { label: '.jp', value: '.jp' },
+        { label: '.cn', value: '.cn' },
+        { label: '.org', value: '.org' },
+      ]}
+    />
   );
   // ==== Cascader ====
   const cascaderFilter = (inputValue: string, path: { label: string }[]) =>
@@ -366,12 +376,10 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
   const showModal = () => {
     setModalOpen(true);
   };
-  const handleOk = (e: React.MouseEvent<HTMLElement>) => {
-    console.log(e);
+  const handleOk = () => {
     setModalOpen(false);
   };
-  const handleCancel = (e: React.MouseEvent<HTMLElement>) => {
-    console.log(e);
+  const handleCancel = () => {
     setModalOpen(false);
   };
   // ==== End Modal ====
@@ -394,7 +402,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
     <div className="direction-components">
       <Row>
         <Col span={24}>
-          <Divider orientation="left">Cascader example</Divider>
+          <Divider titlePlacement="start">Cascader example</Divider>
           <Cascader
             suffixIcon={<SearchIcon />}
             options={cascaderOptions}
@@ -416,7 +424,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
       <br />
       <Row>
         <Col span={12}>
-          <Divider orientation="left">Switch example</Divider>
+          <Divider titlePlacement="start">Switch example</Divider>
           &nbsp;&nbsp;
           <Switch defaultChecked />
           &nbsp;&nbsp;
@@ -425,7 +433,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
           <Switch size="small" loading />
         </Col>
         <Col span={12}>
-          <Divider orientation="left">Radio Group example</Divider>
+          <Divider titlePlacement="start">Radio Group example</Divider>
           <Radio.Group defaultValue="c" buttonStyle="solid">
             <Radio.Button value="a">تهران</Radio.Button>
             <Radio.Button value="b" disabled>
@@ -439,7 +447,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
       <br />
       <Row>
         <Col span={12}>
-          <Divider orientation="left">Button example</Divider>
+          <Divider titlePlacement="start">Button example</Divider>
           <div className="button-demo">
             <Button type="primary" icon={<DownloadOutlined />} />
             <Button type="primary" shape="circle" icon={<DownloadOutlined />} />
@@ -470,7 +478,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
           </div>
         </Col>
         <Col span={12}>
-          <Divider orientation="left">Tree example</Divider>
+          <Divider titlePlacement="start">Tree example</Divider>
           <Tree
             showLine
             checkable
@@ -493,7 +501,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
       <br />
       <Row>
         <Col span={24}>
-          <Divider orientation="left">Input (Input Group) example</Divider>
+          <Divider titlePlacement="start">Input (Input Group) example</Divider>
           <InputGroup size="large">
             <Row gutter={8}>
               <Col span={5}>
@@ -511,10 +519,13 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
           </InputGroup>
           <br />
           <InputGroup compact>
-            <Select defaultValue="Option1">
-              <Option value="Option1">Option1</Option>
-              <Option value="Option2">Option2</Option>
-            </Select>
+            <Select
+              defaultValue="Option1"
+              options={[
+                { label: 'Option1', value: 'Option1' },
+                { label: 'Option2', value: 'Option2' },
+              ]}
+            />
             <Input style={{ width: '50%' }} defaultValue="input content" />
             <InputNumber />
           </InputGroup>
@@ -523,40 +534,62 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
           <br />
           <br />
           <div style={{ marginBottom: 16 }}>
-            <Input addonBefore={selectBefore} addonAfter={selectAfter} defaultValue="mysite" />
+            <Space.Compact>
+              {selectBefore}
+              <Input defaultValue="mysite" />
+              {selectAfter}
+            </Space.Compact>
           </div>
           <br />
           <Row>
             <Col span={12}>
-              <Divider orientation="left">Select example</Divider>
+              <Divider titlePlacement="start">Select example</Divider>
               <Space wrap>
-                <Select mode="multiple" defaultValue="مورچه" style={{ width: 120 }}>
-                  <Option value="jack">Jack</Option>
-                  <Option value="مورچه">مورچه</Option>
-                  <Option value="disabled" disabled>
-                    Disabled
-                  </Option>
-                  <Option value="Yiminghe">yiminghe</Option>
-                </Select>
-                <Select defaultValue="مورچه" style={{ width: 120 }} disabled>
-                  <Option value="مورچه">مورچه</Option>
-                </Select>
-                <Select defaultValue="مورچه" style={{ width: 120 }} loading>
-                  <Option value="مورچه">مورچه</Option>
-                </Select>
-                <Select showSearch style={{ width: 200 }} placeholder="Select a person">
-                  <Option value="jack">Jack</Option>
-                  <Option value="سعید">سعید</Option>
-                  <Option value="tom">Tom</Option>
-                </Select>
+                <Select
+                  mode="multiple"
+                  defaultValue="مورچه"
+                  style={{ width: 120 }}
+                  options={[
+                    { label: 'jack', value: 'jack' },
+                    { label: 'مورچه', value: 'مورچه' },
+                    { label: 'disabled', value: 'disabled', disabled: true },
+                    { label: 'yiminghe', value: 'Yiminghe' },
+                  ]}
+                />
+                <Select
+                  disabled
+                  defaultValue="مورچه"
+                  style={{ width: 120 }}
+                  options={[{ label: 'مورچه', value: 'مورچه' }]}
+                />
+                <Select
+                  loading
+                  defaultValue="مورچه"
+                  style={{ width: 120 }}
+                  options={[{ label: 'مورچه', value: 'مورچه' }]}
+                />
+                <Select
+                  showSearch
+                  style={{ width: 200 }}
+                  placeholder="Select a person"
+                  options={[
+                    { label: 'jack', value: 'jack' },
+                    { label: 'سعید', value: 'سعید' },
+                    { label: 'Tom', value: 'tom' },
+                  ]}
+                />
               </Space>
             </Col>
             <Col span={12}>
-              <Divider orientation="left">TreeSelect example</Divider>
+              <Divider titlePlacement="start">TreeSelect example</Divider>
               <TreeSelect
                 showSearch
                 style={{ width: '100%' }}
-                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                styles={{
+                  popup: {
+                    root: { maxHeight: 400, overflow: 'auto' },
+                  },
+                }}
                 placeholder="Please select"
                 allowClear
                 treeDefaultExpandAll
@@ -576,7 +609,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
           <br />
           <Row>
             <Col span={24}>
-              <Divider orientation="left">Modal example</Divider>
+              <Divider titlePlacement="start">Modal example</Divider>
               <Button type="primary" onClick={showModal}>
                 Open Modal
               </Button>
@@ -590,7 +623,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
           <br />
           <Row>
             <Col span={24}>
-              <Divider orientation="left">Steps example</Divider>
+              <Divider titlePlacement="start">Steps example</Divider>
               <Steps
                 progressDot
                 current={currentStep}
@@ -633,7 +666,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
           <br />
           <Row>
             <Col span={12}>
-              <Divider orientation="left">Rate example</Divider>
+              <Divider titlePlacement="start">Rate example</Divider>
               <Rate defaultValue={2.5} />
               <br />
               <strong>* Note:</strong> Half star not implemented in RTL direction, it will be
@@ -644,7 +677,7 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
               implement rtl support.
             </Col>
             <Col span={12}>
-              <Divider orientation="left">Badge example</Divider>
+              <Divider titlePlacement="start">Badge example</Divider>
               <Badge count={badgeCount}>
                 <a href="#" className="head-example" />
               </Badge>
@@ -670,14 +703,14 @@ const Page: React.FC<{ placement: Placement }> = ({ placement }) => {
       <br />
       <Row>
         <Col span={24}>
-          <Divider orientation="left">Pagination example</Divider>
+          <Divider titlePlacement="start">Pagination example</Divider>
           <Pagination showSizeChanger defaultCurrent={3} total={500} />
         </Col>
       </Row>
       <br />
       <Row>
         <Col span={24}>
-          <Divider orientation="left">Grid System example</Divider>
+          <Divider titlePlacement="start">Grid System example</Divider>
           <div className="grid-demo">
             <div className="code-box-demo">
               <p>
@@ -778,12 +811,12 @@ const App: React.FC = () => {
         }}
       >
         <Radio.Button value="small">Small</Radio.Button>
-        <Radio.Button value="middle">Middle</Radio.Button>
+        <Radio.Button value="medium">Medium</Radio.Button>
         <Radio.Button value="large">Large</Radio.Button>
       </Radio.Group>
       <Divider />
       <ConfigProvider componentSize={componentSize}>
-        <Space size={[0, 16]} style={{ width: '100%' }} direction="vertical">
+        <Space size={[0, 16]} style={{ width: '100%' }} vertical>
           <Input />
           <Tabs
             defaultActiveKey="1"
@@ -939,13 +972,13 @@ export default () => {
 ```tsx
 import React from 'react';
 import { HappyProvider } from '@ant-design/happy-work-theme';
-import { Button, ConfigProvider, Space } from 'antd';
+import { Button, ConfigProvider, Flex } from 'antd';
 import type { ConfigProviderProps, GetProp } from 'antd';
 type WaveConfig = GetProp<ConfigProviderProps, 'wave'>;
 // Prepare effect holder
 const createHolder = (node: HTMLElement) => {
   const { borderWidth } = getComputedStyle(node);
-  const borderWidthNum = parseInt(borderWidth, 10);
+  const borderWidthNum = Number.parseInt(borderWidth, 10);
   const div = document.createElement('div');
   div.style.position = 'absolute';
   div.style.inset = `-${borderWidthNum}px`;
@@ -966,7 +999,7 @@ const createDot = (holder: HTMLElement, color: string, left: number, top: number
   dot.style.height = `${size}px`;
   dot.style.borderRadius = '50%';
   dot.style.background = color;
-  dot.style.transform = 'translate(-50%, -50%)';
+  dot.style.transform = 'translate3d(-50%, -50%, 0)';
   dot.style.transition = 'all 1s ease-out';
   holder.appendChild(dot);
   return dot;
@@ -999,13 +1032,13 @@ const showShakeEffect: WaveConfig['showEffect'] = (node, { component }) => {
   const seq = [0, -15, 15, -5, 5, 0];
   const itv = 10;
   let steps = 0;
-  function loop() {
+  const loop = () => {
     cancelAnimationFrame((node as any).effectTimeout);
     (node as any).effectTimeout = requestAnimationFrame(() => {
       const currentStep = Math.floor(steps / itv);
       const current = seq[currentStep];
       const next = seq[currentStep + 1];
-      if (!next) {
+      if (next === undefined || next === null) {
         node.style.transform = '';
         node.style.transition = '';
         return;
@@ -1017,17 +1050,17 @@ const showShakeEffect: WaveConfig['showEffect'] = (node, { component }) => {
       steps += 1;
       loop();
     });
-  }
+  };
   loop();
 };
 // Component
-const Wrapper = ({ name, ...wave }: WaveConfig & { name: string }) => (
+const Wrapper: React.FC<WaveConfig & { name: string }> = ({ name, ...wave }) => (
   <ConfigProvider wave={wave}>
     <Button type="primary">{name}</Button>
   </ConfigProvider>
 );
-const App = () => (
-  <Space style={{ padding: 24 }} size="large">
+const Demo: React.FC = () => (
+  <Flex gap="large" wrap>
     <Wrapper name="Disabled" disabled />
     <Wrapper name="Default" />
     <Wrapper name="Inset" showEffect={showInsetEffect} />
@@ -1035,9 +1068,9 @@ const App = () => (
     <HappyProvider>
       <Button type="primary">Happy Work</Button>
     </HappyProvider>
-  </Space>
+  </Flex>
 );
-export default App;
+export default Demo;
 ```
 ### 静态方法
 使用 `holderRender` 给 `message` 、`modal` 、`notification` 静态方法设置 `Provider`
@@ -1053,7 +1086,7 @@ const Demo: React.FC = () => {
     ConfigProvider.config({
       holderRender: (children) => (
         <StyleProvider hashPriority="high">
-          <ConfigProvider prefixCls="static" iconPrefixCls="icon" locale={locale} theme={theme}>
+          <ConfigProvider componentSize="small" locale={locale} theme={theme}>
             <App message={{ maxCount: 1 }} notification={{ maxCount: 1 }}>
               {children}
             </App>
@@ -1077,7 +1110,7 @@ const Demo: React.FC = () => {
           type="primary"
           onClick={() => {
             notification.open({
-              message: 'Notification Title',
+              title: 'Notification Title',
               description:
                 'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
             });
@@ -1171,7 +1204,7 @@ const App: React.FC = () => {
           }}
         >
           <Radio.Button value="small">Small</Radio.Button>
-          <Radio.Button value="middle">Middle</Radio.Button>
+          <Radio.Button value="medium">Medium</Radio.Button>
           <Radio.Button value="large">Large</Radio.Button>
         </Radio.Group>
         <Checkbox checked={disabled} onChange={(e) => setDisabled(e.target.checked)}>
