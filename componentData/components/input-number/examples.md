@@ -38,23 +38,30 @@ export default App;
 import React from 'react';
 import { SettingOutlined } from '@ant-design/icons';
 import { Cascader, InputNumber, Select, Space } from 'antd';
-const { Option } = Select;
 const selectBefore = (
-  <Select defaultValue="add" style={{ width: 60 }}>
-    <Option value="add">+</Option>
-    <Option value="minus">-</Option>
-  </Select>
+  <Select
+    defaultValue="add"
+    style={{ width: 60 }}
+    options={[
+      { label: '+', value: 'add' },
+      { label: '-', value: 'minus' },
+    ]}
+  />
 );
 const selectAfter = (
-  <Select defaultValue="USD" style={{ width: 60 }}>
-    <Option value="USD">$</Option>
-    <Option value="EUR">€</Option>
-    <Option value="GBP">£</Option>
-    <Option value="CNY">¥</Option>
-  </Select>
+  <Select
+    defaultValue="USD"
+    style={{ width: 60 }}
+    options={[
+      { label: '$', value: 'USD' },
+      { label: '€', value: 'EUR' },
+      { label: '£', value: 'GBP' },
+      { label: '¥', value: 'CNY' },
+    ]}
+  />
 );
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <InputNumber addonBefore="+" addonAfter="$" defaultValue={100} />
     <InputNumber addonBefore={selectBefore} addonAfter={selectAfter} defaultValue={100} />
     <InputNumber addonAfter={<SettingOutlined />} defaultValue={100} />
@@ -139,11 +146,16 @@ import { InputNumber, Space } from 'antd';
 const onChange: InputNumberProps['onChange'] = (value) => {
   console.log('changed', value);
 };
+const formatter: InputNumberProps<number>['formatter'] = (value) => {
+  const [start, end] = `${value}`.split('.') || [];
+  const v = `${start}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return `$ ${end ? `${v}.${end}` : `${v}`}`;
+};
 const App: React.FC = () => (
   <Space>
     <InputNumber<number>
       defaultValue={1000}
-      formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+      formatter={formatter}
       parser={(value) => value?.replace(/\$\s?|(,*)/g, '') as unknown as number}
       onChange={onChange}
     />
@@ -193,8 +205,18 @@ import { InputNumber } from 'antd';
 const onChange: InputNumberProps['onChange'] = (value) => {
   console.log('changed', value);
 };
+const onStep: InputNumberProps['onStep'] = (value, info) => {
+  console.log('onStep', value, info);
+};
 const App: React.FC = () => (
-  <InputNumber min={1} max={10} defaultValue={3} onChange={onChange} changeOnWheel />
+  <InputNumber
+    min={1}
+    max={10}
+    defaultValue={3}
+    onChange={onChange}
+    onStep={onStep}
+    changeOnWheel
+  />
 );
 export default App;
 ```
@@ -210,6 +232,71 @@ const App: React.FC = () => (
     <InputNumber placeholder="Filled" variant="filled" style={{ width: 200 }} />
     <InputNumber placeholder="Borderless" variant="borderless" style={{ width: 200 }} />
     <InputNumber placeholder="Underlined" variant="underlined" style={{ width: 200 }} />
+  </Flex>
+);
+export default App;
+```
+### 拨轮
+数字拨轮。
+
+```tsx
+import React from 'react';
+import type { InputNumberProps } from 'antd';
+import { Flex, InputNumber } from 'antd';
+const onChange: InputNumberProps['onChange'] = (value) => {
+  console.log('changed', value);
+};
+const sharedProps = {
+  mode: 'spinner' as const,
+  min: 1,
+  max: 10,
+  defaultValue: 3,
+  onChange,
+  style: { width: 150 },
+};
+const App: React.FC = () => (
+  <Flex vertical gap="medium">
+    <InputNumber {...sharedProps} placeholder="Outlined" />
+    <InputNumber {...sharedProps} variant="filled" placeholder="Filled" />
+  </Flex>
+);
+export default App;
+```
+### 禁用步进按钮 hover
+禁用步进按钮 hover 排查。
+
+```tsx
+import React from 'react';
+import { Flex, InputNumber, Typography } from 'antd';
+const sharedProps = {
+  min: 0,
+  max: 3,
+  controls: true,
+  style: { width: 180 },
+};
+const App: React.FC = () => (
+  <Flex vertical gap={16}>
+    <Typography.Text type="secondary">
+      Hover the disabled step controls when the value reaches min or max.
+    </Typography.Text>
+    <Flex gap={16} wrap>
+      <Flex vertical gap={8}>
+        <Typography.Text>Input mode at max</Typography.Text>
+        <InputNumber {...sharedProps} defaultValue={3} />
+      </Flex>
+      <Flex vertical gap={8}>
+        <Typography.Text>Input mode at min</Typography.Text>
+        <InputNumber {...sharedProps} defaultValue={0} />
+      </Flex>
+      <Flex vertical gap={8}>
+        <Typography.Text>Spinner mode at max</Typography.Text>
+        <InputNumber {...sharedProps} defaultValue={3} mode="spinner" />
+      </Flex>
+      <Flex vertical gap={8}>
+        <Typography.Text>Spinner mode at min</Typography.Text>
+        <InputNumber {...sharedProps} defaultValue={0} mode="spinner" />
+      </Flex>
+    </Flex>
   </Flex>
 );
 export default App;
@@ -259,6 +346,55 @@ const App: React.FC = () => (
       <InputNumber addonBefore="http://" placeholder="Filled" variant="filled" disabled />
       <InputNumber addonBefore="http://" placeholder="Filled" variant="filled" status="error" />
     </Flex>
+    <Flex gap={12}>
+      <InputNumber
+        addonBefore="http://"
+        placeholder="Outlined"
+        variant="outlined"
+        status="warning"
+      />
+      <InputNumber
+        addonBefore="http://"
+        placeholder="Filled"
+        variant="filled"
+        status="warning"
+        disabled
+      />
+      <InputNumber addonBefore="http://" placeholder="Filled" variant="filled" status="warning" />
+    </Flex>
+  </Flex>
+);
+export default App;
+```
+### Borderless 高度对齐
+```tsx
+import React from 'react';
+import { Flex, Input, InputNumber, Select } from 'antd';
+const App: React.FC = () => (
+  <Flex vertical gap={16}>
+    <Flex gap={8} align="center">
+      <InputNumber
+        style={{ width: 100, background: 'lightpink' }}
+        variant="borderless"
+        size="large"
+      />
+      <Input style={{ width: 100, background: 'lightpink' }} variant="borderless" size="large" />
+      <Select style={{ width: 100, background: 'lightpink' }} variant="borderless" size="large" />
+    </Flex>
+    <Flex gap={8} align="center">
+      <InputNumber style={{ width: 100, background: 'lightpink' }} variant="borderless" />
+      <Input style={{ width: 100, background: 'lightpink' }} variant="borderless" />
+      <Select style={{ width: 100, background: 'lightpink' }} variant="borderless" />
+    </Flex>
+    <Flex gap={8} align="center">
+      <InputNumber
+        style={{ width: 100, background: 'lightpink' }}
+        variant="borderless"
+        size="small"
+      />
+      <Input style={{ width: 100, background: 'lightpink' }} variant="borderless" size="small" />
+      <Select style={{ width: 100, background: 'lightpink' }} variant="borderless" size="small" />
+    </Flex>
   </Flex>
 );
 export default App;
@@ -293,20 +429,19 @@ export default App;
 ```tsx
 import React from 'react';
 import { UserOutlined } from '@ant-design/icons';
-import { InputNumber } from 'antd';
+import { Flex, InputNumber, Space } from 'antd';
 const App: React.FC = () => (
-  <>
+  <Flex vertical gap="medium">
     <InputNumber prefix="￥" style={{ width: '100%' }} />
-    <br />
-    <br />
-    <InputNumber addonBefore={<UserOutlined />} prefix="￥" style={{ width: '100%' }} />
-    <br />
-    <br />
+    <Space.Compact block>
+      <Space.Addon>
+        <UserOutlined />
+      </Space.Addon>
+      <InputNumber prefix="￥" style={{ width: '100%' }} />
+    </Space.Compact>
     <InputNumber prefix="￥" disabled style={{ width: '100%' }} />
-    <br />
-    <br />
     <InputNumber suffix="RMB" style={{ width: '100%' }} />
-  </>
+  </Flex>
 );
 export default App;
 ```
@@ -318,7 +453,7 @@ import React from 'react';
 import ClockCircleOutlined from '@ant-design/icons/ClockCircleOutlined';
 import { InputNumber, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical" style={{ width: '100%' }}>
+  <Space vertical style={{ width: '100%' }}>
     <InputNumber status="error" style={{ width: '100%' }} />
     <InputNumber status="warning" style={{ width: '100%' }} />
     <InputNumber status="error" style={{ width: '100%' }} prefix={<ClockCircleOutlined />} />
@@ -332,45 +467,38 @@ export default App;
 
 ```tsx
 import React, { useRef } from 'react';
+import type { GetRef } from 'antd';
 import { Button, InputNumber, Space } from 'antd';
-import type { InputNumberRef } from 'rc-input-number';
+type InputNumberRef = GetRef<typeof InputNumber>;
 const App: React.FC = () => {
   const inputRef = useRef<InputNumberRef>(null);
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
+    <Space vertical style={{ width: '100%' }}>
       <Space wrap>
         <Button
           onClick={() => {
-            inputRef.current!.focus({
-              cursor: 'start',
-            });
+            inputRef.current?.focus({ cursor: 'start' });
           }}
         >
           Focus at first
         </Button>
         <Button
           onClick={() => {
-            inputRef.current!.focus({
-              cursor: 'end',
-            });
+            inputRef.current?.focus({ cursor: 'end' });
           }}
         >
           Focus at last
         </Button>
         <Button
           onClick={() => {
-            inputRef.current!.focus({
-              cursor: 'all',
-            });
+            inputRef.current?.focus({ cursor: 'all' });
           }}
         >
           Focus to select all
         </Button>
         <Button
           onClick={() => {
-            inputRef.current!.focus({
-              preventScroll: true,
-            });
+            inputRef.current?.focus({ preventScroll: true });
           }}
         >
           Focus prevent scroll
@@ -378,6 +506,51 @@ const App: React.FC = () => {
       </Space>
       <InputNumber style={{ width: '100%' }} defaultValue={999} ref={inputRef} />
     </Space>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 InputNumber 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, InputNumber } from 'antd';
+import type { InputNumberProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyle = createStyles(({ token }) => ({
+  root: {
+    border: `1px solid ${token.colorPrimary}`,
+    borderRadius: 8,
+    width: 200,
+  },
+}));
+const stylesObject: InputNumberProps['styles'] = {
+  input: {
+    fontSize: 14,
+  },
+};
+const stylesFn: InputNumberProps['styles'] = ({ props }) => {
+  if (props.size === 'large') {
+    return {
+      root: {
+        backgroundColor: 'rgba(250,250,250, 0.5)',
+        borderColor: '#722ed1',
+      },
+    } satisfies InputNumberProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyle();
+  const sharedProps: InputNumberProps = {
+    classNames,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <InputNumber {...sharedProps} styles={stylesObject} placeholder="Object" />
+      <InputNumber {...sharedProps} styles={stylesFn} placeholder="Function" size="large" />
+    </Flex>
   );
 };
 export default App;
