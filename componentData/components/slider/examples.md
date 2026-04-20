@@ -87,7 +87,7 @@ const DecimalStep: React.FC = () => {
   );
 };
 const App: React.FC = () => (
-  <Space style={{ width: '100%' }} direction="vertical">
+  <Space style={{ width: '100%' }} vertical>
     <IntegerStep />
     <DecimalStep />
   </Space>
@@ -165,7 +165,7 @@ const App: React.FC = () => (
 export default App;
 ```
 ### 带标签的滑块
-使用 `marks` 属性标注分段式滑块，使用 `value` / `defaultValue` 指定滑块位置。当 `included=false` 时，表明不同标记间为并列关系。当 `step=null` 时，Slider 的可选值仅有 `marks` 标出来的部分。
+使用 `marks` 属性标注分段式滑块，使用 `value` / `defaultValue` 指定滑块位置。当 `included=false` 时，表明不同标记间为并列关系。当 `step=null` 时，Slider 的可选值仅有 `marks`、`min` 和 `max`。
 
 ```tsx
 import React from 'react';
@@ -323,6 +323,68 @@ const App: React.FC = () => {
       value={value}
       onChange={setValue}
     />
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Sliders 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Slider } from 'antd';
+import type { SliderSingleProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    width: 300px;
+  `,
+}));
+const classNamesFn = createStaticStyles(({ css, cssVar }) => ({
+  root: css`
+    width: 100px;
+    &:hover .ant-slider-handle:after {
+      box-shadow: 0 0 0 ${cssVar.lineWidthBold} #722ed1;
+    }
+  `,
+  handle: css`
+    &.ant-slider-handle:hover::after,
+    &.ant-slider-handle:active::after,
+    &.ant-slider-handle:focus::after,
+    &.ant-slider-handle::after {
+      box-shadow: 0 0 0 ${cssVar.lineWidthBold} #722ed1;
+    }
+  `,
+}));
+const stylesObject: SliderSingleProps['styles'] = {
+  track: { backgroundImage: 'linear-gradient(180deg, #91caff, #1677ff)' },
+  handle: { borderColor: '#1677ff', boxShadow: '0 2px 8px #1677ff' },
+};
+const stylesFn: SliderSingleProps['styles'] = (info) => {
+  if (info.props.orientation === 'vertical') {
+    return {
+      root: { height: 300 },
+      track: { backgroundImage: 'linear-gradient(180deg, #722cc0, #722ed1)' },
+      handle: { borderColor: '#722ed1', boxShadow: '0 2px 8px #722ed1' },
+    } satisfies SliderSingleProps['styles'];
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const sharedProps: SliderSingleProps = {
+    defaultValue: 30,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Slider {...sharedProps} classNames={classNames} styles={stylesObject} />
+      <Slider
+        {...sharedProps}
+        classNames={classNamesFn}
+        orientation="vertical"
+        reverse
+        styles={stylesFn}
+      />
+    </Flex>
   );
 };
 export default App;

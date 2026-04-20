@@ -39,7 +39,7 @@ const layoutStyle = {
   maxWidth: 'calc(50% - 8px)',
 };
 const App: React.FC = () => (
-  <Flex gap="middle" wrap>
+  <Flex gap="medium" wrap>
     <Layout style={layoutStyle}>
       <Header style={headerStyle}>Header</Header>
       <Content style={contentStyle}>Content</Content>
@@ -95,6 +95,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Header style={{ display: 'flex', alignItems: 'center' }}>
@@ -123,9 +124,7 @@ const App: React.FC = () => {
           Content
         </div>
       </Content>
-      <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
-      </Footer>
+      <Footer style={{ textAlign: 'center' }}>Ant Design ©{currentYear} Created by Ant UED</Footer>
     </Layout>
   );
 };
@@ -165,6 +164,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Header style={{ display: 'flex', alignItems: 'center' }}>
@@ -197,9 +197,7 @@ const App: React.FC = () => {
           <Content style={{ padding: '0 24px', minHeight: 280 }}>Content</Content>
         </Layout>
       </div>
-      <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
-      </Footer>
+      <Footer style={{ textAlign: 'center' }}>Ant Design ©{currentYear} Created by Ant UED</Footer>
     </Layout>
   );
 };
@@ -257,7 +255,7 @@ const App: React.FC = () => {
             mode="inline"
             defaultSelectedKeys={['1']}
             defaultOpenKeys={['sub1']}
-            style={{ height: '100%', borderRight: 0 }}
+            style={{ height: '100%', borderInlineEnd: 0 }}
             items={items2}
           />
         </Sider>
@@ -331,6 +329,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
@@ -353,7 +352,7 @@ const App: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+          Ant Design ©{currentYear} Created by Ant UED
         </Footer>
       </Layout>
     </Layout>
@@ -457,6 +456,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Sider
@@ -487,7 +487,7 @@ const App: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+          Ant Design ©{currentYear} Created by Ant UED
         </Footer>
       </Layout>
     </Layout>
@@ -510,6 +510,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Header
@@ -547,9 +548,7 @@ const App: React.FC = () => {
           Content
         </div>
       </Content>
-      <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
-      </Footer>
+      <Footer style={{ textAlign: 'center' }}>Ant Design ©{currentYear} Created by Ant UED</Footer>
     </Layout>
   );
 };
@@ -579,7 +578,6 @@ const siderStyle: React.CSSProperties = {
   position: 'sticky',
   insetInlineStart: 0,
   top: 0,
-  bottom: 0,
   scrollbarWidth: 'thin',
   scrollbarGutter: 'stable',
 };
@@ -601,6 +599,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout hasSider>
       <Sider style={siderStyle}>
@@ -631,7 +630,7 @@ const App: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+          Ant Design ©{currentYear} Created by Ant UED
         </Footer>
       </Layout>
     </Layout>
@@ -820,7 +819,7 @@ const App: React.FC = () => {
               mode="inline"
               defaultSelectedKeys={['1']}
               defaultOpenKeys={['sub1']}
-              style={{ borderRight: 0 }}
+              style={{ borderInlineEnd: 0 }}
               items={items2}
             />
           </Sider>

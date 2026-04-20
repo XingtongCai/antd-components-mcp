@@ -81,7 +81,7 @@ const App: React.FC = () => {
     font: { color: typeof color === 'string' ? color : color.toRgbString(), fontSize },
   };
   return (
-    <Flex gap="middle">
+    <Flex gap="medium">
       <Watermark {...watermarkProps}>
         <Typography>
           <Paragraph>
@@ -109,13 +109,19 @@ const App: React.FC = () => {
           </Paragraph>
         </Typography>
         <img
+          draggable={false}
           style={{ zIndex: 10, width: '100%', maxWidth: 800, position: 'relative' }}
           src="https://gw.alipayobjects.com/mdn/rms_08e378/afts/img/A*zx7LTI_ECSAAAAAAAAAAAABkARQnAQ"
           alt="img"
         />
       </Watermark>
       <Form
-        style={{ width: 280, flexShrink: 0, borderLeft: '1px solid #eee', paddingInlineStart: 16 }}
+        style={{
+          width: 280,
+          flexShrink: 0,
+          borderInlineStart: '1px solid #eee',
+          paddingInlineStart: 16,
+        }}
         form={form}
         layout="vertical"
         initialValues={config}
@@ -187,7 +193,7 @@ const App: React.FC = () => {
   const closeDrawer2 = () => setShowDrawer2(false);
   return (
     <>
-      <Flex gap="middle">
+      <Flex gap="medium">
         <Button type="primary" onClick={() => setShowModal(true)}>
           Show in Modal
         </Button>
