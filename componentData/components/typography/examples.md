@@ -213,7 +213,7 @@ import React from 'react';
 import { Space, Typography } from 'antd';
 const { Text, Link } = Typography;
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <Text>Ant Design (default)</Text>
     <Text type="secondary">Ant Design (secondary)</Text>
     <Text type="success">Ant Design (success)</Text>
@@ -532,20 +532,19 @@ const App: React.FC = () => (
 export default App;
 ```
 ### 省略号 Debug
-多行文本省略。
+多行文本省略。页面底部包含「可复制 + 省略」时 tooltip 行为的调试区块，便于验证：悬停文字显示省略 tooltip，悬停复制按钮仅显示复制 tooltip，从复制按钮移回文字时省略 tooltip 再次出现。
 
 ```tsx
 import React, { useState } from 'react';
-import { Button, Slider, Switch, Typography } from 'antd';
+import { Slider, Switch, Typography } from 'antd';
 const { Text, Paragraph } = Typography;
 const templateStr =
   'In the process of internal desktop applications development, many different design specs and implementations would be involved, which might cause designers and developers difficulties and duplication and reduce the efficiency of development.';
 const text = `this is a multiline
   text that has many
-  lines and 
+  lines and
     - render like this
     - and this
-    
   and that`;
 const App: React.FC = () => {
   const [rows, setRows] = useState(1);
@@ -555,9 +554,12 @@ const App: React.FC = () => {
   const [expandable, setExpandable] = useState(false);
   const [display, setDisplay] = useState('none');
   React.useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setDisplay('block');
     }, 100);
+    return () => {
+      clearTimeout(timer);
+    };
   }, []);
   return (
     <>
@@ -604,16 +606,12 @@ const App: React.FC = () => {
       </p>
       <div style={{ display }}>
         <Text style={{ width: 100 }} ellipsis={{ tooltip: 'I am ellipsis now!' }}>
-          默认display none 样式的超长文字， 悬停tooltip失效了
+          默认 display none 样式的超长文字， 悬停 tooltip 失效了
         </Text>
       </div>
       <Typography.Paragraph
         style={{ width: 300 }}
-        ellipsis={{
-          rows: 3,
-          expandable: true,
-          symbol: <Button>Open</Button>,
-        }}
+        ellipsis={{ rows: 3, expandable: true, symbol: <span>Open</span> }}
       >
         {templateStr.slice(0, 60)}
         <span style={{ fontSize: '5em' }}>ANTD</span>
@@ -626,6 +624,21 @@ const App: React.FC = () => {
       <Text style={{ width: 100, whiteSpace: 'nowrap' }} ellipsis copyable>
         {templateStr}
       </Text>
+      <div style={{ marginTop: 24 }}>
+        <div style={{ marginBottom: 8, fontSize: 12, color: '#666' }}>
+          <strong>Debug: copyable + ellipsis tooltips</strong>
+          <br />
+          1. Hover the text → ellipsis tooltip (full content) should show.
+          <br />
+          2. Hover the copy button → only &quot;Copy&quot; / &quot;Copied&quot; tooltip should show.
+          <br />
+          3. Move from copy button back to the text (without leaving the block) → ellipsis tooltip
+          should show again.
+        </div>
+        <Text style={{ width: 280, display: 'block' }} ellipsis={{ tooltip: true }} copyable>
+          {templateStr}
+        </Text>
+      </div>
     </>
   );
 };
@@ -759,6 +772,30 @@ const App: React.FC = () => (
     <Typography.Text type="warning">Warning but green</Typography.Text>
     <Typography.Text type="danger">Danger but blue</Typography.Text>
   </ConfigProvider>
+);
+export default App;
+```
+### Link danger Debug
+Typography.Link 的 danger 颜色与 Button Link 的样式隔离。
+
+```tsx
+import React from 'react';
+import { Button, Divider, Typography } from 'antd';
+const { Text, Link } = Typography;
+const App: React.FC = () => (
+  <Typography>
+    <Text>Typography.Link 的 type="danger" 颜色应为 error 文本色。</Text>
+    <br />
+    <Link href="https://ant.design" type="danger">
+      Danger Link
+    </Link>
+    <Divider />
+    <Text>Button 以 a 标签渲染时，不应被 Typography 链接样式影响。</Text>
+    <br />
+    <Button type="link" href="https://ant.design">
+      Button Link
+    </Button>
+  </Typography>
 );
 export default App;
 ```

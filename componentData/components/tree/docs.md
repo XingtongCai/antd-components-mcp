@@ -11,6 +11,7 @@
 | checkable | 节点前添加 Checkbox 复选框 | boolean | false |  |
 | checkedKeys | （受控）选中复选框的树节点（注意：父子节点有关联，如果传入父节点 key，则子节点自动选中；相应当子节点 key 都传入，父节点也自动选中。当设置 `checkable` 和 `checkStrictly`，它是一个有`checked`和`halfChecked`属性的对象，并且父子节点的选中与否不再关联 | string\[] \| {checked: string\[], halfChecked: string\[]} | \[] |  |
 | checkStrictly | checkable 状态下节点选择完全受控（父子节点选中状态不再关联） | boolean | false |  |
+| classNames | 用于自定义组件内部各语义化结构的 class，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - | |
 | defaultCheckedKeys | 默认选中复选框的树节点 | string\[] | \[] |  |
 | defaultExpandAll | 默认展开所有树节点 | boolean | false |  |
 | defaultExpandedKeys | 默认展开指定的树节点 | string\[] | \[] |  |
@@ -31,12 +32,14 @@
 | selectedKeys | （受控）设置选中的树节点，多选需设置 `multiple` 为 true | string\[] | - |  |
 | showIcon | 控制是否展示 `icon` 节点，没有默认样式 | boolean | false |  |
 | showLine | 是否展示连接线 | boolean \| { showLeafIcon: ReactNode \| ((props: AntTreeNodeProps) => ReactNode) } | false |  |
-| switcherIcon | 自定义树节点的展开/折叠图标（带有默认 rotate 角度样式） | ReactNode \| ((props: AntTreeNodeProps) => ReactNode) | - | renderProps: 4.20.0 |
+| styles | 用于自定义组件内部各语义化结构的行内 style，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - | |
+| switcherIcon | 自定义树节点的展开/折叠图标（`showLine` 下不会自动 rotate） | ReactNode \| ((props: AntTreeNodeProps) => ReactNode) | - | renderProps: 4.20.0 |
 | switcherLoadingIcon | 自定义树节点的加载图标 | ReactNode | - | 5.20.0 |
 | titleRender | 自定义渲染节点 | (nodeData) => ReactNode | - | 4.5.0 |
 | treeData | treeNodes 数据，如果设置则不需要手动构造 TreeNode 节点（key 在整个树范围内唯一） | array&lt;{key, title, children, \[disabled, selectable]}> | - |  |
 | virtual | 设置 false 时关闭虚拟滚动 | boolean | true | 4.1.0 |
 | onCheck | 点击复选框触发 | function(checkedKeys, e:{checked: boolean, checkedNodes, node, event, halfCheckedKeys}) | - |  |
+| onDoubleClick | 双击树节点触发 | function(event, node) | - |  |
 | onDragEnd | dragend 触发时调用 | function({event, node}) | - |  |
 | onDragEnter | dragenter 触发时调用 | function({event, node, expandedKeys}) | - |  |
 | onDragLeave | dragleave 触发时调用 | function({event, node}) | - |  |
@@ -82,10 +85,10 @@
 | --- | --- |
 | scrollTo({ key: string \| number; align?: 'top' \| 'bottom' \| 'auto'; offset?: number }) | 虚拟滚动下，滚动到指定 key 条目 |
 ## FAQ
-### defaultExpandAll 在异步加载数据时为何不生效？
+### defaultExpandAll 在异步加载数据时为何不生效？ {#faq-default-expand-all}
 `default` 前缀属性只有在初始化时生效，因而异步加载数据时 `defaultExpandAll` 已经执行完成。你可以通过受控 `expandedKeys` 或者在数据加载完成后渲染 Tree 来实现全部展开。
-### 虚拟滚动的限制
+### 虚拟滚动的限制 {#faq-virtual-scroll-limitation}
 虚拟滚动通过在仅渲染可视区域的元素来提升渲染性能。但是同时由于不会渲染所有节点，所以无法自动拓转横向宽度（比如超长 `title` 的横向滚动条）。
-### `disabled` 节点在树中的关系是什么？
+### `disabled` 节点在树中的关系是什么？ {#faq-disabled-node}
 Tree 通过传导方式进行数据变更。无论是展开还是勾选，它都会从变更的节点开始向上、向下传导变化，直到遍历的当前节点是 `disabled` 时停止。因而如果控制的节点本身为 `disabled` 时，那么它只会修改本身而不会影响其他节点。举例来说，一个父节点包含 3 个子节点，其中一个为 `disabled` 状态。那么勾选父节点，只会影响其余两个子节点变成勾选状态。勾选两个子节点后，无论 `disabled` 节点什么状态，父节点都会变成勾选状态。
 这种传导终止的方式是为了防止通过勾选子节点使得 `disabled` 父节点变成勾选状态，而用户无法直接勾选 `disabled` 父节点更改其状态导致的交互矛盾。如果你有着自己的传导需求，可以通过 `checkStrictly` 自定义勾选逻辑。

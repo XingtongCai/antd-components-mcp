@@ -1,5 +1,9 @@
 ## 何时使用
 最基础的列表展示，可承载文字、列表、图片、段落，常用于后台数据展示页面。
+<!-- prettier-ignore -->
+:::warning{title=废弃提示}
+List 组件已经进入废弃阶段，将于下个 major 版本移除。
+:::
 ## API
 另外我们封装了 [ProList](https://procomponents.ant.design/components/list)，在 `antd` List 之上扩展了更多便捷易用的功能，比如多选，展开等功能，使用体验贴近 Table，欢迎尝试使用。
 ### List
@@ -27,16 +31,17 @@
 | align    | 指定分页对齐的位置 | `start` \| `center` \| `end` | `end`    |
 更多配置项，请查看 [`Pagination`](/components/pagination-cn)。
 ### List grid props
-| 参数   | 说明                 | 类型   | 默认值 | 版本 |
-| ------ | -------------------- | ------ | ------ | ---- |
-| column | 列数                 | number | -      |      |
-| gutter | 栅格间隔             | number | 0      |      |
-| xs     | `<576px` 展示的列数  | number | -      |      |
-| sm     | `≥576px` 展示的列数  | number | -      |      |
-| md     | `≥768px` 展示的列数  | number | -      |      |
-| lg     | `≥992px` 展示的列数  | number | -      |      |
-| xl     | `≥1200px` 展示的列数 | number | -      |      |
-| xxl    | `≥1600px` 展示的列数 | number | -      |      |
+| 参数   | 说明                 | 类型   | 默认值 | 版本  |
+| ------ | -------------------- | ------ | ------ | ----- |
+| column | 列数                 | number | -      |       |
+| gutter | 栅格间隔             | number | 0      |       |
+| xs     | `<576px` 展示的列数  | number | -      |       |
+| sm     | `≥576px` 展示的列数  | number | -      |       |
+| md     | `≥768px` 展示的列数  | number | -      |       |
+| lg     | `≥992px` 展示的列数  | number | -      |       |
+| xl     | `≥1200px` 展示的列数 | number | -      |       |
+| xxl    | `≥1600px` 展示的列数 | number | -      |       |
+| xxxl   | `≥1920px` 展示的列数 | number | -      | 6.3.0 |
 ### List.Item
 | 参数 | 说明 | 类型 | 默认值 | 版本 |
 | --- | --- | --- | --- | --- |
@@ -50,3 +55,12 @@
 | avatar      | 列表元素的图标     | ReactNode | -      |      |
 | description | 列表元素的描述内容 | ReactNode | -      |      |
 | title       | 列表元素的标题     | ReactNode | -      |      |
+## FAQ {#faq}
+### List 组件废弃后，有替代方案吗？ {#faq-listy-replacement}
+在 Ant Design v6 中，我们将推出一个全新的 Listy 组件作为 List 的继任者。
+Listy 内置虚拟滚动能力，并更加强调灵活的布局控制，旨在帮助开发者根据不同业务场景更高效地实现自定义列表。
+目前，底层实现 rc-listy 已基本开发完成，正在等待核心维护者的评审与后续调整。
+Ant Design v6 将基于 rc-listy 正式提供 Listy 组件。
+相关链接：
+- Pull Request: [PR #54182](https://github.com/ant-design/ant-design/pull/54182)
+- RFC 讨论: [Discussion #54458](https://github.com/ant-design/ant-design/discussions/54458)
