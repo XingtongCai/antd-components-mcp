@@ -27,17 +27,19 @@ const App: React.FC = () => {
         options={options}
         style={{ width: 200 }}
         onSelect={onSelect}
-        onSearch={(text) => setOptions(getPanelValue(text))}
+        showSearch={{
+          onSearch: (text) => setOptions(getPanelValue(text)),
+        }}
         placeholder="input here"
       />
       <br />
       <br />
       <AutoComplete
         value={value}
+        showSearch={{ onSearch: (text) => setAnotherOptions(getPanelValue(text)) }}
         options={anotherOptions}
         style={{ width: 200 }}
         onSelect={onSelect}
-        onSearch={(text) => setAnotherOptions(getPanelValue(text))}
         onChange={onChange}
         placeholder="control mode"
       />
@@ -69,7 +71,7 @@ const App: React.FC = () => {
   return (
     <AutoComplete
       style={{ width: 200 }}
-      onSearch={handleSearch}
+      showSearch={{ onSearch: handleSearch }}
       placeholder="input here"
       options={options}
     />
@@ -103,7 +105,7 @@ const App: React.FC = () => {
       options={options}
       style={{ width: 200 }}
       onSelect={onSelect}
-      onSearch={handleSearch}
+      showSearch={{ onSearch: handleSearch }}
     >
       <TextArea
         placeholder="input here"
@@ -132,9 +134,10 @@ const App: React.FC = () => (
     style={{ width: 200 }}
     options={options}
     placeholder="try to type `b`"
-    filterOption={(inputValue, option) =>
-      option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-    }
+    showSearch={{
+      filterOption: (inputValue, option) =>
+        option!.value.toUpperCase().includes(inputValue.toUpperCase()),
+    }}
   />
 );
 export default App;
@@ -181,7 +184,11 @@ const options = [
 ];
 const App: React.FC = () => (
   <AutoComplete
-    classNames={{ popup: { root: 'certain-category-search-dropdown' } }}
+    classNames={{
+      popup: {
+        root: 'certain-category-search-dropdown',
+      },
+    }}
     popupMatchSelectWidth={500}
     style={{ width: 250 }}
     options={options}
@@ -243,7 +250,7 @@ const App: React.FC = () => {
       style={{ width: 300 }}
       options={options}
       onSelect={onSelect}
-      onSearch={handleSearch}
+      showSearch={{ onSearch: handleSearch }}
     >
       <Input.Search size="large" placeholder="input here" enterButton />
     </AutoComplete>
@@ -267,16 +274,20 @@ const App: React.FC = () => {
   const getPanelValue = (searchText: string) =>
     !searchText ? [] : [mockVal(searchText), mockVal(searchText, 2), mockVal(searchText, 3)];
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
+    <Space vertical style={{ width: '100%' }}>
       <AutoComplete
         options={options}
-        onSearch={(text) => setOptions(getPanelValue(text))}
+        showSearch={{
+          onSearch: (text) => setOptions(getPanelValue(text)),
+        }}
         status="error"
         style={{ width: 200 }}
       />
       <AutoComplete
         options={anotherOptions}
-        onSearch={(text) => setAnotherOptions(getPanelValue(text))}
+        showSearch={{
+          onSearch: (text) => setAnotherOptions(getPanelValue(text)),
+        }}
         status="warning"
         style={{ width: 200 }}
       />
@@ -286,7 +297,7 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 多种形态
-可选 `outlined` `filled` `borderless` 三种形态。
+可选 `outlined` `filled` `borderless` `underlined` 四种形态。
 
 ```tsx
 import React, { useState } from 'react';
@@ -305,14 +316,14 @@ const App: React.FC = () => {
         options={options}
         style={{ width: 200 }}
         placeholder="Outlined"
-        onSearch={(text) => setOptions(getPanelValue(text))}
+        showSearch={{ onSearch: (text) => setOptions(getPanelValue(text)) }}
         onSelect={globalThis.console.log}
       />
       <AutoComplete
         options={options}
         style={{ width: 200 }}
         placeholder="Filled"
-        onSearch={(text) => setOptions(getPanelValue(text))}
+        showSearch={{ onSearch: (text) => setOptions(getPanelValue(text)) }}
         onSelect={globalThis.console.log}
         variant="filled"
       />
@@ -320,9 +331,17 @@ const App: React.FC = () => {
         options={options}
         style={{ width: 200 }}
         placeholder="Borderless"
-        onSearch={(text) => setOptions(getPanelValue(text))}
+        showSearch={{ onSearch: (text) => setOptions(getPanelValue(text)) }}
         onSelect={globalThis.console.log}
         variant="borderless"
+      />
+      <AutoComplete
+        options={options}
+        style={{ width: 200 }}
+        placeholder="Underlined"
+        onSearch={(text) => setOptions(getPanelValue(text))}
+        onSelect={globalThis.console.log}
+        variant="underlined"
       />
     </Flex>
   );
@@ -349,7 +368,7 @@ const App: React.FC = () => {
       <AutoComplete
         options={options}
         style={{ width: 200 }}
-        onSearch={(text) => setOptions(getPanelValue(text))}
+        showSearch={{ onSearch: (text) => setOptions(getPanelValue(text)) }}
         placeholder="UnClearable"
         allowClear={false}
       />
@@ -358,13 +377,93 @@ const App: React.FC = () => {
       <AutoComplete
         options={options}
         style={{ width: 200 }}
-        onSearch={(text) => setOptions(getPanelValue(text))}
+        showSearch={{ onSearch: (text) => setOptions(getPanelValue(text)) }}
         placeholder="Customized clear icon"
         allowClear={{ clearIcon: <CloseSquareFilled /> }}
       />
     </>
   );
 };
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 AutoComplete 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { AutoComplete, Flex } from 'antd';
+import type { AutoCompleteProps, GetProp } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    border-radius: 4px;
+  `,
+}));
+const stylesObject: AutoCompleteProps['styles'] = {
+  popup: {
+    root: { borderWidth: 1, borderColor: '#1890ff' },
+    list: { backgroundColor: 'rgba(240,240,240, 0.85)' },
+    listItem: { color: '#272727' },
+  },
+};
+const stylesFn: AutoCompleteProps['styles'] = ({
+  props,
+}): GetProp<AutoCompleteProps, 'styles', 'Return'> => {
+  if (props.variant === 'filled') {
+    return {
+      popup: {
+        root: { borderWidth: 1, borderColor: '#ccc' },
+        list: { backgroundColor: 'rgba(240,240,240, 0.85)' },
+        listItem: { color: '#272727' },
+      },
+    };
+  }
+  return {};
+};
+const options: AutoCompleteProps['options'] = [
+  { value: 'Burnaby' },
+  { value: 'Seattle' },
+  { value: 'Los Angeles' },
+  { value: 'San Francisco' },
+  { value: 'Meet student' },
+];
+const App: React.FC = () => {
+  const sharedProps: AutoCompleteProps = {
+    options,
+    classNames: {
+      root: classNames.root,
+    },
+    style: { width: 200 },
+  };
+  return (
+    <Flex vertical gap="medium">
+      <AutoComplete {...sharedProps} placeholder="object styles" styles={stylesObject} />
+      <AutoComplete
+        {...sharedProps}
+        variant="filled"
+        placeholder="function styles"
+        styles={stylesFn}
+      />
+    </Flex>
+  );
+};
+export default App;
+```
+### 禁用自定义输入 Debug
+禁用自定义输入组件 Debug。
+
+```tsx
+import React from 'react';
+import { AutoComplete, Flex, Input, Select } from 'antd';
+const App: React.FC = () => (
+  <Flex gap={12} wrap>
+    <Input disabled placeholder="Regular Input" />
+    <AutoComplete disabled>
+      <Input.TextArea disabled />
+    </AutoComplete>
+    <Select disabled options={[]} />
+  </Flex>
+);
 export default App;
 ```
 ### 在 Form 中 Debugundefined
@@ -442,14 +541,13 @@ import { AutoComplete, Flex, Select } from 'antd';
 const AutoCompleteAndSelect = () => {
   return (
     <Flex vertical gap={16}>
-      {(['small', 'middle', 'large'] as const).map((size) => (
+      {(['small', 'medium', 'large'] as const).map((size) => (
         <Flex key={size}>
           <Select
             value="centered"
             size={size}
             style={{ width: 200 }}
-            searchValue="centered"
-            showSearch
+            showSearch={{ searchValue: 'centered' }}
           />
           <AutoComplete value="centered" size={size} style={{ width: 200 }} />
         </Flex>
@@ -464,12 +562,12 @@ export default AutoCompleteAndSelect;
 
 ```tsx
 import React from 'react';
-import { AutoComplete, Space, Switch } from 'antd';
+import { AutoComplete, Flex, Switch } from 'antd';
 const { _InternalPanelDoNotUseOrYouWillBeFired: InternalAutoComplete } = AutoComplete;
 const App: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   return (
-    <Space direction="vertical" style={{ display: 'flex' }}>
+    <Flex vertical align="start" gap="small">
       <Switch checked={open} onChange={() => setOpen(!open)} />
       <InternalAutoComplete
         defaultValue="lucy"
@@ -482,7 +580,7 @@ const App: React.FC = () => {
           { label: 'Bamboo', value: 'bamboo' },
         ]}
       />
-    </Space>
+    </Flex>
   );
 };
 export default App;

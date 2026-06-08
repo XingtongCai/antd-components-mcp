@@ -1,29 +1,12 @@
 ## 何时使用
 用于在输入中提及某人或某事，常用于发布、聊天或评论功能。
-### 用法升级 <Badge>5.1.0+</Badge>
-<!-- prettier-ignore -->
-:::warning{title="升级提示"}
-在 5.1.0 版本后，我们提供了 `<Mentions options={[...]} />` 的简写方式，有更好的性能和更方便的数据组织方式，开发者不再需要自行拼接 JSX。
-同时我们废弃了原先的写法，你还是可以在 5.x 继续使用，但会在控制台看到警告，并会在 6.0 后移除。
-:::
-```jsx
-// >=5.1.0 可用，推荐的写法 ✅
-const options = [{ value: 'sample', label: 'sample' }];
-return <Mentions options={options} />;
-// <5.1.0 可用，>=5.1.0 时不推荐 🙅🏻‍♀️
-return (
-  <Mentions onChange={onChange}>
-    <Mentions.Option value="sample">Sample</Mentions.Option>
-  </Mentions>
-);
-```
 ## API
 ### Mentions
 | 参数 | 说明 | 类型 | 默认值 | 版本 |
 | --- | --- | --- | --- | --- |
-| allowClear | 可以点击清除图标删除内容 | boolean \| { clearIcon?: ReactNode } | false | 5.13.0 |
-| autoFocus | 自动获得焦点 | boolean | false |  |
+| allowClear | 可以点击清除图标删除内容 | boolean \| { clearIcon?: ReactNode, disabled?: boolean } | false | 5.13.0, disabled: 6.4.0 |
 | autoSize | 自适应内容高度，可设置为 true \| false 或对象：{ minRows: 2, maxRows: 6 } | boolean \| object | false |  |
+| classNames | 用于自定义组件内部各语义化结构的 class，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - |  |
 | defaultValue | 默认值 | string | - |  |
 | filterOption | 自定义过滤逻辑 | false \| (input: string, option: OptionProps) => boolean | - |  |
 | getPopupContainer | 指定建议框挂载的 HTML 节点 | () => HTMLElement | - |  |
@@ -31,6 +14,7 @@ return (
 | placement | 弹出层展示位置 | `top` \| `bottom` | `bottom` |  |
 | prefix | 设置触发关键字 | string \| string\[] | `@` |  |
 | split | 设置选中项前后分隔符 | string | ` ` |  |
+| size | 控件大小 | `large` \| `medium` \| `small` | - |  |
 | status | 设置校验状态 | 'error' \| 'warning' | - | 4.19.0 |
 | validateSearch | 自定义触发验证逻辑 | (text: string, props: MentionsProps) => void | - |  |
 | value | 设置值 | string | - |  |
@@ -44,6 +28,7 @@ return (
 | onSelect | 选择选项时触发 | (option: OptionProps, prefix: string) => void | - |  |
 | onPopupScroll | 滚动时触发 | (event: Event) => void | - | 5.23.0 |
 | options | 选项配置 | [Options](#option) | [] | 5.1.0 |
+| styles | 用于自定义组件内部各语义化结构的行内 style，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - |  |
 ### Mentions 方法
 | 名称    | 描述     |
 | ------- | -------- |

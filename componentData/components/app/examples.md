@@ -6,7 +6,7 @@
 import React from 'react';
 import { App, Button, Space } from 'antd';
 // Sub page
-const MyPage = () => {
+const Page: React.FC = () => {
   const { message, modal, notification } = App.useApp();
   const showMessage = () => {
     message.success('Success!');
@@ -19,7 +19,7 @@ const MyPage = () => {
   };
   const showNotification = () => {
     notification.info({
-      message: 'Notification topLeft',
+      title: 'Notification topLeft',
       description: 'Hello, Ant Design!!',
       placement: 'topLeft',
     });
@@ -41,7 +41,7 @@ const MyPage = () => {
 // Entry component
 export default () => (
   <App>
-    <MyPage />
+    <Page />
   </App>
 );
 ```
@@ -52,14 +52,14 @@ export default () => (
 import React from 'react';
 import { App, Button, Space } from 'antd';
 // Sub page
-const MyPage = () => {
+const Page: React.FC = () => {
   const { message, notification } = App.useApp();
   const showMessage = () => {
     message.success('Success!');
   };
   const showNotification = () => {
     notification.info({
-      message: 'Notification',
+      title: 'Notification',
       description: 'Hello, Ant Design!!',
     });
   };
@@ -77,7 +77,7 @@ const MyPage = () => {
 // Entry component
 export default () => (
   <App message={{ maxCount: 1 }} notification={{ placement: 'bottomLeft' }}>
-    <MyPage />
+    <Page />
   </App>
 );
 ```
