@@ -7,7 +7,7 @@ import React from 'react';
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical" size={16}>
+  <Space vertical size={16}>
     <Space wrap size={16}>
       <Avatar size={64} icon={<UserOutlined />} />
       <Avatar size="large" icon={<UserOutlined />} />
@@ -40,7 +40,7 @@ const App: React.FC = () => (
     <Avatar>U</Avatar>
     <Avatar size={40}>USER</Avatar>
     <Avatar src={url} />
-    <Avatar src={<img src={url} alt="avatar" />} />
+    <Avatar src={<img draggable={false} src={url} alt="avatar" />} />
     <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }}>U</Avatar>
     <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
   </Space>
@@ -118,7 +118,7 @@ import { Avatar, Divider, Tooltip } from 'antd';
 const App: React.FC = () => (
   <>
     <Avatar.Group>
-      <Avatar src="https://api.dicebear.com/7.x/miniavs/svg?seed=1" />
+      <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=1" />
       <a href="https://ant.design">
         <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
       </a>
@@ -134,7 +134,7 @@ const App: React.FC = () => (
         style: { color: '#f56a00', backgroundColor: '#fde3cf' },
       }}
     >
-      <Avatar src="https://api.dicebear.com/7.x/miniavs/svg?seed=2" />
+      <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=2" />
       <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
       <Tooltip title="Ant User" placement="top">
         <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
@@ -149,7 +149,7 @@ const App: React.FC = () => (
         style: { color: '#f56a00', backgroundColor: '#fde3cf' },
       }}
     >
-      <Avatar src="https://api.dicebear.com/7.x/miniavs/svg?seed=3" />
+      <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=3" />
       <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
       <Tooltip title="Ant User" placement="top">
         <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
@@ -189,7 +189,7 @@ export default App;
 ```tsx
 import React, { useState } from 'react';
 import { Avatar, Button, Space } from 'antd';
-type SizeType = 'large' | 'small' | 'default' | number;
+type SizeType = 'large' | 'small' | 'medium' | number;
 const App: React.FC = () => {
   const [hide, setHide] = useState(true);
   const [size, setSize] = useState<SizeType>('large');
@@ -198,7 +198,7 @@ const App: React.FC = () => {
     setHide(!hide);
   };
   const toggleSize = () => {
-    const sizes = ['small', 'default', 'large'] as SizeType[];
+    const sizes = ['small', 'medium', 'large'] as SizeType[];
     let current = sizes.indexOf(size) + 1;
     if (current > 2) {
       current = 0;
@@ -288,9 +288,12 @@ const App: React.FC = () => (
           containerSize: 60,
           containerSizeLG: 30,
           containerSizeSM: 16,
-          textFontSize: 18,
-          textFontSizeLG: 28,
-          textFontSizeSM: 12,
+          textFontSize: 14,
+          textFontSizeLG: 14,
+          textFontSizeSM: 14,
+          iconFontSize: 18,
+          iconFontSizeLG: 28,
+          iconFontSizeSM: 12,
           borderRadius: 10,
           groupOverlapping: -10,
           groupBorderColor: '#eee',
@@ -310,7 +313,7 @@ const App: React.FC = () => (
           style: { color: '#f56a00', backgroundColor: '#fde3cf' },
         }}
       >
-        <Avatar src="https://api.dicebear.com/7.x/miniavs/svg?seed=2" />
+        <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=2" />
         <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
         <Tooltip title="Ant User" placement="top">
           <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />

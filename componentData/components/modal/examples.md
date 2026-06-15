@@ -144,6 +144,49 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 遮罩
+遮罩效果。
+
+```tsx
+import React from 'react';
+import { Button, Modal, Space } from 'antd';
+const modalConfig = {
+  title: 'Title',
+  content: 'Some contents...',
+};
+const App: React.FC = () => {
+  const [modal, contextHolder] = Modal.useModal();
+  return (
+    <>
+      <Space>
+        <Button
+          onClick={() => {
+            modal.confirm({ ...modalConfig, mask: { blur: true } });
+          }}
+        >
+          blur
+        </Button>
+        <Button
+          onClick={() => {
+            modal.confirm(modalConfig);
+          }}
+        >
+          Dimmed mask
+        </Button>
+        <Button
+          onClick={() => {
+            modal.confirm({ ...modalConfig, mask: false });
+          }}
+        >
+          No mask
+        </Button>
+      </Space>
+      {contextHolder}
+    </>
+  );
+};
+export default App;
+```
 ### 加载中
 设置对话框加载状态。
 
@@ -452,8 +495,8 @@ const App: React.FC = () => {
 };
 export default App;
 ```
-### 暗背景
-第一个对话框。
+### 调试使用
+调试使用。
 
 ```tsx
 import React, { useState } from 'react';
@@ -485,7 +528,6 @@ import difference from 'lodash/difference';
 dayjs.extend(customParseFormat);
 const { Panel } = Collapse;
 const { TreeNode } = Tree;
-const { TabPane } = Tabs;
 const { Meta } = Card;
 const { Link } = Anchor;
 const { Text } = Typography;
@@ -618,8 +660,8 @@ const nestDataSource = Array.from({ length: 3 }).map<NestDataType>((_, i) => ({
   createdAt: '2014-12-24 23:12:00',
 }));
 const columnsFixed: TableProps<FixedDataType>['columns'] = [
-  { title: 'Full Name', width: 100, dataIndex: 'name', key: 'name', fixed: 'left' },
-  { title: 'Age', width: 100, dataIndex: 'age', key: 'age', fixed: 'left' },
+  { title: 'Full Name', width: 100, dataIndex: 'name', key: 'name', fixed: 'start' },
+  { title: 'Age', width: 100, dataIndex: 'age', key: 'age', fixed: 'start' },
   { title: 'Column 1', dataIndex: 'address', key: '1' },
   { title: 'Column 2', dataIndex: 'address', key: '2' },
   { title: 'Column 3', dataIndex: 'address', key: '3' },
@@ -628,7 +670,7 @@ const columnsFixed: TableProps<FixedDataType>['columns'] = [
   { title: 'Column 6', dataIndex: 'address', key: '6' },
   { title: 'Column 7', dataIndex: 'address', key: '7' },
   { title: 'Column 8', dataIndex: 'address', key: '8' },
-  { title: 'Action', key: 'operation', fixed: 'right', width: 100, render: () => <a>action</a> },
+  { title: 'Action', key: 'operation', fixed: 'end', width: 100, render: () => <a>action</a> },
 ];
 const fixedDataSource: FixedDataType[] = [
   { key: '1', name: 'John Brown', age: 32, address: 'New York Park' },
@@ -653,14 +695,15 @@ const TableTransfer: React.FC<
         const columns = (direction === 'left' ? leftColumns : rightColumns) ?? [];
         const rowSelection: TableProps<DataType>['rowSelection'] = {
           getCheckboxProps: (item) => ({ disabled: listDisabled || item.disabled }),
-          onSelectAll(selected, selectedRows) {
+          onChange(_selectedKeys, selectedRows, info) {
             const treeSelectedKeys = selectedRows
               .filter((item) => !item.disabled)
               .map(({ key }) => key);
-            const diffKeys = selected
-              ? difference(treeSelectedKeys, listSelectedKeys)
-              : difference(listSelectedKeys, treeSelectedKeys);
-            onItemSelectAll(diffKeys, selected);
+            const diffKeys =
+              info.type === 'all'
+                ? difference(treeSelectedKeys, listSelectedKeys)
+                : difference(listSelectedKeys, treeSelectedKeys);
+            onItemSelectAll(diffKeys, info.type === 'all');
           },
           onSelect({ key }, selected) {
             onItemSelect(key, selected);
@@ -761,12 +804,10 @@ const Demo: React.FC = () => {
   const showModal = () => {
     setOpen(true);
   };
-  const handleOk = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    console.log(e);
+  const handleOk = () => {
     setOpen(false);
   };
-  const handleCancel = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    console.log(e);
+  const handleCancel = () => {
     setOpen(false);
   };
   return (
@@ -851,17 +892,14 @@ const Demo: React.FC = () => {
             <Link href="#Link-Props" title="Link Props" />
           </Link>
         </Anchor>
-        <Tabs type="card">
-          <TabPane tab="Tab 1" key="1">
-            Content of Tab Pane 1
-          </TabPane>
-          <TabPane tab="Tab 2" key="2">
-            Content of Tab Pane 2
-          </TabPane>
-          <TabPane tab="Tab 3" key="3">
-            Content of Tab Pane 3
-          </TabPane>
-        </Tabs>
+        <Tabs
+          type="card"
+          items={[
+            { key: '1', label: 'Tab 1', children: 'Content of Tab Pane 1' },
+            { key: '2', label: 'Tab 2', children: 'Content of Tab Pane 2' },
+            { key: '3', label: 'Tab 3', children: 'Content of Tab Pane 3' },
+          ]}
+        />
         <Timeline>
           <Timeline.Item>Create a services site 2015-09-01</Timeline.Item>
           <Timeline.Item>Solve initial network problems 2015-09-01</Timeline.Item>
@@ -968,12 +1006,10 @@ const App: React.FC = () => {
   const showModal = () => {
     setOpen(true);
   };
-  const handleOk = (e: React.MouseEvent<HTMLElement>) => {
-    console.log(e);
+  const handleOk = () => {
     setOpen(false);
   };
-  const handleCancel = (e: React.MouseEvent<HTMLElement>) => {
-    console.log(e);
+  const handleCancel = () => {
     setOpen(false);
   };
   return (
@@ -1014,12 +1050,10 @@ const App: React.FC = () => {
   const showModal = () => {
     setOpen(true);
   };
-  const handleOk = (e: React.MouseEvent<HTMLElement>) => {
-    console.log(e);
+  const handleOk = () => {
     setOpen(false);
   };
-  const handleCancel = (e: React.MouseEvent<HTMLElement>) => {
-    console.log(e);
+  const handleCancel = () => {
     setOpen(false);
   };
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
@@ -1094,7 +1128,7 @@ const App: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [openResponsive, setOpenResponsive] = useState(false);
   return (
-    <Flex vertical gap="middle" align="flex-start">
+    <Flex vertical gap="medium" align="flex-start">
       {/* Basic */}
       <Button type="primary" onClick={() => setOpen(true)}>
         Open Modal of 1000px width
@@ -1140,7 +1174,7 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 静态方法
-在绝大多数场景，都不需要静态方法。它无法消费 context，例如无法响应动态主题。请优先使用 hooks 版本或者 `App` 组件提供的 Modal 实例。
+静态方法无法消费 Context，不能动态响应 ConfigProvider 提供的各项配置，启用 `layer` 时还可能导致样式异常。请优先使用 hooks 版本或者 App 组件提供的 `modal` 实例。
 
 ```tsx
 import React from 'react';
@@ -1267,114 +1301,6 @@ const App: React.FC = () => (
 );
 export default App;
 ```
-### 自定义内部模块 className
-通过 `classNames` 属性设置弹窗内部区域（header、body、footer、mask、wrapper）的 `className`。
-
-```tsx
-import React, { useState } from 'react';
-import { Button, ConfigProvider, Modal, Space } from 'antd';
-import { createStyles, useTheme } from 'antd-style';
-const useStyle = createStyles(({ token }) => ({
-  'my-modal-body': {
-    background: token.blue1,
-    padding: token.paddingSM,
-  },
-  'my-modal-mask': {
-    boxShadow: `inset 0 0 15px #fff`,
-  },
-  'my-modal-header': {
-    borderBottom: `1px dotted ${token.colorPrimary}`,
-  },
-  'my-modal-footer': {
-    color: token.colorPrimary,
-  },
-  'my-modal-content': {
-    border: '1px solid #333',
-  },
-}));
-const App: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState([false, false]);
-  const { styles } = useStyle();
-  const token = useTheme();
-  const toggleModal = (idx: number, target: boolean) => {
-    setIsModalOpen((p) => {
-      p[idx] = target;
-      return [...p];
-    });
-  };
-  const classNames = {
-    body: styles['my-modal-body'],
-    mask: styles['my-modal-mask'],
-    header: styles['my-modal-header'],
-    footer: styles['my-modal-footer'],
-    content: styles['my-modal-content'],
-  };
-  const modalStyles = {
-    header: {
-      borderLeft: `5px solid ${token.colorPrimary}`,
-      borderRadius: 0,
-      paddingInlineStart: 5,
-    },
-    body: {
-      boxShadow: 'inset 0 0 5px #999',
-      borderRadius: 5,
-    },
-    mask: {
-      backdropFilter: 'blur(10px)',
-    },
-    footer: {
-      borderTop: '1px solid #333',
-    },
-    content: {
-      boxShadow: '0 0 30px #999',
-    },
-  };
-  return (
-    <>
-      <Space>
-        <Button type="primary" onClick={() => toggleModal(0, true)}>
-          Open Modal
-        </Button>
-        <Button type="primary" onClick={() => toggleModal(1, true)}>
-          ConfigProvider
-        </Button>
-      </Space>
-      <Modal
-        title="Basic Modal"
-        open={isModalOpen[0]}
-        onOk={() => toggleModal(0, false)}
-        onCancel={() => toggleModal(0, false)}
-        footer="Footer"
-        classNames={classNames}
-        styles={modalStyles}
-      >
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-      </Modal>
-      <ConfigProvider
-        modal={{
-          classNames,
-          styles: modalStyles,
-        }}
-      >
-        <Modal
-          title="Basic Modal"
-          open={isModalOpen[1]}
-          onOk={() => toggleModal(1, false)}
-          onCancel={() => toggleModal(1, false)}
-          footer="Footer"
-        >
-          <p>Some contents...</p>
-          <p>Some contents...</p>
-          <p>Some contents...</p>
-        </Modal>
-      </ConfigProvider>
-    </>
-  );
-};
-export default App;
-```
 ### 销毁确认对话框
 使用 `Modal.destroyAll()` 可以销毁弹出的确认窗。通常用于路由监听当中，处理路由前进、后退不能销毁确认对话框的问题。
 
@@ -1403,6 +1329,123 @@ const showConfirm = () => {
   }
 };
 const App: React.FC = () => <Button onClick={showConfirm}>Confirm</Button>;
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象或者函数可以自定义 Modal 组件的 [语义化结构](#semantic-dom) 样式。
+
+```tsx
+import React, { useState } from 'react';
+import { Button, Flex, Modal } from 'antd';
+import type { GetProp, ModalProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const lineStyle: React.CSSProperties = {
+  lineHeight: '28px',
+};
+const sharedContent = (
+  <>
+    <div style={lineStyle}>
+      Following the Ant Design specification, we developed a React UI library antd that contains a
+      set of high quality components and demos for building rich, interactive user interfaces.
+    </div>
+    <div style={lineStyle}>🌈 Enterprise-class UI designed for web applications.</div>
+    <div style={lineStyle}>📦 A set of high-quality React components out of the box.</div>
+    <div style={lineStyle}>🛡 Written in TypeScript with predictable static types.</div>
+    <div style={lineStyle}>⚙️ Whole package of design resources and development tools.</div>
+    <div style={lineStyle}>🌍 Internationalization support for dozens of languages.</div>
+    <div style={lineStyle}>🎨 Powerful theme customization in every detail.</div>
+  </>
+);
+const classNames = createStaticStyles(({ css }) => ({
+  container: css`
+    border-radius: 10px;
+    padding: 10px;
+  `,
+}));
+const styles: ModalProps['styles'] = {
+  mask: {
+    backgroundImage: `linear-gradient(to top, #18181b 0, rgba(21, 21, 22, 0.2) 100%)`,
+  },
+};
+const stylesFn: ModalProps['styles'] = (info): GetProp<ModalProps, 'styles', 'Return'> => {
+  if (info.props.footer) {
+    return {
+      container: {
+        borderRadius: 14,
+        border: '1px solid #ccc',
+        padding: 0,
+        overflow: 'hidden',
+      },
+      header: {
+        padding: 16,
+      },
+      body: {
+        padding: 16,
+      },
+      footer: {
+        padding: '16px 10px',
+        backgroundColor: '#fafafa',
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalFnOpen, setModalFnOpen] = useState(false);
+  const sharedProps: ModalProps = {
+    centered: true,
+    classNames,
+  };
+  const footer: React.ReactNode = (
+    <>
+      <Button
+        onClick={() => setModalFnOpen(false)}
+        styles={{ root: { borderColor: '#ccc', color: '#171717', backgroundColor: '#fff' } }}
+      >
+        Cancel
+      </Button>
+      <Button
+        type="primary"
+        styles={{ root: { backgroundColor: '#171717' } }}
+        onClick={() => setModalOpen(true)}
+      >
+        Submit
+      </Button>
+    </>
+  );
+  return (
+    <Flex gap="medium">
+      <Button onClick={() => setModalOpen(true)}>Open Style Modal</Button>
+      <Button type="primary" onClick={() => setModalFnOpen(true)}>
+        Open Function Modal
+      </Button>
+      <Modal
+        {...sharedProps}
+        footer={null}
+        title="Custom Style Modal"
+        styles={styles}
+        open={modalOpen}
+        onOk={() => setModalOpen(false)}
+        onCancel={() => setModalOpen(false)}
+      >
+        {sharedContent}
+      </Modal>
+      <Modal
+        {...sharedProps}
+        footer={footer}
+        title="Custom Function Modal"
+        styles={stylesFn}
+        mask={{ enabled: true, blur: true }}
+        open={modalFnOpen}
+        onOk={() => setModalFnOpen(false)}
+        onCancel={() => setModalFnOpen(false)}
+      >
+        {sharedContent}
+      </Modal>
+    </Flex>
+  );
+};
 export default App;
 ```
 ### 嵌套弹框
@@ -1445,10 +1488,10 @@ const Demo: React.FC = () => {
         footer={null}
         destroyOnHidden
         onCancel={() => setIsModalOpen(false)}
-        maskClosable={false}
+        mask={{ closable: false }}
         closable={false}
         styles={{
-          content: {
+          container: {
             marginBlockStart: 100,
           },
         }}
@@ -1464,7 +1507,7 @@ const Demo: React.FC = () => {
           maskClosable={false}
           closable={false}
           styles={{
-            content: {
+            container: {
               marginBlockStart: 250,
             },
             body: {
@@ -1484,7 +1527,7 @@ const Demo: React.FC = () => {
             onCancel={() => setIsModalOpen(false)}
             closable={false}
             styles={{
-              content: {
+              container: {
                 marginBlockStart: 400,
               },
               body: {
@@ -1508,7 +1551,7 @@ const Demo: React.FC = () => {
                 onClick={() => {
                   message.success('Hello World');
                   notification.success({
-                    message: 'Hello World',
+                    title: 'Hello World',
                   });
                 }}
               >
@@ -1518,7 +1561,7 @@ const Demo: React.FC = () => {
                 onClick={() => {
                   messageInstance.success('Hello World');
                   notificationInstance.success({
-                    message: 'Hello World',
+                    title: 'Hello World',
                   });
                 }}
               >
@@ -1546,7 +1589,7 @@ import type { ModalFuncProps } from 'antd';
 /** Test usage. Do not use in your production. */
 const { _InternalPanelDoNotUseOrYouWillBeFired: InternalPanel } = Modal;
 const customFooterFn: ModalFuncProps['footer'] = (originNode, { OkBtn, CancelBtn }) => (
-  <Space direction="vertical">
+  <Space vertical>
     <Space>{originNode}</Space>
     <Space>
       <CancelBtn />
