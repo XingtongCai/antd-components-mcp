@@ -9,31 +9,33 @@
 // dayjs.locale('zh-cn');
 <Calendar cellRender={cellRender} onPanelChange={onPanelChange} onSelect={onSelect} />
 ```
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| --- | --- | --- | --- | --- |
-| cellRender | 自定义单元格的内容 | function(current: dayjs, info: { prefixCls: string, originNode: React.ReactElement, today: dayjs, range?: 'start' \| 'end', type: PanelMode, locale?: Locale, subType?: 'hour' \| 'minute' \| 'second' \| 'meridiem' }) => React.ReactNode | - | 5.4.0 |
-| dateFullCellRender | 自定义渲染日期单元格，返回内容覆盖单元格，>= 5.4.0 请用 `fullCellRender` | function(date: Dayjs): ReactNode | - | < 5.4.0 |
-| fullCellRender | 自定义单元格的内容 | function(current: dayjs, info: { prefixCls: string, originNode: React.ReactElement, today: dayjs, range?: 'start' \| 'end', type: PanelMode, locale?: Locale, subType?: 'hour' \| 'minute' \| 'second' \| 'meridiem' }) => React.ReactNode | - | 5.4.0 |
-| defaultValue | 默认展示的日期 | [dayjs](https://day.js.org/) | - |  |
-| disabledDate | 不可选择的日期，参数为当前 `value`，注意使用时[不要直接修改](https://github.com/ant-design/ant-design/issues/30987) | (currentDate: Dayjs) => boolean | - |  |
-| fullscreen | 是否全屏显示 | boolean | true |  |
-| showWeek | 是否显示周数列 | boolean | false | 5.23.0 |
-| headerRender | 自定义头部内容 | function(object:{value: Dayjs, type: 'year' \| 'month', onChange: f(), onTypeChange: f()}) | - |  |
-| locale | 国际化配置 | object | [(默认配置)](https://github.com/ant-design/ant-design/blob/master/components/date-picker/locale/example.json) |  |
-| mode | 初始模式 | `month` \| `year` | `month` |  |
-| validRange | 设置可以显示的日期 | \[[dayjs](https://day.js.org/), [dayjs](https://day.js.org/)] | - |  |
-| value | 展示日期 | [dayjs](https://day.js.org/) | - |  |
-| onChange | 日期变化回调 | function(date: Dayjs) | - |  |
-| onPanelChange | 日期面板变化回调 | function(date: Dayjs, mode: string) | - |  |
-| onSelect | 选择日期回调，包含来源信息 | function(date: Dayjs, info: { source: 'year' \| 'month' \| 'date' \| 'customize' }) | - | `info`: 5.6.0 |
+| 参数 | 说明 | 类型 | 默认值 | 版本 | [全局配置](/components/config-provider-cn#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| cellRender | 自定义单元格的内容 | function(current: dayjs, info: { prefixCls: string, originNode: React.ReactElement, today: dayjs, range?: 'start' \| 'end', type: PanelMode, locale?: Locale, subType?: 'hour' \| 'minute' \| 'second' \| 'meridiem' }) => React.ReactNode | - | 5.4.0 | × |
+| classNames | 用于自定义组件内部各语义化结构的 class，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - |  | 6.0.0 |
+| ~~dateFullCellRender~~ | 自定义渲染日期单元格，返回内容覆盖单元格，>= 5.4.0 请用 `fullCellRender` | function(date: Dayjs): ReactNode | - | < 5.4.0 | × |
+| fullCellRender | 自定义单元格的内容 | function(current: dayjs, info: { prefixCls: string, originNode: React.ReactElement, today: dayjs, range?: 'start' \| 'end', type: PanelMode, locale?: Locale, subType?: 'hour' \| 'minute' \| 'second' \| 'meridiem' }) => React.ReactNode | - | 5.4.0 | × |
+| defaultValue | 默认展示的日期 | [dayjs](https://day.js.org/) | - |  | × |
+| disabledDate | 不可选择的日期，参数为当前 `value`，注意使用时[不要直接修改](https://github.com/ant-design/ant-design/issues/30987) | (currentDate: Dayjs) => boolean | - |  | × |
+| fullscreen | 是否全屏显示 | boolean | true |  | × |
+| showWeek | 是否显示周数列 | boolean | false | 5.23.0 | × |
+| styles | 用于自定义组件内部各语义化结构的行内 style，支持对象或函数 | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - |  | 6.0.0 |
+| headerRender | 自定义头部内容 | function(object:{value: Dayjs, type: 'year' \| 'month', onChange: f(), onTypeChange: f()}) | - |  | × |
+| locale | 国际化配置 | object | [(默认配置)](https://github.com/ant-design/ant-design/blob/master/components/date-picker/locale/example.json) |  | × |
+| mode | 初始模式 | `month` \| `year` | `month` |  | × |
+| validRange | 设置可以显示的日期 | \[[dayjs](https://day.js.org/), [dayjs](https://day.js.org/)] | - |  | × |
+| value | 展示日期 | [dayjs](https://day.js.org/) | - |  | × |
+| onChange | 日期变化回调 | function(date: Dayjs) | - |  | × |
+| onPanelChange | 日期面板变化回调 | function(date: Dayjs, mode: string) | - |  | × |
+| onSelect | 选择日期回调，包含来源信息 | function(date: Dayjs, info: { source: 'year' \| 'month' \| 'date' \| 'customize' }) | - | `info`: 5.6.0 | × |
 ## FAQ
-### 如何在 Calendar 中使用自定义日期库
+### 如何在 Calendar 中使用自定义日期库 {#faq-customize-date-library}
 参考 [使用自定义日期库](/docs/react/use-custom-date-library#calendar)。
-### 如何给日期类组件配置国际化？
+### 如何给日期类组件配置国际化？ {#faq-set-locale-date-components}
 参考 [如何给日期类组件配置国际化](/components/date-picker-cn#%E5%9B%BD%E9%99%85%E5%8C%96%E9%85%8D%E7%BD%AE)。
-### 为什么时间类组件的国际化 locale 设置不生效？
+### 为什么时间类组件的国际化 locale 设置不生效？ {#faq-locale-not-working}
 参考 FAQ [为什么时间类组件的国际化 locale 设置不生效？](/docs/react/faq#为什么时间类组件的国际化-locale-设置不生效)。
-### 如何仅获取来自面板点击的日期？
+### 如何仅获取来自面板点击的日期？ {#faq-get-date-panel-click}
 `onSelect` 事件提供额外的来源信息，你可以通过 `info.source` 来判断来源：
 ```tsx
 <Calendar
