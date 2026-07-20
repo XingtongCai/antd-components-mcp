@@ -147,11 +147,10 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import type { RadioChangeEvent } from 'antd';
+import type { RadioChangeEvent, TabsProps } from 'antd';
 import { Radio, Tabs } from 'antd';
-type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 const App: React.FC = () => {
-  const [mode, setMode] = useState<TabPosition>('top');
+  const [mode, setMode] = useState<TabsProps['tabPlacement']>('top');
   const handleModeChange = (e: RadioChangeEvent) => {
     setMode(e.target.value);
   };
@@ -163,7 +162,7 @@ const App: React.FC = () => {
       </Radio.Group>
       <Tabs
         defaultActiveKey="1"
-        tabPosition={mode}
+        tabPlacement={mode}
         style={{ height: 220 }}
         items={Array.from({ length: 30 }, (_, i) => {
           const id = String(i);
@@ -188,12 +187,13 @@ import React, { useMemo, useState } from 'react';
 import { Button, Checkbox, Divider, Tabs } from 'antd';
 const CheckboxGroup = Checkbox.Group;
 const operations = <Button>Extra Action</Button>;
-const OperationsSlot: Record<PositionType, React.ReactNode> = {
-  left: <Button className="tabs-extra-demo-button">Left Extra Action</Button>,
-  right: <Button>Right Extra Action</Button>,
+const operationsSlot: Record<PositionType, React.ReactNode> = {
+  left: <Button style={{ marginInlineEnd: 16 }}>Left Extra Action</Button>,
+  right: <Button style={{ marginInlineStart: 16 }}>Right Extra Action</Button>,
 };
 const options = ['left', 'right'];
 type PositionType = 'left' | 'right';
+type TabBarExtraMap = Partial<Record<PositionType, React.ReactNode>>;
 const items = Array.from({ length: 3 }).map((_, i) => {
   const id = String(i + 1);
   return {
@@ -208,8 +208,8 @@ const App: React.FC = () => {
     if (position.length === 0) {
       return null;
     }
-    return position.reduce(
-      (acc, direction) => ({ ...acc, [direction]: OperationsSlot[direction] }),
+    return position.reduce<TabBarExtraMap>(
+      (acc, direction) => ({ ...acc, [direction]: operationsSlot[direction] }),
       {},
     );
   }, [position]);
@@ -221,13 +221,7 @@ const App: React.FC = () => {
       <br />
       <div>You can also specify its direction or both side</div>
       <Divider />
-      <CheckboxGroup
-        options={options}
-        value={position}
-        onChange={(value) => {
-          setPosition(value as PositionType[]);
-        }}
-      />
+      <CheckboxGroup<PositionType> options={options} value={position} onChange={setPosition} />
       <br />
       <br />
       <Tabs tabBarExtraContent={slot} items={items} />
@@ -240,12 +234,12 @@ export default App;
 大号页签用在页头区域，小号用在弹出框等较狭窄的容器内。
 
 ```tsx
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { RadioChangeEvent, TabsProps } from 'antd';
 import { Radio, Tabs } from 'antd';
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const App: React.FC = () => {
-  const [size, setSize] = useState<'small' | 'middle' | 'large'>('small');
+  const [size, setSize] = useState<'small' | 'medium' | 'large'>('small');
   const [activeKey, setActiveKey] = useState('1');
   const [items, setItems] = useState<TabsProps['items']>([
     {
@@ -264,20 +258,23 @@ const App: React.FC = () => {
       children: 'Content of editable tab 3',
     },
   ]);
+  const newTabIndex = useRef(0);
   const add = () => {
-    const newKey = String((items || []).length + 1);
+    const newActiveKey = `newTab${newTabIndex.current++}`;
     setItems([
       ...(items || []),
       {
-        label: `Tab ${newKey}`,
-        key: newKey,
-        children: `Content of editable tab ${newKey}`,
+        label: 'New Tab',
+        key: newActiveKey,
+        children: 'Content of new Tab',
       },
     ]);
-    setActiveKey(newKey);
+    setActiveKey(newActiveKey);
   };
   const remove = (targetKey: TargetKey) => {
-    if (!items) return;
+    if (!items) {
+      return;
+    }
     const targetIndex = items.findIndex((item) => item.key === targetKey);
     const newItems = items.filter((item) => item.key !== targetKey);
     if (newItems.length && targetKey === activeKey) {
@@ -301,7 +298,7 @@ const App: React.FC = () => {
     <div>
       <Radio.Group value={size} onChange={onChange} style={{ marginBottom: 16 }}>
         <Radio.Button value="small">Small</Radio.Button>
-        <Radio.Button value="middle">Middle</Radio.Button>
+        <Radio.Button value="medium">Medium</Radio.Button>
         <Radio.Button value="large">Large</Radio.Button>
       </Radio.Group>
       <Tabs
@@ -345,31 +342,30 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 位置
-有四个位置，`tabPosition="left|right|top|bottom"`。在移动端下，`left|right` 会自动切换成 `top`。
+有四个位置，`tabPlacement="start|end|top|bottom"`。在移动端下，`start|end` 会自动切换成 `top`。
 
 ```tsx
 import React, { useState } from 'react';
-import type { RadioChangeEvent } from 'antd';
+import type { RadioChangeEvent, TabsProps } from 'antd';
 import { Radio, Space, Tabs } from 'antd';
-type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 const App: React.FC = () => {
-  const [tabPosition, setTabPosition] = useState<TabPosition>('left');
-  const changeTabPosition = (e: RadioChangeEvent) => {
-    setTabPosition(e.target.value);
+  const [tabPlacement, setTabPlacement] = useState<TabsProps['tabPlacement']>('start');
+  const changeTabPlacement = (e: RadioChangeEvent) => {
+    setTabPlacement(e.target.value);
   };
   return (
     <>
       <Space style={{ marginBottom: 24 }}>
-        Tab position:
-        <Radio.Group value={tabPosition} onChange={changeTabPosition}>
+        Tab placement:
+        <Radio.Group value={tabPlacement} onChange={changeTabPlacement}>
           <Radio.Button value="top">top</Radio.Button>
           <Radio.Button value="bottom">bottom</Radio.Button>
-          <Radio.Button value="left">left</Radio.Button>
-          <Radio.Button value="right">right</Radio.Button>
+          <Radio.Button value="start">start</Radio.Button>
+          <Radio.Button value="end">end</Radio.Button>
         </Radio.Group>
       </Space>
       <Tabs
-        tabPosition={tabPosition}
+        tabPlacement={tabPlacement}
         items={Array.from({ length: 3 }).map((_, i) => {
           const id = String(i + 1);
           return {
@@ -488,13 +484,14 @@ export default App;
 import React from 'react';
 import { Tabs } from 'antd';
 import { createStyles } from 'antd-style';
-const useStyle = createStyles(({ token, css }) => {
-  const antdTabsCls = '.ant-tabs';
+const useStyle = createStyles((props) => {
+  const { cssVar, prefixCls, css } = props;
+  const antdTabsCls = `.${prefixCls}-tabs`;
   return css`
     ${antdTabsCls}${antdTabsCls}-card {
-      ${antdTabsCls}-content {
-        padding: ${token.padding}px;
-        background: ${token.colorBgContainer};
+      ${antdTabsCls}-body {
+        padding: ${cssVar.padding};
+        background: ${cssVar.colorBgContainer};
       }
       ${antdTabsCls}-nav {
         margin: 0;
@@ -502,8 +499,8 @@ const useStyle = createStyles(({ token, css }) => {
           background: transparent;
           border-color: transparent;
           &-active {
-            border-color: ${token.colorBorderBg};
-            background: ${token.colorBgContainer};
+            border-color: ${cssVar.colorBorderBg};
+            background: ${cssVar.colorBgContainer};
           }
         }
         &::before {
@@ -640,20 +637,38 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles((props) => {
+  const { css, prefixCls } = props;
+  return {
+    root: css`
+      margin: 0;
+      &.${prefixCls}-tabs-editable {
+        .${prefixCls}-tabs-nav {
+          .${prefixCls}-tabs-tab {
+            /* set transition to none when type="editable-card" */
+            transition: none;
+          }
+        }
+      }
+    `,
+  };
+});
 interface DraggableTabPaneProps extends React.HTMLAttributes<HTMLDivElement> {
   'data-node-key': string;
 }
-const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = ({ className, ...props }) => {
+const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = (props) => {
+  const { className, ...rest } = props;
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: props['data-node-key'],
+    id: rest['data-node-key'],
   });
   const style: React.CSSProperties = {
-    ...props.style,
+    ...rest.style,
     transform: CSS.Translate.toString(transform),
     transition,
     cursor: 'move',
   };
-  return React.cloneElement(props.children as React.ReactElement<any>, {
+  return React.cloneElement(rest.children as React.ReactElement<any>, {
     ref: setNodeRef,
     style,
     ...attributes,
@@ -661,6 +676,7 @@ const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = ({ className
   });
 };
 const App: React.FC = () => {
+  const { styles } = useStyles();
   const [items, setItems] = useState<NonNullable<TabsProps['items']>>([
     { key: '1', label: 'Tab 1', children: 'Content of Tab Pane 1' },
     { key: '2', label: 'Tab 2', children: 'Content of Tab Pane 2' },
@@ -679,6 +695,7 @@ const App: React.FC = () => {
   return (
     <Tabs
       items={items}
+      rootClassName={styles.root}
       renderTabBar={(tabBarProps, DefaultTabBar) => (
         <DndContext sensors={[sensor]} onDragEnd={onDragEnd} collisionDetection={closestCenter}>
           <SortableContext items={items.map((i) => i.key)} strategy={horizontalListSortingStrategy}>
@@ -696,6 +713,71 @@ const App: React.FC = () => {
         </DndContext>
       )}
     />
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Tabs 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Tabs } from 'antd';
+import type { GetProp, TabsProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    border-width: 2px;
+    border-style: dashed;
+    padding: 16px;
+    margin-bottom: 10px;
+  `,
+}));
+const stylesObject: TabsProps['styles'] = {
+  root: { borderWidth: 2, borderStyle: 'dashed', padding: 16, marginBottom: 10 },
+  header: { backgroundColor: 'rgba(245,245,245,0.5)' },
+  item: { fontWeight: 'bold', color: '#1890ff', padding: `6px 10px` },
+  indicator: { backgroundColor: 'rgba(255,77,79, 0.3)', height: 4 },
+  body: { backgroundColor: 'rgba(230,247,255,0.8)' },
+  content: { padding: 16 },
+};
+const stylesFn: TabsProps['styles'] = (info): GetProp<TabsProps, 'styles', 'Return'> => {
+  if (info.props.type === 'card') {
+    return {
+      root: { backgroundColor: 'rgba(250,250,250, 0.8)', borderColor: '#d9d9d9' },
+      header: { textAlign: 'start' },
+    };
+  }
+  return {};
+};
+const items = [
+  {
+    key: '1',
+    label: 'Tab 1',
+    children: 'Content of Tab Pane 1',
+  },
+  {
+    key: '2',
+    label: 'Tab 2',
+    children: 'Content of Tab Pane 2',
+  },
+  {
+    key: '3',
+    label: 'Tab 3',
+    children: 'Content of Tab Pane 3',
+  },
+];
+const App: React.FC = () => {
+  const shareProps: TabsProps = {
+    items,
+    defaultActiveKey: '1',
+    classNames,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Tabs {...shareProps} styles={stylesObject} />
+      <Tabs tabPlacement="start" type="card" {...shareProps} styles={stylesFn} />
+    </Flex>
   );
 };
 export default App;
@@ -763,13 +845,12 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 嵌套
-默认选中第一项。
+调试专用
 
 ```tsx
 import React, { useState } from 'react';
 import { Select, Tabs } from 'antd';
-const { Option } = Select;
-const positionList = ['left', 'right', 'top', 'bottom'];
+const placementList = ['start', 'end', 'top', 'bottom'];
 const App: React.FC = () => {
   const [parentPos, setParentPos] = useState(undefined);
   const [childPos, setChildPos] = useState(undefined);
@@ -779,51 +860,45 @@ const App: React.FC = () => {
     <div>
       <Select
         style={{ width: 200 }}
-        onChange={(val) => {
-          setParentPos(val);
-        }}
-      >
-        {positionList.map((pos) => (
-          <Option key={pos} value={pos}>
-            Parent - {pos}
-          </Option>
-        ))}
-      </Select>
+        onChange={(val) => setParentPos(val)}
+        options={placementList.map((pos) => {
+          return {
+            value: pos,
+            label: `Parent - ${pos}`,
+          };
+        })}
+      />
       <Select
         style={{ width: 200 }}
-        onChange={(val) => {
-          setChildPos(val);
-        }}
-      >
-        {positionList.map((pos) => (
-          <Option key={pos} value={pos}>
-            Child - {pos}
-          </Option>
-        ))}
-      </Select>
+        onChange={(val) => setChildPos(val)}
+        options={placementList.map((pos) => {
+          return {
+            value: pos,
+            label: `Child - ${pos}`,
+          };
+        })}
+      />
       <Select
         style={{ width: 200 }}
-        onChange={(val) => {
-          setParentType(val);
-        }}
-      >
-        <Option value="line">Parent - line</Option>
-        <Option value="card">Parent - card</Option>
-        <Option value="editable-card">Parent - card edit</Option>
-      </Select>
+        onChange={(val) => setParentType(val)}
+        options={[
+          { value: 'line', label: 'Parent - line' },
+          { value: 'card', label: 'Parent - card' },
+          { value: 'editable-card', label: 'Parent - card edit' },
+        ]}
+      />
       <Select
         style={{ width: 200 }}
-        onChange={(val) => {
-          setChildType(val);
-        }}
-      >
-        <Option value="line">Child - line</Option>
-        <Option value="card">Child - card</Option>
-        <Option value="editable-card">Parent - card edit</Option>
-      </Select>
+        onChange={(val) => setChildType(val)}
+        options={[
+          { value: 'line', label: 'Child - line' },
+          { value: 'card', label: 'Child - card' },
+          { value: 'editable-card', label: 'Child - card edit' },
+        ]}
+      />
       <Tabs
         defaultActiveKey="1"
-        tabPosition={parentPos}
+        tabPlacement={parentPos}
         type={parentType}
         items={[
           {
@@ -832,7 +907,7 @@ const App: React.FC = () => {
             children: (
               <Tabs
                 defaultActiveKey="1"
-                tabPosition={childPos}
+                tabPlacement={childPos}
                 type={childType}
                 style={{ height: 300 }}
                 items={Array.from({ length: 20 }).map((_, index) => {
@@ -922,7 +997,7 @@ const App: React.FC = () => (
           items={tabItems}
         />
         <Tabs
-          tabPosition="left"
+          tabPlacement="start"
           defaultActiveKey="1"
           tabBarExtraContent={<Button>Extra Action</Button>}
           style={{ marginBottom: 32 }}
@@ -968,7 +1043,7 @@ const App: React.FC = () => (
     </ConfigProvider>
     <Flex align="flex-end">
       <Tabs size="large" type="card" {...sharedTabsProps} />
-      <Tabs size="middle" type="card" {...sharedTabsProps} />
+      <Tabs size="medium" type="card" {...sharedTabsProps} />
       <Tabs size="small" type="editable-card" {...sharedTabsProps} />
       <Tabs size="small" type="card" {...sharedTabsProps} />
     </Flex>
