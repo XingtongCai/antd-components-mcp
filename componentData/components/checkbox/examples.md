@@ -17,15 +17,13 @@ checkbox 不可用。
 
 ```tsx
 import React from 'react';
-import { Checkbox } from 'antd';
+import { Checkbox, Flex } from 'antd';
 const App: React.FC = () => (
-  <>
+  <Flex vertical gap="medium">
     <Checkbox defaultChecked={false} disabled />
-    <br />
     <Checkbox indeterminate disabled />
-    <br />
     <Checkbox defaultChecked disabled />
-  </>
+  </Flex>
 );
 export default App;
 ```
@@ -172,6 +170,73 @@ const App: React.FC = () => (
     </Row>
   </Checkbox.Group>
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Checkbox 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Checkbox, Flex } from 'antd';
+import type { CheckboxProps, GetProp } from 'antd';
+import { createStyles } from 'antd-style';
+import { clsx } from 'clsx';
+const useStyles = createStyles(({ token, css }) => ({
+  root: css`
+    border-radius: ${token.borderRadius}px;
+    background-color: ${token.colorBgContainer};
+  `,
+  icon: css`
+    border-color: ${token.colorWarning};
+  `,
+  label: css`
+    color: ${token.colorTextDisabled};
+    font-weight: bold;
+  `,
+  iconChecked: css`
+    background-color: ${token.colorWarning};
+  `,
+  labelChecked: css`
+    color: ${token.colorWarning};
+  `,
+}));
+// Object style
+const styles: CheckboxProps['styles'] = {
+  icon: {
+    borderRadius: 6,
+  },
+  label: {
+    color: 'blue',
+  },
+};
+const App: React.FC = () => {
+  const { styles: classNamesStyles } = useStyles();
+  // Function classNames - dynamically adjust based on checked state
+  const classNamesFn: CheckboxProps['classNames'] = (
+    info,
+  ): GetProp<CheckboxProps, 'classNames', 'Return'> => {
+    if (info.props.checked) {
+      return {
+        root: clsx(classNamesStyles.root),
+        icon: clsx(classNamesStyles.icon, classNamesStyles.iconChecked),
+        label: clsx(classNamesStyles.label, classNamesStyles.labelChecked),
+      };
+    }
+    return {
+      root: classNamesStyles.root,
+      icon: classNamesStyles.icon,
+      label: classNamesStyles.label,
+    };
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Checkbox styles={styles}>Object styles</Checkbox>
+      <Checkbox classNames={classNamesFn} defaultChecked>
+        Function styles
+      </Checkbox>
+    </Flex>
+  );
+};
 export default App;
 ```
 ### 自定义 lineWidth

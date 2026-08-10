@@ -4,7 +4,7 @@
 
 ```tsx
 import React from 'react';
-import { Space, Table, Tag } from 'antd';
+import { Flex, Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
 interface DataType {
   key: string;
@@ -35,10 +35,10 @@ const columns: TableProps<DataType>['columns'] = [
     key: 'tags',
     dataIndex: 'tags',
     render: (_, { tags }) => (
-      <>
+      <Flex gap="small" align="center" wrap>
         {tags.map((tag) => {
           let color = tag.length > 5 ? 'geekblue' : 'green';
-          if (tag === 'loser') {
+          if (tag === 'kawaii') {
             color = 'volcano';
           }
           return (
@@ -47,14 +47,14 @@ const columns: TableProps<DataType>['columns'] = [
             </Tag>
           );
         })}
-      </>
+      </Flex>
     ),
   },
   {
     title: 'Action',
     key: 'action',
     render: (_, record) => (
-      <Space size="middle">
+      <Space size="medium">
         <a>Invite {record.name}</a>
         <a>Delete</a>
       </Space>
@@ -74,7 +74,7 @@ const data: DataType[] = [
     name: 'Jim Green',
     age: 42,
     address: 'London No. 1 Lake Park',
-    tags: ['loser'],
+    tags: ['kawaii'],
   },
   {
     key: '3',
@@ -93,7 +93,7 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Space, Table, Tag } from 'antd';
+import { Flex, Space, Table, Tag } from 'antd';
 const { Column, ColumnGroup } = Table;
 interface DataType {
   key: React.Key;
@@ -118,7 +118,7 @@ const data: DataType[] = [
     lastName: 'Green',
     age: 42,
     address: 'London No. 1 Lake Park',
-    tags: ['loser'],
+    tags: ['kawaii'],
   },
   {
     key: '3',
@@ -142,10 +142,10 @@ const App: React.FC = () => (
       dataIndex="tags"
       key="tags"
       render={(tags: string[]) => (
-        <>
+        <Flex gap="small" align="center" wrap>
           {tags.map((tag) => {
             let color = tag.length > 5 ? 'geekblue' : 'green';
-            if (tag === 'loser') {
+            if (tag === 'kawaii') {
               color = 'volcano';
             }
             return (
@@ -154,14 +154,14 @@ const App: React.FC = () => (
               </Tag>
             );
           })}
-        </>
+        </Flex>
       )}
     />
     <Column
       title="Action"
       key="action"
       render={(_: any, record: DataType) => (
-        <Space size="middle">
+        <Space size="medium">
           <a>Invite {record.lastName}</a>
           <a>Delete</a>
         </Space>
@@ -301,8 +301,8 @@ const App: React.FC = () => {
   };
   const hasSelected = selectedRowKeys.length > 0;
   return (
-    <Flex gap="middle" vertical>
-      <Flex align="center" gap="middle">
+    <Flex gap="medium" vertical>
+      <Flex align="center" gap="medium">
         <Button type="primary" onClick={start} disabled={!hasSelected} loading={loading}>
           Reload
         </Button>
@@ -365,28 +365,14 @@ const App: React.FC = () => {
         key: 'odd',
         text: 'Select Odd Row',
         onSelect: (changeableRowKeys) => {
-          let newSelectedRowKeys = [];
-          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-            if (index % 2 !== 0) {
-              return false;
-            }
-            return true;
-          });
-          setSelectedRowKeys(newSelectedRowKeys);
+          setSelectedRowKeys(changeableRowKeys.filter((_, index) => index % 2 === 0));
         },
       },
       {
         key: 'even',
         text: 'Select Even Row',
         onSelect: (changeableRowKeys) => {
-          let newSelectedRowKeys = [];
-          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-            if (index % 2 !== 0) {
-              return true;
-            }
-            return false;
-          });
-          setSelectedRowKeys(newSelectedRowKeys);
+          setSelectedRowKeys(changeableRowKeys.filter((_, index) => index % 2 !== 0));
         },
       },
     ],
@@ -1171,11 +1157,9 @@ export default App;
 > 🛎️ 想要 3 分钟实现？试试 [ProTable](https://procomponents.ant.design/components/table)！
 
 ```tsx
-/* eslint-disable compat/compat */
 import React, { useEffect, useState } from 'react';
 import type { GetProp, TableProps } from 'antd';
 import { Table } from 'antd';
-import type { AnyObject } from 'antd/es/_util/type';
 import type { SorterResult } from 'antd/es/table/interface';
 type ColumnsType<T extends object = object> = TableProps<T>['columns'];
 type TablePaginationConfig = Exclude<GetProp<TableProps, 'pagination'>, boolean>;
@@ -1212,7 +1196,10 @@ const columns: ColumnsType<DataType> = [
     dataIndex: 'email',
   },
 ];
-const toURLSearchParams = <T extends AnyObject>(record: T) => {
+const isNonNullable = <T,>(val: T): val is NonNullable<T> => {
+  return val !== undefined && val !== null;
+};
+const toURLSearchParams = <T extends Record<PropertyKey, any>>(record: T) => {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(record)) {
     params.append(key, value);
@@ -1228,7 +1215,7 @@ const getRandomuserParams = (params: TableParams) => {
   // https://github.com/mockapi-io/docs/wiki/Code-examples#filtering
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      if (isNonNullable(value)) {
         result[key] = value;
       }
     });
@@ -1240,7 +1227,7 @@ const getRandomuserParams = (params: TableParams) => {
   }
   // 处理其他参数
   Object.entries(restParams).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
+    if (isNonNullable(value)) {
       result[key] = value;
     }
   });
@@ -1272,6 +1259,9 @@ const App: React.FC = () => {
             // total: data.totalCount,
           },
         });
+      })
+      .catch(() => {
+        console.log('fetch mock data failed');
       });
   };
   useEffect(fetchData, [
@@ -1355,8 +1345,8 @@ const data: DataType[] = [
 ];
 const App: React.FC = () => (
   <>
-    <Divider>Middle size table</Divider>
-    <Table<DataType> columns={columns} dataSource={data} size="middle" />
+    <Divider>Medium size table</Divider>
+    <Table<DataType> columns={columns} dataSource={data} size="medium" />
     <Divider>Small size table</Divider>
     <Table<DataType> columns={columns} dataSource={data} size="small" />
   </>
@@ -1530,6 +1520,87 @@ const App: React.FC = () => (
     expandable={{
       expandedRowRender: (record) => <p style={{ margin: 0 }}>{record.description}</p>,
       rowExpandable: (record) => record.name !== 'Not Expandable',
+    }}
+    dataSource={data}
+  />
+);
+export default App;
+```
+### 可自定义展开位置
+使用 `expandedRowOffset` 自定义展开子表格偏移列数
+
+```tsx
+import React from 'react';
+import { Table } from 'antd';
+import type { TableColumnsType } from 'antd';
+interface DataType {
+  key: React.Key;
+  team: string;
+  name: string;
+  age: number;
+  address: string;
+  description: string;
+}
+const columns: TableColumnsType<DataType> = [
+  {
+    title: 'Team',
+    dataIndex: 'team',
+    key: 'team',
+    onCell: (__, index = 0) => (index % 2 === 0 ? { rowSpan: 2 } : { rowSpan: 0 }),
+    width: 100,
+  },
+  Table.EXPAND_COLUMN,
+  { title: 'Name', dataIndex: 'name', key: 'name', width: 150 },
+  { title: 'Age', dataIndex: 'age', key: 'age' },
+  { title: 'Address', dataIndex: 'address', key: 'address' },
+  {
+    title: 'Action',
+    dataIndex: '',
+    key: 'x',
+    render: () => <a>Delete</a>,
+  },
+];
+const data: DataType[] = [
+  {
+    key: 1,
+    team: 'Team A',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+    description: 'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.',
+  },
+  {
+    key: 2,
+    team: 'Team A',
+    name: 'Jim Green',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+    description: 'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.',
+  },
+  {
+    key: 3,
+    team: 'Team B',
+    name: 'Not Expandable',
+    age: 29,
+    address: 'Jiangsu No. 1 Lake Park',
+    description: 'This not expandable',
+  },
+  {
+    key: 4,
+    team: 'Team B',
+    name: 'Joe Black',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+    description: 'My name is Joe Black, I am 32 years old, living in Sydney No. 1 Lake Park.',
+  },
+];
+const App: React.FC = () => (
+  <Table<DataType>
+    bordered
+    columns={columns}
+    expandable={{
+      expandedRowOffset: 3,
+      expandedRowRender: (record) => <div>{record.description}</div>,
     }}
     dataSource={data}
   />
@@ -1818,14 +1889,17 @@ const data: DataType[] = [
 ];
 // rowSelection objects indicates the need for row selection
 const rowSelection: TableRowSelection<DataType> = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  onChange: (selectedRowKeys, selectedRows, info) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      'selectedRows: ',
+      selectedRows,
+      'info',
+      info,
+    );
   },
   onSelect: (record, selected, selectedRows) => {
     console.log(record, selected, selectedRows);
-  },
-  onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
   },
 };
 const App: React.FC = () => {
@@ -2019,14 +2093,17 @@ const dataSource = Array.from({ length: 15 }).map<DataType>((_, i) => ({
 }));
 // rowSelection objects indicates the need for row selection
 const rowSelection: TableRowSelection<DataType> = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  onChange: (selectedRowKeys, selectedRows, info) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      'selectedRows: ',
+      selectedRows,
+      'info',
+      info,
+    );
   },
   onSelect: (record, selected, selectedRows) => {
     console.log(record, selected, selectedRows);
-  },
-  onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
   },
 };
 const App: React.FC = () => {
@@ -2069,7 +2146,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2118,6 +2194,143 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 自动高度
+通过封装，实现 Table 始终自动填充容器高度。
+
+```tsx
+import React, { useEffect, useRef, useState } from 'react';
+import { Flex, Switch, Table } from 'antd';
+import type { GetRef, TableColumnsType, TableProps } from 'antd';
+// ===================== HOC =====================
+const measureClassNames = {
+  header: 'measure-header',
+  pagination: 'measure-pagination',
+};
+const tableClassNames = {
+  header: {
+    wrapper: measureClassNames.header,
+  },
+  pagination: {
+    root: measureClassNames.pagination,
+  },
+};
+type AutoHeightTableProps<RecordType extends object> = Omit<
+  TableProps<RecordType>,
+  'styles' | 'classNames'
+>;
+const AutoHeightTable = <RecordType extends object>(props: AutoHeightTableProps<RecordType>) => {
+  const { scroll, style, ...restProps } = props;
+  const rootRef = useRef<GetRef<typeof Table>>(null);
+  const [scrollY, setScrollY] = useState(0);
+  const [sectionHeight, setSectionHeight] = useState(0);
+  const getHeight = (className: string | HTMLElement) => {
+    const ele =
+      typeof className === 'string'
+        ? rootRef.current?.nativeElement?.querySelector<HTMLElement>(`.${className}`)
+        : className;
+    if (ele) {
+      const styles = getComputedStyle(ele);
+      const marginTop = Number.parseFloat(styles.marginTop) || 0;
+      const marginBottom = Number.parseFloat(styles.marginBottom) || 0;
+      return ele.getBoundingClientRect().height + marginTop + marginBottom;
+    }
+    return 0;
+  };
+  useEffect(() => {
+    const element = rootRef.current?.nativeElement;
+    if (!element) {
+      return;
+    }
+    const measure = () => {
+      const totalHeight = getHeight(element);
+      const headerHeight = getHeight(measureClassNames.header);
+      const paginationHeight = getHeight(measureClassNames.pagination);
+      setScrollY(Math.max(0, Math.floor(totalHeight - headerHeight - paginationHeight)));
+      setSectionHeight(totalHeight - paginationHeight);
+    };
+    measure();
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(element);
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+  return (
+    <Table<RecordType>
+      {...restProps}
+      ref={rootRef}
+      scroll={{ ...scroll, y: scrollY }}
+      style={{ ...style, height: '100%' }}
+      styles={{
+        section: {
+          height: sectionHeight,
+        },
+      }}
+      classNames={tableClassNames}
+    />
+  );
+};
+// ==================== Usage ====================
+interface DataType {
+  key: React.Key;
+  name: string;
+  age: number;
+  address: string;
+}
+const columns: TableColumnsType<DataType> = [
+  {
+    title: 'Name',
+    dataIndex: 'name',
+    width: '20%',
+  },
+  {
+    title: 'Age',
+    dataIndex: 'age',
+    width: '20%',
+  },
+  {
+    title: 'Address',
+    dataIndex: 'address',
+    width: '60%',
+  },
+];
+const genData = (length: number): DataType[] => {
+  return Array.from({ length }).map<DataType>((_, index) => ({
+    key: index,
+    name: `Edward King ${index}`,
+    age: 32 + index,
+    address: `London, Park Lane no. ${index}`,
+  }));
+};
+const dataMore = genData(30);
+const dataLess = genData(2);
+const App: React.FC = () => {
+  const [hasData, setHasData] = useState(true);
+  const mergedData = hasData ? dataMore : dataLess;
+  return (
+    <Flex vertical gap="middle" align="start">
+      <Switch
+        checked={hasData}
+        checkedChildren="More Data"
+        unCheckedChildren="More Data"
+        onChange={setHasData}
+      />
+      <div
+        style={{
+          height: 400,
+          boxSizing: 'border-box',
+          background: 'rgba(140, 140, 140, 0.03)',
+          padding: 16,
+          alignSelf: 'stretch',
+        }}
+      >
+        <AutoHeightTable<DataType> columns={columns} dataSource={mergedData} />
+      </div>
+    </Flex>
+  );
+};
+export default App;
+```
 ### 固定列
 对于列数很多的数据，可以固定前后的列，横向滚动查看其它数据，需要和 `scroll.x` 配合使用。
 > 若列头与内容不对齐或出现列重复，请指定**固定列**的宽度 `width`。如果指定 `width` 不生效或出现白色垂直空隙，请尝试建议留一列不设宽度以适应弹性布局，或者检查是否有[超长连续字段破坏布局](https://github.com/ant-design/ant-design/issues/13825#issuecomment-449889241)。
@@ -2140,7 +2353,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2159,14 +2371,14 @@ const columns: TableColumnsType<DataType> = [
     width: 100,
     dataIndex: 'name',
     key: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
     key: 'age',
-    fixed: 'left',
+    fixed: 'start',
     sorter: true,
   },
   { title: 'Column 1', dataIndex: 'address', key: '1' },
@@ -2192,7 +2404,7 @@ const columns: TableColumnsType<DataType> = [
   {
     title: 'Action',
     key: 'operation',
-    fixed: 'right',
+    fixed: 'end',
     width: 100,
     render: () => <a>action</a>,
   },
@@ -2233,7 +2445,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2251,14 +2462,14 @@ const columns: TableColumnsType<DataType> = [
     title: 'Full Name',
     width: 100,
     dataIndex: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
   },
-  { title: 'Column 1', dataIndex: 'address', key: '1', fixed: 'left' },
+  { title: 'Column 1', dataIndex: 'address', key: '1', fixed: 'start' },
   { title: 'Column 2', dataIndex: 'address', key: '2' },
   { title: 'Column 3', dataIndex: 'address', key: '3' },
   { title: 'Column 4', dataIndex: 'address', key: '4' },
@@ -2280,7 +2491,7 @@ const columns: TableColumnsType<DataType> = [
   { title: 'Column 20', dataIndex: 'address', key: '20' },
   {
     title: 'Action 1',
-    fixed: 'right',
+    fixed: 'end',
     width: 90,
     render: () => <a>action</a>,
   },
@@ -2291,7 +2502,7 @@ const columns: TableColumnsType<DataType> = [
   },
   {
     title: 'Action 3',
-    fixed: 'right',
+    fixed: 'end',
     width: 90,
     render: () => <a>action</a>,
   },
@@ -2336,7 +2547,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2355,14 +2565,14 @@ const columns: TableColumnsType<DataType> = [
     width: 100,
     dataIndex: 'name',
     key: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
     key: 'age',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Column 1',
@@ -2422,7 +2632,7 @@ const columns: TableColumnsType<DataType> = [
   {
     title: 'Action',
     key: 'operation',
-    fixed: 'right',
+    fixed: 'end',
     width: 100,
     render: () => <a>action</a>,
   },
@@ -2528,7 +2738,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -2552,7 +2761,7 @@ const columns: TableColumnsType<DataType> = [
     dataIndex: 'name',
     key: 'name',
     width: 100,
-    fixed: 'left',
+    fixed: 'start',
     filters: [
       {
         text: 'Joe',
@@ -2626,7 +2835,7 @@ const columns: TableColumnsType<DataType> = [
     dataIndex: 'gender',
     key: 'gender',
     width: 80,
-    fixed: 'right',
+    fixed: 'end',
   },
 ];
 const dataSource = Array.from({ length: 100 }).map<DataType>((_, i) => ({
@@ -2648,7 +2857,7 @@ const App: React.FC = () => {
       columns={columns}
       dataSource={dataSource}
       bordered
-      size="middle"
+      size="medium"
       scroll={{ x: 'calc(700px + 50%)', y: 47 * 5 }}
     />
   );
@@ -2662,6 +2871,29 @@ export default App;
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import type { GetRef, InputRef, TableProps } from 'antd';
 import { Button, Form, Input, Popconfirm, Table } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles((props) => {
+  const { css, cssVar } = props;
+  return {
+    editableRow: css`
+      position: relative;
+      .editable-cell-value-wrap {
+        cursor: pointer;
+        padding: ${cssVar.paddingXXS} ${cssVar.paddingSM};
+        border-width: ${cssVar.lineWidth};
+        border-style: ${cssVar.lineType};
+        border-color: transparent;
+        border-radius: ${cssVar.borderRadiusSM};
+        transition: all ${cssVar.motionDurationFast} ${cssVar.motionEaseInOut};
+      }
+      &:hover {
+        .editable-cell-value-wrap {
+          border-color: ${cssVar.colorBorder};
+        }
+      }
+    `,
+  };
+});
 type FormInstance<T> = GetRef<typeof Form<T>>;
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 interface Item {
@@ -2690,15 +2922,8 @@ interface EditableCellProps {
   record: Item;
   handleSave: (record: Item) => void;
 }
-const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
-  title,
-  editable,
-  children,
-  dataIndex,
-  record,
-  handleSave,
-  ...restProps
-}) => {
+const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = (props) => {
+  const { title, editable, children, dataIndex, record, handleSave, ...restProps } = props;
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<InputRef>(null);
   const form = useContext(EditableContext)!;
@@ -2708,7 +2933,7 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
     }
   }, [editing]);
   const toggleEdit = () => {
-    setEditing(!editing);
+    setEditing((prev) => !prev);
     form.setFieldsValue({ [dataIndex]: record[dataIndex] });
   };
   const save = async () => {
@@ -2728,7 +2953,7 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
         name={dataIndex}
         rules={[{ required: true, message: `${title} is required.` }]}
       >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+        <Input ref={inputRef} variant="filled" onPressEnter={save} onBlur={save} />
       </Form.Item>
     ) : (
       <div
@@ -2750,6 +2975,7 @@ interface DataType {
 }
 type ColumnTypes = Exclude<TableProps<DataType>['columns'], undefined>;
 const App: React.FC = () => {
+  const { styles } = useStyles();
   const [dataSource, setDataSource] = useState<DataType[]>([
     {
       key: '0',
@@ -2795,7 +3021,7 @@ const App: React.FC = () => {
         ) : null,
     },
   ];
-  const handleAdd = () => {
+  const handleAdd: React.MouseEventHandler<HTMLElement> = () => {
     const newData: DataType = {
       key: count,
       name: `Edward King ${count}`,
@@ -2803,23 +3029,19 @@ const App: React.FC = () => {
       address: `London, Park Lane no. ${count}`,
     };
     setDataSource([...dataSource, newData]);
-    setCount(count + 1);
+    setCount((prevCount) => prevCount + 1);
   };
   const handleSave = (row: DataType) => {
     const newData = [...dataSource];
     const index = newData.findIndex((item) => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
-    });
-    setDataSource(newData);
+    if (index !== -1) {
+      const item = newData[index];
+      newData.splice(index, 1, { ...item, ...row });
+      setDataSource(newData);
+    }
   };
   const components = {
-    body: {
-      row: EditableRow,
-      cell: EditableCell,
-    },
+    body: { row: EditableRow, cell: EditableCell },
   };
   const columns = defaultColumns.map((col) => {
     if (!col.editable) {
@@ -2843,7 +3065,7 @@ const App: React.FC = () => {
       </Button>
       <Table<DataType>
         components={components}
-        rowClassName={() => 'editable-row'}
+        rowClassName={() => styles.editableRow}
         bordered
         dataSource={dataSource}
         columns={columns as ColumnTypes}
@@ -2859,8 +3081,22 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import type { TableProps } from 'antd';
+import type { TableColumnsType } from 'antd';
 import { Form, Input, InputNumber, Popconfirm, Table, Typography } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles((props) => {
+  const { css, prefixCls, cssVar } = props;
+  return {
+    editableRow: css`
+      position: relative;
+      .${prefixCls}-form-item-explain {
+        position: absolute;
+        top: 100%;
+        font-size: ${cssVar.fontSizeSM};
+      }
+    `,
+  };
+});
 interface DataType {
   key: string;
   name: string;
@@ -2881,16 +3117,8 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   record: DataType;
   index: number;
 }
-const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
-  editing,
-  dataIndex,
-  title,
-  inputType,
-  record,
-  index,
-  children,
-  ...restProps
-}) => {
+const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = (props) => {
+  const { editing, dataIndex, title, inputType, record, index, children, ...restProps } = props;
   const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
   return (
     <td {...restProps}>
@@ -2898,12 +3126,7 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
         <Form.Item
           name={dataIndex}
           style={{ margin: 0 }}
-          rules={[
-            {
-              required: true,
-              message: `Please Input ${title}!`,
-            },
-          ]}
+          rules={[{ required: true, message: `Please Input ${title}!` }]}
         >
           {inputNode}
         </Form.Item>
@@ -2914,6 +3137,7 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
   );
 };
 const App: React.FC = () => {
+  const { styles } = useStyles();
   const [form] = Form.useForm();
   const [data, setData] = useState<DataType[]>(originData);
   const [editingKey, setEditingKey] = useState('');
@@ -2932,10 +3156,7 @@ const App: React.FC = () => {
       const index = newData.findIndex((item) => key === item.key);
       if (index > -1) {
         const item = newData[index];
-        newData.splice(index, 1, {
-          ...item,
-          ...row,
-        });
+        newData.splice(index, 1, { ...item, ...row });
         setData(newData);
         setEditingKey('');
       } else {
@@ -2988,13 +3209,13 @@ const App: React.FC = () => {
       },
     },
   ];
-  const mergedColumns: TableProps<DataType>['columns'] = columns.map((col) => {
+  const mergedColumns = columns.map<TableColumnsType<DataType>[number]>((col) => {
     if (!col.editable) {
       return col;
     }
     return {
       ...col,
-      onCell: (record: DataType) => ({
+      onCell: (record) => ({
         record,
         inputType: col.dataIndex === 'age' ? 'number' : 'text',
         dataIndex: col.dataIndex,
@@ -3006,13 +3227,11 @@ const App: React.FC = () => {
   return (
     <Form form={form} component={false}>
       <Table<DataType>
-        components={{
-          body: { cell: EditableCell },
-        }}
         bordered
+        components={{ body: { cell: EditableCell } }}
         dataSource={data}
         columns={mergedColumns}
-        rowClassName="editable-row"
+        rowClassName={() => styles.editableRow}
         pagination={{ onChange: cancel }}
       />
     </Form>
@@ -3075,7 +3294,7 @@ const expandColumns: TableColumnsType<ExpandedDataType> = [
     title: 'Action',
     key: 'operation',
     render: () => (
-      <Space size="middle">
+      <Space size="medium">
         <a>Pause</a>
         <a>Stop</a>
         <Dropdown menu={{ items }}>
@@ -3114,7 +3333,7 @@ const App: React.FC = () => (
       columns={columns}
       expandable={{ expandedRowRender, defaultExpandedRowKeys: ['0'] }}
       dataSource={dataSource}
-      size="middle"
+      size="medium"
     />
     <Table<DataType>
       columns={columns}
@@ -3288,13 +3507,11 @@ const dragActiveStyle = (dragState: DragIndexState, id: string) => {
   let style: React.CSSProperties = {};
   if (active && active === id) {
     style = { backgroundColor: 'gray', opacity: 0.5 };
-  }
-  // dragover dashed style
-  else if (over && id === over && active !== over) {
+  } else if (over && id === over && active !== over) {
     style =
       direction === 'right'
-        ? { borderRight: '1px dashed gray' }
-        : { borderLeft: '1px dashed gray' };
+        ? { borderInlineEnd: '1px dashed gray' }
+        : { borderInlineStart: '1px dashed gray' };
   }
   return style;
 };
@@ -3531,123 +3748,6 @@ const App: React.FC = () => {
 };
 export default App;
 ```
-### 可伸缩列
-集成 [react-resizable](https://github.com/STRML/react-resizable) 来实现可伸缩列。如果有排序需要，可以通过[额外标记](https://codesandbox.io/s/zrj8xvyzxx)阻止触发排序。
-
-```tsx
-import React, { useState } from 'react';
-import { Table } from 'antd';
-import type { TableColumnsType } from 'antd';
-import type { ResizeCallbackData } from 'react-resizable';
-import { Resizable } from 'react-resizable';
-interface DataType {
-  key: React.Key;
-  date: string;
-  amount: number;
-  type: string;
-  note: string;
-}
-interface TitlePropsType {
-  width: number;
-  onResize: (e: React.SyntheticEvent<Element>, data: ResizeCallbackData) => void;
-}
-const ResizableTitle: React.FC<Readonly<React.HTMLAttributes<any> & TitlePropsType>> = (props) => {
-  const { onResize, width, ...restProps } = props;
-  if (!width) {
-    return <th {...restProps} />;
-  }
-  return (
-    <Resizable
-      width={width}
-      height={0}
-      handle={<span className="react-resizable-handle" onClick={(e) => e.stopPropagation()} />}
-      onResize={onResize}
-      draggableOpts={{ enableUserSelectHack: false }}
-    >
-      <th {...restProps} />
-    </Resizable>
-  );
-};
-const data: DataType[] = [
-  {
-    key: 0,
-    date: '2018-02-11',
-    amount: 120,
-    type: 'income',
-    note: 'transfer',
-  },
-  {
-    key: 1,
-    date: '2018-03-11',
-    amount: 243,
-    type: 'income',
-    note: 'transfer',
-  },
-  {
-    key: 2,
-    date: '2018-04-11',
-    amount: 98,
-    type: 'income',
-    note: 'transfer',
-  },
-];
-const App: React.FC = () => {
-  const [columns, setColumns] = useState<TableColumnsType<DataType>>([
-    {
-      title: 'Date',
-      dataIndex: 'date',
-      width: 200,
-    },
-    {
-      title: 'Amount',
-      dataIndex: 'amount',
-      width: 100,
-      sorter: (a, b) => a.amount - b.amount,
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      width: 100,
-    },
-    {
-      title: 'Note',
-      dataIndex: 'note',
-      width: 100,
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: () => <a>Delete</a>,
-    },
-  ]);
-  const handleResize =
-    (index: number) =>
-    (_: React.SyntheticEvent<Element>, { size }: ResizeCallbackData) => {
-      const newColumns = [...columns];
-      newColumns[index] = {
-        ...newColumns[index],
-        width: size.width,
-      };
-      setColumns(newColumns);
-    };
-  const mergedColumns = columns.map<TableColumnsType<DataType>[number]>((col, index) => ({
-    ...col,
-    onHeaderCell: (column: TableColumnsType<DataType>[number]) => ({
-      width: column.width,
-      onResize: handleResize(index) as React.ReactEventHandler<any>,
-    }),
-  }));
-  return (
-    <Table<DataType>
-      bordered
-      components={{ header: { cell: ResizableTitle } }}
-      columns={mergedColumns}
-      dataSource={data}
-    />
-  );
-};
-export default App;
-```
 ### 单元格自动省略
 设置 `column.ellipsis` 可以让单元格内容根据宽度自动省略。
 > 列头缩略暂不支持和排序筛选一起使用。
@@ -3714,7 +3814,7 @@ const data = [
     name: 'Jim Green',
     age: 42,
     address: 'London No. 2 Lake Park, London No. 2 Lake Park',
-    tags: ['loser'],
+    tags: ['kawaii'],
   },
   {
     key: '3',
@@ -3725,6 +3825,61 @@ const data = [
   },
 ];
 const App: React.FC = () => <Table<DataType> columns={columns} dataSource={data} />;
+export default App;
+```
+### 统一列配置
+通过 `column` 在 Table 上统一设置列属性，并按需在单列上覆盖。
+
+```tsx
+import React from 'react';
+import type { TableProps } from 'antd';
+import { Table } from 'antd';
+interface DataType {
+  key: React.Key;
+  name: string;
+  address: string;
+  description: string;
+}
+const columns: TableProps<DataType>['columns'] = [
+  {
+    title: 'Name',
+    dataIndex: 'name',
+    width: 140,
+  },
+  {
+    title: 'Description',
+    dataIndex: 'description',
+    width: 180,
+  },
+  {
+    title: 'Address',
+    dataIndex: 'address',
+    align: 'left',
+    width: 220,
+  },
+];
+const data: DataType[] = [
+  {
+    key: '1',
+    name: 'John Brown',
+    description: 'Shared column props let repeated column settings live on the table.',
+    address: 'No. 1 Lake Park Road, Hangzhou, Zhejiang, China',
+  },
+  {
+    key: '2',
+    name: 'Jim Green',
+    description: 'Columns can still override the default alignment or other shared props.',
+    address: 'No. 99 Garden Avenue, Pudong, Shanghai, China',
+  },
+];
+const App: React.FC = () => (
+  <Table<DataType>
+    columns={columns}
+    dataSource={data}
+    column={{ align: 'center', ellipsis: true }}
+    pagination={false}
+  />
+);
 export default App;
 ```
 ### 自定义单元格省略提示
@@ -3921,7 +4076,6 @@ const useStyle = createStyles(({ css, token }) => {
           ${antCls}-table-content {
             scrollbar-width: thin;
             scrollbar-color: #eaeaea transparent;
-            scrollbar-gutter: stable;
           }
         }
       }
@@ -4077,19 +4231,19 @@ const fixedColumns: TableProps<RecordType>['columns'] = [
     title: 'ID',
     dataIndex: 'id',
     width: 100,
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'FistName',
     dataIndex: 'firstName',
     width: 120,
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'LastName',
     dataIndex: 'lastName',
     width: 120,
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Group',
@@ -4125,7 +4279,7 @@ const fixedColumns: TableProps<RecordType>['columns'] = [
   {
     title: 'Action',
     width: 150,
-    fixed: 'right',
+    fixed: 'end',
     render: () => (
       <Space>
         <Typography.Link>Action1</Typography.Link>
@@ -4189,7 +4343,7 @@ const App: React.FC = () => {
   }, [expanded]);
   return (
     <div style={{ padding: 64 }}>
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space vertical style={{ width: '100%' }}>
         <Space>
           <Switch
             checked={bordered}
@@ -4338,7 +4492,7 @@ const expandedColumns: TableProps<ExpandedDataType>['columns'] = [
     dataIndex: 'operation',
     key: 'operation',
     render: () => (
-      <Space size="middle">
+      <Space size="medium">
         <a>Pause</a>
         <a>Stop</a>
         <Dropdown menu={{ items }}>
@@ -4408,17 +4562,50 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### Tabs 中的嵌套表格 Debug
+带边框的表格嵌套在展开行的 Tabs 中时应保留上边框。
+
+```tsx
+import React from 'react';
+import type { TableColumnsType, TabsProps } from 'antd';
+import { Table, Tabs } from 'antd';
+interface DataType {
+  key: string;
+  name: string;
+}
+const columns: TableColumnsType<DataType> = [{ title: 'Name', dataIndex: 'name' }];
+const dataSource: DataType[] = [{ key: '0', name: 'Jack' }];
+const items: TabsProps['items'] = [
+  {
+    key: '1',
+    label: 'Tab 1',
+    children: (
+      <Table<DataType> bordered columns={columns} dataSource={dataSource} pagination={false} />
+    ),
+  },
+];
+const expandedRowRender = () => <Tabs defaultActiveKey="1" items={items} />;
+const App: React.FC = () => (
+  <Table<DataType>
+    columns={columns}
+    dataSource={dataSource}
+    expandable={{ expandedRowRender, defaultExpandedRowKeys: ['0'] }}
+    pagination={false}
+  />
+);
+export default App;
+```
 ### 分页设置
 表格的分页设置。
 
 ```tsx
 import React, { useState } from 'react';
-import { Radio, Space, Table, Tag } from 'antd';
+import { Flex, Radio, Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
 type ColumnsType<T extends object> = TableProps<T>['columns'];
 type TablePagination<T extends object> = NonNullable<Exclude<TableProps<T>['pagination'], boolean>>;
-type TablePaginationPosition<T extends object> = NonNullable<
-  TablePagination<T>['position']
+type TablePaginationPlacement<T extends object> = NonNullable<
+  TablePagination<T>['placement']
 >[number];
 interface DataType {
   key: string;
@@ -4428,15 +4615,15 @@ interface DataType {
   tags: string[];
 }
 const topOptions = [
-  { label: 'topLeft', value: 'topLeft' },
+  { label: 'topStart', value: 'topStart' },
   { label: 'topCenter', value: 'topCenter' },
-  { label: 'topRight', value: 'topRight' },
+  { label: 'topEnd', value: 'topEnd' },
   { label: 'none', value: 'none' },
 ];
 const bottomOptions = [
-  { label: 'bottomLeft', value: 'bottomLeft' },
+  { label: 'bottomStart', value: 'bottomStart' },
   { label: 'bottomCenter', value: 'bottomCenter' },
-  { label: 'bottomRight', value: 'bottomRight' },
+  { label: 'bottomEnd', value: 'bottomEnd' },
   { label: 'none', value: 'none' },
 ];
 const columns: ColumnsType<DataType> = [
@@ -4461,10 +4648,10 @@ const columns: ColumnsType<DataType> = [
     key: 'tags',
     dataIndex: 'tags',
     render: (tags: string[]) => (
-      <span>
+      <Flex gap="small" align="center" wrap>
         {tags.map((tag) => {
           let color = tag.length > 5 ? 'geekblue' : 'green';
-          if (tag === 'loser') {
+          if (tag === 'kawaii') {
             color = 'volcano';
           }
           return (
@@ -4473,14 +4660,14 @@ const columns: ColumnsType<DataType> = [
             </Tag>
           );
         })}
-      </span>
+      </Flex>
     ),
   },
   {
     title: 'Action',
     key: 'action',
     render: (_, record) => (
-      <Space size="middle">
+      <Space size="medium">
         <a>Invite {record.name}</a>
         <a>Delete</a>
       </Space>
@@ -4500,7 +4687,7 @@ const data: DataType[] = [
     name: 'Jim Green',
     age: 42,
     address: 'London No. 1 Lake Park',
-    tags: ['loser'],
+    tags: ['kawaii'],
   },
   {
     key: '3',
@@ -4511,8 +4698,8 @@ const data: DataType[] = [
   },
 ];
 const App: React.FC = () => {
-  const [top, setTop] = useState<TablePaginationPosition<DataType>>('topLeft');
-  const [bottom, setBottom] = useState<TablePaginationPosition<DataType>>('bottomRight');
+  const [top, setTop] = useState<TablePaginationPlacement<DataType>>('topStart');
+  const [bottom, setBottom] = useState<TablePaginationPlacement<DataType>>('bottomEnd');
   return (
     <div>
       <div>
@@ -4535,7 +4722,7 @@ const App: React.FC = () => {
       />
       <Table<DataType>
         columns={columns}
-        pagination={{ position: [top, bottom] }}
+        pagination={{ placement: [top, bottom] }}
         dataSource={data}
       />
     </div>
@@ -4599,14 +4786,14 @@ const columns: TableColumnsType<DataType> = [
     width: 100,
     dataIndex: 'name',
     key: 'name',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Age',
     width: 100,
     dataIndex: 'age',
     key: 'age',
-    fixed: 'left',
+    fixed: 'start',
   },
   {
     title: 'Column 1',
@@ -4654,7 +4841,7 @@ const columns: TableColumnsType<DataType> = [
   {
     title: 'Action',
     key: 'operation',
-    fixed: 'right',
+    fixed: 'end',
     width: 100,
     render: () => <a>action</a>,
   },
@@ -4707,10 +4894,25 @@ import React, { useState } from 'react';
 import { DownOutlined } from '@ant-design/icons';
 import type { GetProp, RadioChangeEvent, TableProps } from 'antd';
 import { Form, Radio, Space, Switch, Table } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles((props) => {
+  const { css, cssVar } = props;
+  return {
+    tableControlBar: css`
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: ${cssVar.margin};
+      row-gap: ${cssVar.marginXS};
+      column-gap: 0;
+    `,
+  };
+});
 type SizeType = TableProps['size'];
 type ColumnsType<T extends object> = GetProp<TableProps<T>, 'columns'>;
 type TablePagination<T extends object> = NonNullable<Exclude<TableProps<T>['pagination'], boolean>>;
-type TablePaginationPosition = NonNullable<TablePagination<any>['position']>[number];
+type TablePaginationPlacement = NonNullable<TablePagination<any>['placement']>[number];
 type ExpandableConfig<T extends object> = TableProps<T>['expandable'];
 type TableRowSelection<T extends object> = TableProps<T>['rowSelection'];
 interface DataType {
@@ -4750,7 +4952,7 @@ const columns: ColumnsType<DataType> = [
     key: 'action',
     sorter: true,
     render: () => (
-      <Space size="middle">
+      <Space size="medium">
         <a>Delete</a>
         <a>
           <Space>
@@ -4775,6 +4977,7 @@ const defaultExpandable: ExpandableConfig<DataType> = {
 const defaultTitle = () => 'Here is title';
 const defaultFooter = () => 'Here is footer';
 const App: React.FC = () => {
+  const { styles } = useStyles();
   const [bordered, setBordered] = useState(false);
   const [loading, setLoading] = useState(false);
   const [size, setSize] = useState<SizeType>('large');
@@ -4785,8 +4988,8 @@ const App: React.FC = () => {
   const [rowSelection, setRowSelection] = useState<TableRowSelection<DataType> | undefined>({});
   const [hasData, setHasData] = useState(true);
   const [tableLayout, setTableLayout] = useState<string>('unset');
-  const [top, setTop] = useState<TablePaginationPosition>('none');
-  const [bottom, setBottom] = useState<TablePaginationPosition>('bottomRight');
+  const [top, setTop] = useState<TablePaginationPlacement>('none');
+  const [bottom, setBottom] = useState<TablePaginationPlacement>('bottomEnd');
   const [ellipsis, setEllipsis] = useState(false);
   const [yScroll, setYScroll] = useState(false);
   const [xScroll, setXScroll] = useState<string>('unset');
@@ -4834,7 +5037,7 @@ const App: React.FC = () => {
     scroll.y = 240;
   }
   if (xScroll !== 'unset') {
-    scroll.x = '100vw';
+    scroll.x = '120vw';
   }
   const tableColumns = columns.map((item) => ({ ...item, ellipsis }));
   if (xScroll === 'fixed') {
@@ -4855,7 +5058,7 @@ const App: React.FC = () => {
   };
   return (
     <>
-      <Form layout="inline" className="table-demo-control-bar" style={{ marginBottom: 16 }}>
+      <Form layout="inline" className={styles.tableControlBar}>
         <Form.Item label="Bordered">
           <Switch checked={bordered} onChange={handleBorderChange} />
         </Form.Item>
@@ -4889,7 +5092,7 @@ const App: React.FC = () => {
         <Form.Item label="Size">
           <Radio.Group value={size} onChange={handleSizeChange}>
             <Radio.Button value="large">Large</Radio.Button>
-            <Radio.Button value="middle">Middle</Radio.Button>
+            <Radio.Button value="medium">Medium</Radio.Button>
             <Radio.Button value="small">Small</Radio.Button>
           </Radio.Group>
         </Form.Item>
@@ -4908,29 +5111,177 @@ const App: React.FC = () => {
         </Form.Item>
         <Form.Item label="Pagination Top">
           <Radio.Group value={top} onChange={(e) => setTop(e.target.value)}>
-            <Radio.Button value="topLeft">TopLeft</Radio.Button>
+            <Radio.Button value="topStart">TopStart</Radio.Button>
             <Radio.Button value="topCenter">TopCenter</Radio.Button>
-            <Radio.Button value="topRight">TopRight</Radio.Button>
+            <Radio.Button value="topEnd">TopEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item label="Pagination Bottom">
           <Radio.Group value={bottom} onChange={(e) => setBottom(e.target.value)}>
-            <Radio.Button value="bottomLeft">BottomLeft</Radio.Button>
+            <Radio.Button value="bottomStart">BottomStart</Radio.Button>
             <Radio.Button value="bottomCenter">BottomCenter</Radio.Button>
-            <Radio.Button value="bottomRight">BottomRight</Radio.Button>
+            <Radio.Button value="bottomEnd">BottomEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
       </Form>
       <Table<DataType>
         {...tableProps}
-        pagination={{ position: [top, bottom] }}
+        pagination={{ placement: [top, bottom] }}
         columns={tableColumns}
         dataSource={hasData ? data : []}
         scroll={scroll}
       />
     </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Table 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Table } from 'antd';
+import type { GetProp, TableProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    color: #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  `,
+}));
+interface DataType {
+  key?: string;
+  name?: string;
+  age?: number;
+  address?: string;
+  description?: string;
+}
+const columns: TableProps<DataType>['columns'] = [
+  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Age', dataIndex: 'age', key: 'age' },
+  { title: 'Address', dataIndex: 'address', key: 'address' },
+  { title: 'Description', dataIndex: 'description', key: 'description' },
+];
+const dataSource: DataType[] = [
+  {
+    key: '1',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+    description: 'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.',
+  },
+  {
+    key: '2',
+    name: 'Jim Green',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+    description: 'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.',
+  },
+  {
+    key: '3',
+    name: 'Joe Black',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+    description: 'My name is Joe Black, I am 32 years old, living in Sydney No. 1 Lake Park.',
+  },
+  {
+    key: '4',
+    name: 'Disabled User',
+    age: 99,
+    address: 'Sydney No. 2 Lake Park',
+    description: 'This user is disabled.',
+  },
+];
+const styles: TableProps<DataType>['styles'] = {
+  root: {
+    padding: 10,
+    borderRadius: 8,
+  },
+  pagination: {
+    root: {
+      padding: 10,
+    },
+  },
+  body: {
+    row: {
+      outline: '1px dashed rgba(226, 225, 225, 0.1)',
+    },
+    cell: {
+      outline: '1px dashed rgba(226, 225, 225, 0.1)',
+    },
+  },
+};
+const stylesFn: TableProps<DataType>['styles'] = (
+  info,
+): GetProp<TableProps<DataType>, 'styles', 'Return'> => {
+  if (info?.props?.size === 'medium') {
+    return {
+      root: {
+        color: '#e0e0e0',
+        borderRadius: 8,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+      },
+      title: {
+        backgroundImage: 'linear-gradient(90deg, #6a5acd, #836fff)',
+        color: '#fff',
+        fontSize: '1.25rem',
+        fontWeight: 600,
+        padding: '12px 16px',
+      },
+      footer: {
+        color: '#9ca3af',
+      },
+      header: {
+        cell: {
+          fontWeight: 600,
+          fontSize: '0.95rem',
+          color: '#b8bdfd',
+          padding: '12px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        },
+      },
+      pagination: {
+        root: {
+          padding: 10,
+        },
+        item: {
+          color: '#b8bdfd',
+        },
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const sharedProps: TableProps<DataType> = {
+    columns,
+    dataSource,
+    classNames,
+    pagination: { pageSize: 3, simple: true },
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Table<DataType>
+        {...sharedProps}
+        styles={styles}
+        title={() => 'Table Object Styles'}
+        footer={() => 'Table Object Footer'}
+        size="small"
+        virtual
+        scroll={{ y: 300 }}
+      />
+      <Table<DataType>
+        {...sharedProps}
+        styles={stylesFn}
+        title={() => 'Table Function Styles'}
+        footer={() => 'Table Function Styles'}
+        size="medium"
+      />
+    </Flex>
   );
 };
 export default App;
@@ -5003,7 +5354,7 @@ import { ConfigProvider, Form, Radio, Space, Switch, Table } from 'antd';
 type SizeType = ConfigProviderProps['componentSize'];
 type ColumnsType<T extends object> = GetProp<TableProps<T>, 'columns'>;
 type TablePagination = Exclude<GetProp<TableProps, 'pagination'>, boolean>;
-type TablePaginationPosition = NonNullable<TablePagination['position']>[number];
+type TablePaginationPlacement = NonNullable<TablePagination['placement']>[number];
 type ExpandableConfig<T extends object> = GetProp<TableProps<T>, 'expandable'>;
 type TableRowSelection<T extends object> = GetProp<TableProps<T>, 'rowSelection'>;
 interface DataType {
@@ -5043,7 +5394,7 @@ const columns: ColumnsType<DataType> = [
     key: 'action',
     sorter: true,
     render: () => (
-      <Space size="middle">
+      <Space size="medium">
         <a>Delete</a>
         <a>
           <Space>
@@ -5080,8 +5431,8 @@ const App: React.FC = () => {
   const [rowSelection, setRowSelection] = useState<TableRowSelection<DataType> | undefined>({});
   const [hasData, setHasData] = useState(true);
   const [tableLayout, setTableLayout] = useState<string>('unset');
-  const [top, setTop] = useState<TablePaginationPosition>('none');
-  const [bottom, setBottom] = useState<TablePaginationPosition>('bottomRight');
+  const [top, setTop] = useState<TablePaginationPlacement>('none');
+  const [bottom, setBottom] = useState<TablePaginationPlacement>('bottomEnd');
   const [ellipsis, setEllipsis] = useState(false);
   const [yScroll, setYScroll] = useState(false);
   const [xScroll, setXScroll] = useState<string>('unset');
@@ -5184,7 +5535,7 @@ const App: React.FC = () => {
         <Form.Item label="Size">
           <Radio.Group value={size} onChange={handleSizeChange}>
             <Radio.Button value="large">Large</Radio.Button>
-            <Radio.Button value="middle">Middle</Radio.Button>
+            <Radio.Button value="medium">Medium</Radio.Button>
             <Radio.Button value="small">Small</Radio.Button>
           </Radio.Group>
         </Form.Item>
@@ -5203,17 +5554,17 @@ const App: React.FC = () => {
         </Form.Item>
         <Form.Item label="Pagination Top">
           <Radio.Group value={top} onChange={(e) => setTop(e.target.value)}>
-            <Radio.Button value="topLeft">TopLeft</Radio.Button>
+            <Radio.Button value="topStart">TopStart</Radio.Button>
             <Radio.Button value="topCenter">TopCenter</Radio.Button>
-            <Radio.Button value="topRight">TopRight</Radio.Button>
+            <Radio.Button value="topEnd">TopEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item label="Pagination Bottom">
           <Radio.Group value={bottom} onChange={(e) => setBottom(e.target.value)}>
-            <Radio.Button value="bottomLeft">BottomLeft</Radio.Button>
+            <Radio.Button value="bottomStart">BottomStart</Radio.Button>
             <Radio.Button value="bottomCenter">BottomCenter</Radio.Button>
-            <Radio.Button value="bottomRight">BottomRight</Radio.Button>
+            <Radio.Button value="bottomEnd">BottomEnd</Radio.Button>
             <Radio.Button value="none">None</Radio.Button>
           </Radio.Group>
         </Form.Item>
@@ -5256,7 +5607,7 @@ const App: React.FC = () => {
       >
         <Table<DataType>
           {...tableProps}
-          pagination={{ position: [top, bottom] }}
+          pagination={{ placement: [top, bottom] }}
           columns={tableColumns}
           dataSource={hasData ? dataSource : []}
           scroll={scroll}
@@ -5264,6 +5615,194 @@ const App: React.FC = () => {
       </ConfigProvider>
     </>
   );
+};
+export default App;
+```
+### measureRowRender
+用 `measureRowRender` 修复 https://github.com/ant-design/ant-design/issues/54906 。
+
+```tsx
+import React, { useRef, useState } from 'react';
+import { SearchOutlined } from '@ant-design/icons';
+import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
+import { Button, Input, Space, Table } from 'antd';
+import type { FilterDropdownProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
+interface DataType {
+  key: string;
+  name: string;
+  age: number;
+  address: string;
+}
+type DataIndex = keyof DataType;
+const data: DataType[] = [
+  {
+    key: '1',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+  },
+  {
+    key: '2',
+    name: 'Joe Black',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+  },
+  {
+    key: '3',
+    name: 'Jim Green',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+  },
+  {
+    key: '4',
+    name: 'Jim Red',
+    age: 32,
+    address: 'London No. 2 Lake Park',
+  },
+];
+const App: React.FC = () => {
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef<InputRef>(null);
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps['confirm'],
+    dataIndex: DataIndex,
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<DataType> => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText((selectedKeys as string[])[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    filterDropdownProps: {
+      onOpenChange(open) {
+        if (open) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
+  const columns: TableColumnsType<DataType> = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      width: '30%',
+      ...getColumnSearchProps('name'),
+      filterDropdownProps: {
+        open: true,
+      },
+    },
+    {
+      title: 'Age',
+      dataIndex: 'age',
+      key: 'age',
+      width: '20%',
+      filters: [
+        {
+          text: 'Joe',
+          value: 'Joe',
+        },
+        {
+          text: 'Category 1',
+          value: 'Category 1',
+        },
+        {
+          text: 'Category 2',
+          value: 'Category 2',
+        },
+      ],
+      filterDropdownProps: {
+        open: true,
+      },
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
+      ...getColumnSearchProps('address'),
+      sorter: (a, b) => a.address.length - b.address.length,
+      sortDirections: ['descend', 'ascend'],
+      showSorterTooltip: {
+        open: true,
+      },
+    },
+  ];
+  return <Table<DataType> sticky columns={columns} dataSource={data} />;
 };
 export default App;
 ```

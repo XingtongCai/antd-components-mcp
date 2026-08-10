@@ -56,12 +56,11 @@ export default App;
 ```
 ### 表单方法调用
 通过 `Form.useForm` 对表单数据域进行交互。
-> 注意 `useForm` 是 [React Hooks](https://reactjs.org/docs/hooks-intro.html) 的实现，只能用于函数组件。如果是在 Class Component 下，你也可以通过 `ref` 获取数据域：https://codesandbox.io/p/sandbox/ngtjtm
+> 注意 `useForm` 是 [React Hooks](https://zh-hans.react.dev/reference/react/hooks) 的实现，只能用于函数组件。如果是在 Class Component 下，你也可以通过 `ref` 获取数据域：https://codesandbox.io/p/sandbox/ngtjtm
 
 ```tsx
 import React from 'react';
 import { Button, Form, Input, Select, Space } from 'antd';
-const { Option } = Select;
 const layout = {
   labelCol: { span: 8 },
   wrapperCol: { span: 16 },
@@ -107,14 +106,15 @@ const App: React.FC = () => {
       </Form.Item>
       <Form.Item name="gender" label="Gender" rules={[{ required: true }]}>
         <Select
+          allowClear
           placeholder="Select a option and change input text above"
           onChange={onGenderChange}
-          allowClear
-        >
-          <Option value="male">male</Option>
-          <Option value="female">female</Option>
-          <Option value="other">other</Option>
-        </Select>
+          options={[
+            { label: 'male', value: 'male' },
+            { label: 'female', value: 'female' },
+            { label: 'other', value: 'other' },
+          ]}
+        />
       </Form.Item>
       <Form.Item
         noStyle
@@ -152,11 +152,12 @@ export default App;
 ```tsx
 import React, { useState } from 'react';
 import { Button, Form, Input, Radio } from 'antd';
+import type { FormProps } from 'antd';
 type LayoutType = Parameters<typeof Form>[0]['layout'];
 const App: React.FC = () => {
   const [form] = Form.useForm();
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal');
-  const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {
+  const onFormLayoutChange: FormProps<any>['onValuesChange'] = ({ layout }) => {
     setFormLayout(layout);
   };
   return (
@@ -193,37 +194,32 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Form, Input } from 'antd';
+import { Divider, Form, Input } from 'antd';
 const App: React.FC = () => (
   <>
-    <Form
-      name="layout-multiple-horizontal"
-      layout="horizontal"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
-      <Form.Item label="horizontal" name="horizontal" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
+    <Form name="layout-multiple-horizontal" layout="horizontal">
       <Form.Item
-        layout="vertical"
-        label="vertical"
-        name="vertical"
+        label="horizontal"
+        name="horizontal"
         rules={[{ required: true }]}
-        labelCol={{ span: 24 }}
-        wrapperCol={{ span: 24 }}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
+      <Form.Item layout="vertical" label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item layout="vertical" label="vertical2" name="vertical2" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
     </Form>
-    <br />
-    <Form
-      name="layout-multiple-vertical"
-      layout="vertical"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-    >
+    <Divider />
+    <Form name="layout-multiple-vertical" layout="vertical">
       <Form.Item label="vertical" name="vertical" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="vertical2" name="vertical2" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
       <Form.Item
@@ -231,6 +227,8 @@ const App: React.FC = () => (
         label="horizontal"
         name="horizontal"
         rules={[{ required: true }]}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
       >
         <Input />
       </Form.Item>
@@ -254,11 +252,14 @@ import {
   Form,
   Input,
   InputNumber,
+  Mentions,
   Radio,
   Rate,
   Select,
   Slider,
   Switch,
+  Transfer,
+  Tree,
   TreeSelect,
   Upload,
 } from 'antd';
@@ -300,9 +301,7 @@ const FormDisabledDemo: React.FC = () => {
           <Input />
         </Form.Item>
         <Form.Item label="Select">
-          <Select>
-            <Select.Option value="demo">Demo</Select.Option>
-          </Select>
+          <Select options={[{ label: 'Demo', value: 'demo' }]} />
         </Form.Item>
         <Form.Item label="TreeSelect">
           <TreeSelect
@@ -364,6 +363,60 @@ const FormDisabledDemo: React.FC = () => {
         </Form.Item>
         <Form.Item label="Rate">
           <Rate />
+        </Form.Item>
+        <Form.Item label="Mentions">
+          <Mentions defaultValue="@afc163" />
+        </Form.Item>
+        <Form.Item label="Transfer">
+          <Transfer
+            dataSource={Array.from({ length: 20 }, (_, i) => ({
+              key: i.toString(),
+              title: `Content ${i + 1}`,
+              description: `Description of content ${i + 1}`,
+            }))}
+            targetKeys={['1', '3', '5']}
+            render={(item) => item.title}
+          />
+        </Form.Item>
+        <Form.Item label="Tree">
+          <Tree
+            checkable
+            defaultExpandedKeys={['0-0', '0-1']}
+            defaultSelectedKeys={['0-0-0', '0-1-0']}
+            defaultCheckedKeys={['0-0-0-0', '0-1-0']}
+            treeData={[
+              {
+                title: 'Parent 1',
+                key: '0-0',
+                children: [
+                  {
+                    title: 'Child 1-1',
+                    key: '0-0-0',
+                    children: [
+                      {
+                        title: 'Grandchild 1-1-1',
+                        key: '0-0-0-0',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Child 1-2',
+                    key: '0-0-1',
+                  },
+                ],
+              },
+              {
+                title: 'Parent 2',
+                key: '0-1',
+                children: [
+                  {
+                    title: 'Child 2-1',
+                    key: '0-1-0',
+                  },
+                ],
+              },
+            ]}
+          />
         </Form.Item>
       </Form>
     </>
@@ -472,7 +525,7 @@ const App: React.FC = () => {
       >
         <RangePicker />
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+      <Form.Item label={null}>
         <Button type="primary" htmlType="submit">
           Submit
         </Button>
@@ -489,6 +542,7 @@ export default App;
 import React, { useState } from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Radio, Tag } from 'antd';
+import type { FormProps } from 'antd';
 type RequiredMark = boolean | 'optional' | 'customize';
 const customizeRequiredMark = (label: React.ReactNode, { required }: { required: boolean }) => (
   <>
@@ -498,9 +552,9 @@ const customizeRequiredMark = (label: React.ReactNode, { required }: { required:
 );
 const App: React.FC = () => {
   const [form] = Form.useForm();
-  const [requiredMark, setRequiredMarkType] = useState<RequiredMark>('optional');
-  const onRequiredTypeChange = ({ requiredMarkValue }: { requiredMarkValue: RequiredMark }) => {
-    setRequiredMarkType(requiredMarkValue);
+  const [requiredMark, setRequiredMark] = useState<RequiredMark>('optional');
+  const onRequiredTypeChange: FormProps<any>['onValuesChange'] = ({ requiredMarkValue }) => {
+    setRequiredMark(requiredMarkValue);
   };
   return (
     <Form
@@ -552,10 +606,11 @@ import {
   Switch,
   TreeSelect,
 } from 'antd';
+import type { FormProps } from 'antd';
 type SizeType = Parameters<typeof Form>[0]['size'];
 const App: React.FC = () => {
-  const [componentSize, setComponentSize] = useState<SizeType | 'default'>('default');
-  const onFormLayoutChange = ({ size }: { size: SizeType }) => {
+  const [componentSize, setComponentSize] = useState<SizeType>('medium');
+  const onFormLayoutChange: FormProps<any>['onValuesChange'] = ({ size }) => {
     setComponentSize(size);
   };
   return (
@@ -571,7 +626,7 @@ const App: React.FC = () => {
       <Form.Item label="Form Size" name="size">
         <Radio.Group>
           <Radio.Button value="small">Small</Radio.Button>
-          <Radio.Button value="default">Default</Radio.Button>
+          <Radio.Button value="medium">Medium</Radio.Button>
           <Radio.Button value="large">Large</Radio.Button>
         </Radio.Group>
       </Form.Item>
@@ -579,9 +634,7 @@ const App: React.FC = () => {
         <Input />
       </Form.Item>
       <Form.Item label="Select">
-        <Select>
-          <Select.Option value="demo">Demo</Select.Option>
-        </Select>
+        <Select options={[{ label: 'Demo', value: 'demo' }]} />
       </Form.Item>
       <Form.Item label="TreeSelect">
         <TreeSelect
@@ -659,12 +712,13 @@ export default App;
 import React from 'react';
 import { Button, Form, Input, message, Space } from 'antd';
 const App: React.FC = () => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const onFinish = () => {
-    message.success('Submit success!');
+    messageApi.success('Submit success!');
   };
   const onFinishFailed = () => {
-    message.error('Submit failed!');
+    messageApi.error('Submit failed!');
   };
   const onFill = () => {
     form.setFieldsValue({
@@ -672,31 +726,38 @@ const App: React.FC = () => {
     });
   };
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-      autoComplete="off"
-    >
-      <Form.Item
-        name="url"
-        label="URL"
-        rules={[{ required: true }, { type: 'url', warningOnly: true }, { type: 'string', min: 6 }]}
+    <>
+      {contextHolder}
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+        autoComplete="off"
       >
-        <Input placeholder="input placeholder" />
-      </Form.Item>
-      <Form.Item>
-        <Space>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-          <Button htmlType="button" onClick={onFill}>
-            Fill
-          </Button>
-        </Space>
-      </Form.Item>
-    </Form>
+        <Form.Item
+          name="url"
+          label="URL"
+          rules={[
+            { required: true },
+            { type: 'url', warningOnly: true },
+            { type: 'string', min: 6 },
+          ]}
+        >
+          <Input placeholder="input placeholder" />
+        </Form.Item>
+        <Form.Item>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button htmlType="button" onClick={onFill}>
+              Fill
+            </Button>
+          </Space>
+        </Form.Item>
+      </Form>
+    </>
   );
 };
 export default App;
@@ -739,7 +800,7 @@ import React from 'react';
 import { Alert, Form, Input } from 'antd';
 const App: React.FC = () => (
   <Form name="trigger" style={{ maxWidth: 600 }} layout="vertical" autoComplete="off">
-    <Alert message="Use 'max' rule, continue type chars to see it" />
+    <Alert title="Use 'max' rule, continue type chars to see it" />
     <Form.Item
       hasFeedback
       label="Field A"
@@ -879,6 +940,28 @@ export default App;
 import React from 'react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles((props) => {
+  const { css, cssVar } = props;
+  return {
+    dynamicDeleteButton: css`
+      position: relative;
+      top: ${cssVar.marginXXS};
+      margin: 0 ${cssVar.marginXS};
+      color: #999;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all ${cssVar.motionDurationSlow} ease;
+      &:hover {
+        color: #777;
+      }
+      &[disabled] {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    `,
+  };
+});
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -896,6 +979,7 @@ const formItemLayoutWithOutLabel = {
   },
 };
 const App: React.FC = () => {
+  const { styles } = useStyles();
   const onFinish = (values: any) => {
     console.log('Received values of form:', values);
   };
@@ -923,7 +1007,7 @@ const App: React.FC = () => {
             {fields.map((field, index) => (
               <Form.Item
                 {...(index === 0 ? formItemLayout : formItemLayoutWithOutLabel)}
-                label={index === 0 ? 'Passengers' : ''}
+                label={index === 0 ? 'Passengers' : undefined}
                 required={false}
                 key={field.key}
               >
@@ -943,7 +1027,7 @@ const App: React.FC = () => {
                 </Form.Item>
                 {fields.length > 1 ? (
                   <MinusCircleOutlined
-                    className="dynamic-delete-button"
+                    className={styles.dynamicDeleteButton}
                     onClick={() => remove(field.name)}
                   />
                 ) : null}
@@ -1037,6 +1121,144 @@ const App: React.FC = () => (
     </Form.Item>
   </Form>
 );
+export default App;
+```
+### 拖拽排序
+结合 [dnd-kit](https://github.com/clauderic/dnd-kit) 与 `Form.List` 提供的 `move` 操作，实现动态表单项的拖拽排序。拖拽以每个字段稳定的 `key` 作为标识，结束拖拽时调用 `move(from, to)` 调整顺序，表单数据会随之同步。
+
+```tsx
+import React, { useContext, useMemo } from 'react';
+import { HolderOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import type { DragEndEvent, DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core';
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Button, Form, Input, Space } from 'antd';
+const onFinish = (values: any) => {
+  console.log('Received values of form:', values);
+};
+interface RowContextProps {
+  setActivatorNodeRef?: (element: HTMLElement | null) => void;
+  listeners?: DraggableSyntheticListeners;
+  attributes?: DraggableAttributes;
+}
+const RowContext = React.createContext<RowContextProps>({});
+const DragHandle: React.FC = () => {
+  const { setActivatorNodeRef, listeners, attributes } = useContext(RowContext);
+  return (
+    <Button
+      type="text"
+      size="small"
+      icon={<HolderOutlined />}
+      style={{ cursor: 'move' }}
+      ref={setActivatorNodeRef}
+      {...attributes}
+      {...listeners}
+    />
+  );
+};
+interface SortableItemProps {
+  id: number;
+  children?: React.ReactNode;
+}
+const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
+  const {
+    setNodeRef,
+    setActivatorNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+    ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
+  };
+  const contextValue = useMemo<RowContextProps>(
+    () => ({ setActivatorNodeRef, listeners, attributes }),
+    [setActivatorNodeRef, listeners, attributes],
+  );
+  return (
+    <RowContext.Provider value={contextValue}>
+      <div ref={setNodeRef} style={style}>
+        {children}
+      </div>
+    </RowContext.Provider>
+  );
+};
+const App: React.FC = () => {
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 1 } }));
+  return (
+    <Form
+      name="dynamic_form_draggable_item"
+      onFinish={onFinish}
+      style={{ maxWidth: 600 }}
+      autoComplete="off"
+    >
+      <Form.List name="users">
+        {(fields, { add, remove, move }) => {
+          const onDragEnd = ({ active, over }: DragEndEvent) => {
+            if (over && active.id !== over.id) {
+              const activeIndex = fields.findIndex((field) => field.key === active.id);
+              const overIndex = fields.findIndex((field) => field.key === over.id);
+              if (activeIndex !== -1 && overIndex !== -1) {
+                move(activeIndex, overIndex);
+              }
+            }
+          };
+          return (
+            <DndContext
+              sensors={sensors}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={onDragEnd}
+            >
+              <SortableContext
+                items={fields.map((field) => field.key)}
+                strategy={verticalListSortingStrategy}
+              >
+                {fields.map(({ key, name, ...restField }) => (
+                  <SortableItem key={key} id={key}>
+                    <Space style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                      <DragHandle />
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'first']}
+                        rules={[{ required: true, message: 'Missing first name' }]}
+                      >
+                        <Input placeholder="First Name" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'last']}
+                        rules={[{ required: true, message: 'Missing last name' }]}
+                      >
+                        <Input placeholder="Last Name" />
+                      </Form.Item>
+                      <MinusCircleOutlined onClick={() => remove(name)} />
+                    </Space>
+                  </SortableItem>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add field
+                  </Button>
+                </Form.Item>
+              </SortableContext>
+            </DndContext>
+          );
+        }}
+      </Form.List>
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+};
 export default App;
 ```
 ### 动态增减嵌套纯字段
@@ -1254,7 +1476,6 @@ export default App;
 ```tsx
 import React from 'react';
 import { Button, Form, Input, Select, Space, Tooltip, Typography } from 'antd';
-const { Option } = Select;
 const onFinish = (values: any) => {
   console.log('Received values of form: ', values);
 };
@@ -1287,10 +1508,13 @@ const App: React.FC = () => (
           noStyle
           rules={[{ required: true, message: 'Province is required' }]}
         >
-          <Select placeholder="Select province">
-            <Option value="Zhejiang">Zhejiang</Option>
-            <Option value="Jiangsu">Jiangsu</Option>
-          </Select>
+          <Select
+            placeholder="Select province"
+            options={[
+              { label: 'Zhejiang', value: 'Zhejiang' },
+              { label: 'Jiangsu', value: 'Jiangsu' },
+            ]}
+          />
         </Form.Item>
         <Form.Item
           name={['address', 'street']}
@@ -1335,7 +1559,6 @@ export default App;
 ```tsx
 import React, { useState } from 'react';
 import { Button, Form, Input, Select } from 'antd';
-const { Option } = Select;
 type Currency = 'rmb' | 'dollar';
 interface PriceValue {
   number?: number;
@@ -1354,7 +1577,7 @@ const PriceInput: React.FC<PriceInputProps> = (props) => {
     onChange?.({ number, currency, ...value, ...changedValue });
   };
   const onNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newNumber = parseInt(e.target.value || '0', 10);
+    const newNumber = Number.parseInt(e.target.value || '0', 10);
     if (Number.isNaN(number)) {
       return;
     }
@@ -1381,10 +1604,11 @@ const PriceInput: React.FC<PriceInputProps> = (props) => {
         value={value.currency || currency}
         style={{ width: 80, margin: '0 8px' }}
         onChange={onCurrencyChange}
-      >
-        <Option value="rmb">RMB</Option>
-        <Option value="dollar">Dollar</Option>
-      </Select>
+        options={[
+          { label: 'RMB', value: 'rmb' },
+          { label: 'Dollar', value: 'dollar' },
+        ]}
+      />
     </span>
   );
 };
@@ -1404,10 +1628,7 @@ const App: React.FC = () => {
       layout="inline"
       onFinish={onFinish}
       initialValues={{
-        price: {
-          number: 0,
-          currency: 'rmb',
-        },
+        price: { number: 0, currency: 'rmb' },
       }}
     >
       <Form.Item name="price" label="Price" rules={[{ validator: checkPrice }]}>
@@ -1425,6 +1646,7 @@ export default App;
 ```
 ### 表单数据存储于上层组件
 通过 `onFieldsChange` 和 `fields`，可以把表单的数据存储到上层组件或者 [Redux](https://github.com/reactjs/redux)、[dva](https://github.com/dvajs/dva) 中，更多可参考 [rc-field-form 示例](https://rc-field-form.react-component.now.sh/?selectedKind=rc-field-form&selectedStory=StateForm-redux&full=0&addons=1&stories=1&panelRight=0&addonPanel=storybook%2Factions%2Factions-panel)。
+`onFieldsChange` 返回扁平的 `FieldData[]`。当字段名为数组路径时，`FieldData.name` 会保留该路径，而不是转换为嵌套对象，便于在外部状态中逐项处理字段。
 **注意：** 将表单数据存储于外部容器[并非好的实践](https://github.com/reduxjs/redux/issues/1287#issuecomment-175351978)，如无必要请避免使用。
 
 ```tsx
@@ -1433,7 +1655,7 @@ import { Form, Input, Typography } from 'antd';
 const { Paragraph } = Typography;
 interface FieldData {
   name: string | number | (string | number)[];
-  value?: any;
+  value?: unknown;
   touched?: boolean;
   validating?: boolean;
   errors?: string[];
@@ -1458,10 +1680,16 @@ const CustomizedForm: React.FC<CustomizedFormProps> = ({ onChange, fields }) => 
     >
       <Input />
     </Form.Item>
+    <Form.Item name={['profile', 'email']} label="Email">
+      <Input />
+    </Form.Item>
   </Form>
 );
 const App: React.FC = () => {
-  const [fields, setFields] = useState<FieldData[]>([{ name: ['username'], value: 'Ant Design' }]);
+  const [fields, setFields] = useState<FieldData[]>([
+    { name: ['username'], value: 'Ant Design' },
+    { name: ['profile', 'email'], value: 'antd@example.com' },
+  ]);
   return (
     <>
       <CustomizedForm
@@ -1641,7 +1869,7 @@ const App: React.FC = () => {
             disabled={
               !clientReady ||
               !form.isFieldsTouched(true) ||
-              !!form.getFieldsError().filter(({ errors }) => errors.length).length
+              form.getFieldsError().some(({ errors }) => errors.length)
             }
           >
             Log in
@@ -1660,7 +1888,7 @@ export default App;
 ```tsx
 import React from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, Flex } from 'antd';
+import { Button, Checkbox, Flex, Form, Input } from 'antd';
 const App: React.FC = () => {
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values);
@@ -1708,7 +1936,7 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import type { CascaderProps } from 'antd';
+import type { CascaderProps, FormItemProps, FormProps } from 'antd';
 import {
   AutoComplete,
   Button,
@@ -1720,14 +1948,15 @@ import {
   InputNumber,
   Row,
   Select,
+  Space,
 } from 'antd';
-const { Option } = Select;
-interface DataNodeType {
+import type { DefaultOptionType } from 'antd/es/select';
+interface FormCascaderOption {
   value: string;
   label: string;
-  children?: DataNodeType[];
+  children?: FormCascaderOption[];
 }
-const residences: CascaderProps<DataNodeType>['options'] = [
+const residences: CascaderProps<FormCascaderOption>['options'] = [
   {
     value: 'zhejiang',
     label: 'Zhejiang',
@@ -1761,7 +1990,7 @@ const residences: CascaderProps<DataNodeType>['options'] = [
     ],
   },
 ];
-const formItemLayout = {
+const formItemLayout: FormProps = {
   labelCol: {
     xs: { span: 24 },
     sm: { span: 8 },
@@ -1771,7 +2000,7 @@ const formItemLayout = {
     sm: { span: 16 },
   },
 };
-const tailFormItemLayout = {
+const tailFormItemLayout: FormItemProps = {
   wrapperCol: {
     xs: {
       span: 24,
@@ -1783,36 +2012,111 @@ const tailFormItemLayout = {
     },
   },
 };
+interface PhoneValue {
+  prefix?: string;
+  phone?: string;
+}
+interface PhoneInputProps {
+  id?: string;
+  value?: PhoneValue;
+  onChange?: (value: PhoneValue) => void;
+}
+const PhoneInput: React.FC<PhoneInputProps> = ({ id, value = {}, onChange }) => {
+  const [prefix, setPrefix] = useState('86');
+  const [phone, setPhone] = useState('');
+  const triggerChange = (changedValue: PhoneValue) => {
+    onChange?.({ ...value, ...changedValue });
+  };
+  const onPrefixChange = (newPrefix: string) => {
+    if (!('prefix' in value)) {
+      setPrefix(newPrefix);
+    }
+    triggerChange({ prefix: newPrefix });
+  };
+  const onPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPhone = e.target.value;
+    if (!('phone' in value)) {
+      setPhone(newPhone);
+    }
+    triggerChange({ phone: newPhone });
+  };
+  return (
+    <span id={id}>
+      <Space.Compact block>
+        <Select
+          value={value.prefix || prefix}
+          onChange={onPrefixChange}
+          style={{ width: 70 }}
+          options={[
+            { label: '+86', value: '86' },
+            { label: '+87', value: '87' },
+          ]}
+        />
+        <Input value={value.phone || phone} onChange={onPhoneChange} style={{ width: '100%' }} />
+      </Space.Compact>
+    </span>
+  );
+};
+interface DonationValue {
+  amount?: number;
+  currency?: string;
+}
+interface DonationInputProps {
+  id?: string;
+  value?: DonationValue;
+  onChange?: (value: DonationValue) => void;
+}
+const DonationInput: React.FC<DonationInputProps> = ({ id, value = {}, onChange }) => {
+  const [amount, setAmount] = useState<number>();
+  const [currency, setCurrency] = useState('USD');
+  const triggerChange = (changedValue: DonationValue) => {
+    onChange?.({ ...value, ...changedValue });
+  };
+  const onAmountChange = (newAmount: number | null) => {
+    if (!('amount' in value)) {
+      setAmount(newAmount ?? undefined);
+    }
+    triggerChange({ amount: newAmount ?? undefined });
+  };
+  const onCurrencyChange = (newCurrency: string) => {
+    if (!('currency' in value)) {
+      setCurrency(newCurrency);
+    }
+    triggerChange({ currency: newCurrency });
+  };
+  return (
+    <span id={id}>
+      <Space.Compact block>
+        <InputNumber
+          value={value.amount ?? amount}
+          onChange={onAmountChange}
+          style={{ width: '100%' }}
+        />
+        <Select
+          value={value.currency || currency}
+          onChange={onCurrencyChange}
+          style={{ width: 70 }}
+          options={[
+            { label: '$', value: 'USD' },
+            { label: '¥', value: 'CNY' },
+          ]}
+        />
+      </Space.Compact>
+    </span>
+  );
+};
 const App: React.FC = () => {
   const [form] = Form.useForm();
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values);
   };
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select style={{ width: 70 }}>
-        <Option value="86">+86</Option>
-        <Option value="87">+87</Option>
-      </Select>
-    </Form.Item>
-  );
-  const suffixSelector = (
-    <Form.Item name="suffix" noStyle>
-      <Select style={{ width: 70 }}>
-        <Option value="USD">$</Option>
-        <Option value="CNY">¥</Option>
-      </Select>
-    </Form.Item>
-  );
   const [autoCompleteResult, setAutoCompleteResult] = useState<string[]>([]);
   const onWebsiteChange = (value: string) => {
-    if (!value) {
-      setAutoCompleteResult([]);
-    } else {
-      setAutoCompleteResult(['.com', '.org', '.net'].map((domain) => `${value}${domain}`));
-    }
+    setAutoCompleteResult(
+      value ? ['.com', '.org', '.net'].map((domain) => `${value}${domain}`) : [],
+    );
   };
-  const websiteOptions = autoCompleteResult.map((website) => ({
+  const websiteOptions = autoCompleteResult.map<DefaultOptionType>((website) => ({
     label: website,
     value: website,
   }));
@@ -1822,7 +2126,11 @@ const App: React.FC = () => {
       form={form}
       name="register"
       onFinish={onFinish}
-      initialValues={{ residence: ['zhejiang', 'hangzhou', 'xihu'], prefix: '86' }}
+      initialValues={{
+        residence: ['zhejiang', 'hangzhou', 'xihu'],
+        phone: { prefix: '86' },
+        donation: { currency: 'USD' },
+      }}
       style={{ maxWidth: 600 }}
       scrollToFirstError
     >
@@ -1899,14 +2207,14 @@ const App: React.FC = () => {
         label="Phone Number"
         rules={[{ required: true, message: 'Please input your phone number!' }]}
       >
-        <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
+        <PhoneInput />
       </Form.Item>
       <Form.Item
         name="donation"
         label="Donation"
         rules={[{ required: true, message: 'Please input donation amount!' }]}
       >
-        <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
+        <DonationInput />
       </Form.Item>
       <Form.Item
         name="website"
@@ -1929,11 +2237,15 @@ const App: React.FC = () => {
         label="Gender"
         rules={[{ required: true, message: 'Please select gender!' }]}
       >
-        <Select placeholder="select your gender">
-          <Option value="male">Male</Option>
-          <Option value="female">Female</Option>
-          <Option value="other">Other</Option>
-        </Select>
+        <Select
+          placeholder="select your gender"
+          defaultValue={'male'}
+          options={[
+            { label: 'Male', value: 'male' },
+            { label: 'Female', value: 'female' },
+            { label: 'Other', value: 'other' },
+          ]}
+        />
       </Form.Item>
       <Form.Item label="Captcha" extra="We must make sure that your are a human.">
         <Row gutter={8}>
@@ -1985,7 +2297,6 @@ export default App;
 import React, { useState } from 'react';
 import { DownOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Row, Select, Space, theme } from 'antd';
-const { Option } = Select;
 const AdvancedSearchForm = () => {
   const { token } = theme.useToken();
   const [form] = Form.useForm();
@@ -1998,7 +2309,7 @@ const AdvancedSearchForm = () => {
   };
   const getFields = () => {
     const count = expand ? 10 : 6;
-    const children = [];
+    const children: React.ReactNode[] = [];
     for (let i = 0; i < count; i++) {
       children.push(
         <Col span={8} key={i}>
@@ -2027,12 +2338,19 @@ const AdvancedSearchForm = () => {
               ]}
               initialValue="1"
             >
-              <Select>
-                <Option value="1">
-                  longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
-                </Option>
-                <Option value="2">222</Option>
-              </Select>
+              <Select
+                options={[
+                  {
+                    value: '1',
+                    label:
+                      'longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong',
+                  },
+                  {
+                    value: '2',
+                    label: '222',
+                  },
+                ]}
+              />
             </Form.Item>
           )}
         </Col>,
@@ -2046,7 +2364,7 @@ const AdvancedSearchForm = () => {
   return (
     <Form form={form} name="advanced_search" style={formStyle} onFinish={onFinish}>
       <Row gutter={24}>{getFields()}</Row>
-      <div style={{ textAlign: 'right' }}>
+      <div style={{ textAlign: 'end' }}>
         <Space size="small">
           <Button type="primary" htmlType="submit">
             Search
@@ -2312,7 +2630,6 @@ import {
   TimePicker,
   TreeSelect,
 } from 'antd';
-const { Option } = Select;
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -2367,11 +2684,16 @@ const App: React.FC = () => (
       <DatePicker.RangePicker style={{ width: '100%' }} />
     </Form.Item>
     <Form.Item label="Error" hasFeedback validateStatus="error">
-      <Select placeholder="I'm Select" allowClear>
-        <Option value="1">Option 1</Option>
-        <Option value="2">Option 2</Option>
-        <Option value="3">Option 3</Option>
-      </Select>
+      <Select
+        allowClear
+        placeholder="I'm Select"
+        defaultValue={'1'}
+        options={[
+          { label: 'Option 1', value: '1' },
+          { label: 'Option 2', value: '2' },
+          { label: 'Option 3', value: '3' },
+        ]}
+      />
     </Form.Item>
     <Form.Item
       label="Validating"
@@ -2511,12 +2833,12 @@ const App: React.FC = () => {
   return (
     <Form
       form={form}
-      name="dependencies"
+      name="dependenciesDemo"
       autoComplete="off"
       style={{ maxWidth: 600 }}
       layout="vertical"
     >
-      <Alert message=" Try modify `Password2` and then modify `Password`" type="info" showIcon />
+      <Alert title=" Try modify `Password2` and then modify `Password`" type="info" showIcon />
       <Form.Item label="Password" name="password" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
@@ -2573,7 +2895,7 @@ const App = () => {
       labelCol={{ span: 6 }}
       wrapperCol={{ span: 14 }}
     >
-      <Form.Item wrapperCol={{ offset: 6 }}>
+      <Form.Item label={null}>
         <Button onClick={() => form.scrollToField('bio')}>Scroll to Bio</Button>
       </Form.Item>
       <Form.Item name="username" label="UserName" rules={[{ required: true }]}>
@@ -2594,7 +2916,7 @@ const App = () => {
       <Form.Item name="bio" label="Bio" rules={[{ required: true }]}>
         <Input.TextArea rows={6} />
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 6 }}>
+      <Form.Item label={null}>
         <Flex gap="small">
           <Button type="primary" htmlType="submit">
             Submit
@@ -2631,7 +2953,6 @@ import {
   Switch,
   Upload,
 } from 'antd';
-const { Option } = Select;
 const formItemLayout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 14 },
@@ -2668,21 +2989,28 @@ const App: React.FC = () => (
       hasFeedback
       rules={[{ required: true, message: 'Please select your country!' }]}
     >
-      <Select placeholder="Please select a country">
-        <Option value="china">China</Option>
-        <Option value="usa">U.S.A</Option>
-      </Select>
+      <Select
+        placeholder="Please select a country"
+        options={[
+          { label: 'China', value: 'china' },
+          { label: 'U.S.A', value: 'usa' },
+        ]}
+      />
     </Form.Item>
     <Form.Item
       name="select-multiple"
       label="Select[multiple]"
       rules={[{ required: true, message: 'Please select your favourite colors!', type: 'array' }]}
     >
-      <Select mode="multiple" placeholder="Please select favourite colors">
-        <Option value="red">Red</Option>
-        <Option value="green">Green</Option>
-        <Option value="blue">Blue</Option>
-      </Select>
+      <Select
+        mode="multiple"
+        placeholder="Please select favourite colors"
+        options={[
+          { label: 'Red', value: 'red' },
+          { label: 'Green', value: 'green' },
+          { label: 'Blue', value: 'blue' },
+        ]}
+      />
     </Form.Item>
     <Form.Item label="InputNumber">
       <Form.Item name="input-number" noStyle>
@@ -2793,7 +3121,7 @@ const App: React.FC = () => (
     >
       <ColorPicker />
     </Form.Item>
-    <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+    <Form.Item label={null}>
       <Space>
         <Button type="primary" htmlType="submit">
           Submit
@@ -2803,6 +3131,98 @@ const App: React.FC = () => (
     </Form.Item>
   </Form>
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Form 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Button, Form, Input, Space } from 'antd';
+import type { FormProps, GetProp } from 'antd';
+import { createStyles } from 'antd-style';
+const useStyles = createStyles(({ token }) => ({
+  root: {
+    padding: token.padding,
+    maxWidth: 800,
+    marginTop: 32,
+    backgroundColor: token.colorBgContainer,
+    borderRadius: token.borderRadius,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  },
+}));
+const stylesObject: FormProps['styles'] = {
+  label: {
+    textAlign: 'end',
+    color: '#333',
+    fontWeight: 500,
+  },
+  content: {
+    paddingInlineStart: 12,
+  },
+};
+const stylesFunction: FormProps['styles'] = (info): GetProp<FormProps, 'styles', 'Return'> => {
+  if (info.props.variant === 'filled') {
+    return {
+      root: {
+        border: '1px solid #1677FF',
+      },
+      label: {
+        textAlign: 'end',
+        color: '#1677FF',
+      },
+      content: {
+        paddingInlineStart: 12,
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyles();
+  const sharedProps: FormProps = {
+    labelCol: { span: 4 },
+    wrapperCol: { span: 20 },
+    autoComplete: 'off',
+    classNames,
+  };
+  const sharedFormContent = (
+    <>
+      <Form.Item
+        label="Username"
+        name="username"
+        rules={[{ required: true, message: 'Please enter username!' }]}
+      >
+        <Input placeholder="Please enter username" />
+      </Form.Item>
+      <Form.Item
+        label="Email"
+        name="email"
+        rules={[{ required: true, message: 'Please enter email!' }]}
+      >
+        <Input placeholder="Please enter email" />
+      </Form.Item>
+      <Form.Item label={null}>
+        <Space>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+          <Button htmlType="reset">reset</Button>
+        </Space>
+      </Form.Item>
+    </>
+  );
+  return (
+    <>
+      <Form {...sharedProps} styles={stylesObject}>
+        {sharedFormContent}
+      </Form>
+      <Form {...sharedProps} styles={stylesFunction} variant="filled">
+        {sharedFormContent}
+      </Form>
+    </>
+  );
+};
 export default App;
 ```
 ### getValueProps + normalize
@@ -2884,13 +3304,13 @@ const App: React.FC = () => (
       <Input placeholder="unavailable choice" disabled addonBefore="Buggy!" />
     </Form.Item>
     <Form.Item label="Normal3">
-      <Input placeholder="unavailable choice" prefix="人民币" value="50" />
+      <Input placeholder="unavailable choice" prefix="RMB" value="50" />
     </Form.Item>
     <Form.Item label="Fail3" validateStatus="error" help="Buggy!">
-      <Input placeholder="unavailable choice" prefix="人民币" value="50" />
+      <Input placeholder="unavailable choice" prefix="RMB" value="50" />
     </Form.Item>
     <Form.Item label="FailDisabled3" validateStatus="error" help="Buggy!">
-      <Input placeholder="unavailable choice" disabled prefix="人民币" value="50" />
+      <Input placeholder="unavailable choice" disabled prefix="RMB" value="50" />
     </Form.Item>
   </Form>
 );
@@ -2945,7 +3365,7 @@ const sharedItem = (
       <a
         href="https://github.com/ant-design/ant-design/issues/36459"
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         #36459
       </a>
@@ -3096,19 +3516,22 @@ export default App;
 ```tsx
 import React from 'react';
 import { AlertFilled, CloseSquareFilled } from '@ant-design/icons';
-import { Button, Form, Input, Tooltip } from 'antd';
-import { createStyles, css } from 'antd-style';
+import { Button, Form, Input, Mentions, Tooltip } from 'antd';
+import { createStyles } from 'antd-style';
 import uniqueId from 'lodash/uniqueId';
-const useStyle = createStyles(() => ({
-  'custom-feedback-icons': css`
-    .ant-form-item-feedback-icon {
-      pointer-events: all;
-    }
-  `,
-}));
+const useStyles = createStyles((props) => {
+  const { css, prefixCls } = props;
+  return {
+    customFeedbackIcons: css`
+      .${prefixCls}-form-item-feedback-icon {
+        pointer-events: all;
+      }
+    `,
+  };
+});
 const App: React.FC = () => {
   const [form] = Form.useForm();
-  const { styles } = useStyle();
+  const { styles } = useStyles();
   return (
     <Form
       name="custom-feedback-icons"
@@ -3117,9 +3540,11 @@ const App: React.FC = () => {
       feedbackIcons={({ errors }) => ({
         error: (
           <Tooltip
-            key="tooltipKey"
-            title={errors?.map((error) => <div key={uniqueId()}>{error}</div>)}
             color="red"
+            key="tooltipKey"
+            title={errors?.map((error) => (
+              <div key={uniqueId('red')}>{error}</div>
+            ))}
           >
             <CloseSquareFilled />
           </Tooltip>
@@ -3129,7 +3554,7 @@ const App: React.FC = () => {
       <Form.Item
         name="custom-feedback-test-item"
         label="Test"
-        className={styles['custom-feedback-icons']}
+        className={styles.customFeedbackIcons}
         rules={[{ required: true, type: 'email' }, { min: 10 }]}
         help=""
         hasFeedback
@@ -3139,16 +3564,18 @@ const App: React.FC = () => {
       <Form.Item
         name="custom-feedback-test-item2"
         label="Test"
-        className={styles['custom-feedback-icons']}
+        className={styles.customFeedbackIcons}
         rules={[{ required: true, type: 'email' }, { min: 10 }]}
         help=""
         hasFeedback={{
           icons: ({ errors }) => ({
             error: (
               <Tooltip
-                key="tooltipKey"
-                title={errors?.map((error) => <div key={uniqueId()}>{error}</div>)}
                 color="pink"
+                key="tooltipKey"
+                title={errors?.map((error) => (
+                  <div key={uniqueId('pink')}>{error}</div>
+                ))}
               >
                 <AlertFilled />
               </Tooltip>
@@ -3158,6 +3585,22 @@ const App: React.FC = () => {
         }}
       >
         <Input />
+      </Form.Item>
+      <Form.Item
+        name="custom-feedback-test-item3"
+        label="Test"
+        className={styles.customFeedbackIcons}
+        hasFeedback
+        validateStatus="success"
+        initialValue="@mention1"
+      >
+        <Mentions
+          allowClear
+          options={[
+            { value: 'mention1', label: 'mention1' },
+            { value: 'mention2', label: 'mention2' },
+          ]}
+        />
       </Form.Item>
       <Form.Item>
         <Button htmlType="submit">Submit</Button>
