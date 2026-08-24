@@ -5,7 +5,7 @@
 ```tsx
 import React from 'react';
 import { Alert } from 'antd';
-const App: React.FC = () => <Alert message="Success Text" type="success" />;
+const App: React.FC = () => <Alert title="Success Text" type="success" />;
 export default App;
 ```
 ### 四种样式
@@ -16,15 +16,24 @@ import React from 'react';
 import { Alert } from 'antd';
 const App: React.FC = () => (
   <>
-    <Alert message="Success Text" type="success" />
+    <Alert title="Success Text" type="success" />
     <br />
-    <Alert message="Info Text" type="info" />
+    <Alert title="Info Text" type="info" />
     <br />
-    <Alert message="Warning Text" type="warning" />
+    <Alert title="Warning Text" type="warning" />
     <br />
-    <Alert message="Error Text" type="error" />
+    <Alert title="Error Text" type="error" />
   </>
 );
+export default App;
+```
+### 无边框
+通过 `variant="filled"` 隐藏边框。
+
+```tsx
+import React from 'react';
+import { Alert } from 'antd';
+const App: React.FC = () => <Alert title="Info Text" type="info" variant="filled" />;
 export default App;
 ```
 ### 可关闭的警告提示
@@ -32,37 +41,34 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { CloseSquareOutlined } from '@ant-design/icons';
 import { Alert } from 'antd';
-const onClose = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+const onClose: React.MouseEventHandler<HTMLButtonElement> = (e) => {
   console.log(e, 'I was closed.');
 };
 const App: React.FC = () => (
   <>
     <Alert
-      message="Warning Text Warning Text Warning TextW arning Text Warning Text Warning TextWarning Text"
+      title="Warning Title"
       type="warning"
-      closable
-      onClose={onClose}
+      closable={{ closeIcon: true, onClose, 'aria-label': 'close' }}
     />
     <br />
     <Alert
-      message="Error Text"
-      description="Error Description Error Description Error Description Error Description Error Description Error Description"
-      type="error"
-      closable
-      onClose={onClose}
+      title="Success Title"
+      type="success"
+      closable={{ closeIcon: true, onClose, 'aria-label': 'close' }}
     />
     <br />
     <Alert
-      message="Error Text"
-      description="Error Description Error Description Error Description Error Description Error Description Error Description"
+      title="Info Title"
+      type="info"
+      closable={{ closeIcon: true, onClose, 'aria-label': 'close' }}
+    />
+    <br />
+    <Alert
+      title="Error Title"
       type="error"
-      onClose={onClose}
-      closable={{
-        'aria-label': 'close',
-        closeIcon: <CloseSquareOutlined />,
-      }}
+      closable={{ closeIcon: true, onClose, 'aria-label': 'close' }}
     />
   </>
 );
@@ -77,25 +83,25 @@ import { Alert } from 'antd';
 const App: React.FC = () => (
   <>
     <Alert
-      message="Success Text"
+      title="Success Text"
       description="Success Description Success Description Success Description"
       type="success"
     />
     <br />
     <Alert
-      message="Info Text"
+      title="Info Text"
       description="Info Description Info Description Info Description Info Description"
       type="info"
     />
     <br />
     <Alert
-      message="Warning Text"
+      title="Warning Text"
       description="Warning Description Warning Description Warning Description Warning Description"
       type="warning"
     />
     <br />
     <Alert
-      message="Error Text"
+      title="Error Text"
       description="Error Description Error Description Error Description Error Description"
       type="error"
     />
@@ -111,30 +117,30 @@ import React from 'react';
 import { Alert } from 'antd';
 const App: React.FC = () => (
   <>
-    <Alert message="Success Tips" type="success" showIcon />
+    <Alert title="Success Tips" type="success" showIcon />
     <br />
-    <Alert message="Informational Notes" type="info" showIcon />
+    <Alert title="Informational Notes" type="info" showIcon />
     <br />
-    <Alert message="Warning" type="warning" showIcon closable />
+    <Alert title="Warning" type="warning" showIcon closable />
     <br />
-    <Alert message="Error" type="error" showIcon />
+    <Alert title="Error" type="error" showIcon />
     <br />
     <Alert
-      message="Success Tips"
+      title="Success Tips"
       description="Detailed description and advice about successful copywriting."
       type="success"
       showIcon
     />
     <br />
     <Alert
-      message="Informational Notes"
+      title="Informational Notes"
       description="Additional description and information about copywriting."
       type="info"
       showIcon
     />
     <br />
     <Alert
-      message="Warning"
+      title="Warning"
       description="This is a warning notice about copywriting."
       type="warning"
       showIcon
@@ -142,7 +148,7 @@ const App: React.FC = () => (
     />
     <br />
     <Alert
-      message="Error"
+      title="Error"
       description="This is an error message about copywriting."
       type="error"
       showIcon
@@ -159,17 +165,17 @@ import React from 'react';
 import { Alert } from 'antd';
 const App: React.FC = () => (
   <>
-    <Alert message="Warning text" banner />
+    <Alert title="Warning text" banner />
     <br />
     <Alert
-      message="Very long warning text warning text text text text text text text"
+      title="Very long warning text warning text text text text text text text"
       banner
       closable
     />
     <br />
-    <Alert showIcon={false} message="Warning text without icon" banner />
+    <Alert showIcon={false} title="Warning text without icon" banner />
     <br />
-    <Alert type="error" message="Error text" banner />
+    <Alert type="error" title="Error text" banner />
   </>
 );
 export default App;
@@ -184,7 +190,7 @@ import Marquee from 'react-fast-marquee';
 const App: React.FC = () => (
   <Alert
     banner
-    message={
+    title={
       <Marquee pauseOnHover gradient={false}>
         I can be a React component, multiple React components, or just some text.
       </Marquee>
@@ -207,17 +213,26 @@ const App: React.FC = () => {
   return (
     <>
       {visible && (
-        <Alert message="Alert Message Text" type="success" closable afterClose={handleClose} />
+        <Alert
+          title="Alert Message Text"
+          type="success"
+          closable={{ closeIcon: true, afterClose: handleClose }}
+        />
       )}
       <p>click the close button to see the effect</p>
-      <Switch onChange={setVisible} checked={visible} disabled={visible} />
+      <Switch
+        aria-label="Alert visibility"
+        onChange={setVisible}
+        checked={visible}
+        disabled={visible}
+      />
     </>
   );
 };
 export default App;
 ```
 ### React 错误处理
-友好的 [React 错误处理](https://reactjs.org/blog/2017/07/26/error-handling-in-react-16.html) 包裹组件。
+友好的 [React 错误处理](https://zh-hans.react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary) 包裹组件。
 
 ```tsx
 import React, { useState } from 'react';
@@ -233,7 +248,7 @@ const ThrowError: React.FC = () => {
   }
   return (
     <Button danger onClick={onClick}>
-      Click me to throw a error
+      Click to throw an error
     </Button>
   );
 };
@@ -254,19 +269,19 @@ import { Alert } from 'antd';
 const icon = <SmileOutlined />;
 const App: React.FC = () => (
   <>
-    <Alert icon={icon} message="showIcon = false" type="success" />
+    <Alert icon={icon} title="showIcon = false" type="success" />
     <br />
-    <Alert icon={icon} message="Success Tips" type="success" showIcon />
+    <Alert icon={icon} title="Success Tips" type="success" showIcon />
     <br />
-    <Alert icon={icon} message="Informational Notes" type="info" showIcon />
+    <Alert icon={icon} title="Informational Notes" type="info" showIcon />
     <br />
-    <Alert icon={icon} message="Warning" type="warning" showIcon />
+    <Alert icon={icon} title="Warning" type="warning" showIcon />
     <br />
-    <Alert icon={icon} message="Error" type="error" showIcon />
+    <Alert icon={icon} title="Error" type="error" showIcon />
     <br />
     <Alert
       icon={icon}
-      message="Success Tips"
+      title="Success Tips"
       description="Detailed description and advice about successful copywriting."
       type="success"
       showIcon
@@ -274,7 +289,7 @@ const App: React.FC = () => (
     <br />
     <Alert
       icon={icon}
-      message="Informational Notes"
+      title="Informational Notes"
       description="Additional description and information about copywriting."
       type="info"
       showIcon
@@ -282,7 +297,7 @@ const App: React.FC = () => (
     <br />
     <Alert
       icon={icon}
-      message="Warning"
+      title="Warning"
       description="This is a warning notice about copywriting."
       type="warning"
       showIcon
@@ -290,7 +305,7 @@ const App: React.FC = () => (
     <br />
     <Alert
       icon={icon}
-      message="Error"
+      title="Error"
       description="This is an error message about copywriting."
       type="error"
       showIcon
@@ -304,11 +319,11 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Alert, Button, Space } from 'antd';
+import { Alert, Button, Flex } from 'antd';
 const App: React.FC = () => (
   <>
     <Alert
-      message="Success Tips"
+      title="Success Tips"
       type="success"
       showIcon
       action={
@@ -320,7 +335,7 @@ const App: React.FC = () => (
     />
     <br />
     <Alert
-      message="Error Text"
+      title="Error Text"
       showIcon
       description="Error Description Error Description Error Description Error Description"
       type="error"
@@ -332,35 +347,81 @@ const App: React.FC = () => (
     />
     <br />
     <Alert
-      message="Warning Text"
+      title="Warning Text"
       type="warning"
       action={
-        <Space>
-          <Button type="text" size="small">
-            Done
-          </Button>
-        </Space>
+        <Button type="text" size="small">
+          Done
+        </Button>
       }
       closable
     />
     <br />
     <Alert
-      message="Info Text"
+      title="Info Text"
       description="Info Description Info Description Info Description Info Description"
       type="info"
       action={
-        <Space direction="vertical">
-          <Button size="small" type="primary">
+        <Flex vertical gap="small" style={{ minWidth: 80 }}>
+          <Button size="small" type="primary" block>
             Accept
           </Button>
-          <Button size="small" danger ghost>
+          <Button size="small" danger ghost block>
             Decline
           </Button>
-        </Space>
+        </Flex>
       }
       closable
     />
   </>
+);
+export default App;
+```
+### 自定义标题对齐
+未设置 `description` 时，Alert 会让图标、内容、操作区和关闭按钮作为整体垂直居中。组件库不默认改为 `flex-start` 布局并通过 token 补偿偏移，是因为当 `styles` 自定义字体、行高或操作区尺寸后，token 推导出的偏移量可能不再匹配实际样式。若标题可能换行，并希望这些元素与标题首行对齐，可以通过语义化 `styles` 自行调整。
+
+```tsx
+import React from 'react';
+import { Alert, Button, Flex } from 'antd';
+import type { AlertProps } from 'antd';
+const wrapperStyle: React.CSSProperties = {
+  width: 360,
+};
+const title = 'Long alert title wraps to multiple lines when the alert container is narrow enough.';
+const titleLineHeight = 22;
+const iconSize = 14;
+const closeIconSize = 12;
+const smallButtonHeight = 24;
+const firstLineStyles: AlertProps['styles'] = {
+  root: {
+    alignItems: 'flex-start',
+  },
+  icon: {
+    marginBlockStart: (titleLineHeight - iconSize) / 2,
+  },
+  actions: {
+    marginBlockStart: (titleLineHeight - smallButtonHeight) / 2,
+  },
+  close: {
+    marginBlockStart: (titleLineHeight - closeIconSize) / 2,
+  },
+};
+const App: React.FC = () => (
+  <Flex vertical gap="middle" style={wrapperStyle}>
+    <Alert title={title} type="info" showIcon closable styles={firstLineStyles} />
+    <Alert
+      title={title}
+      type="success"
+      showIcon
+      closable
+      styles={firstLineStyles}
+      action={
+        <Button size="small" type="text">
+          Action
+        </Button>
+      }
+    />
+  </Flex>
 );
 export default App;
 ```
@@ -385,12 +446,83 @@ const App: React.FC = () => (
   >
     <Alert
       icon={icon}
-      message="Success Tips"
+      title="Success Tips"
       description="Detailed description and advice about successful copywriting."
       type="success"
       showIcon
     />
   </ConfigProvider>
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Alert 的 [语义化结构](#semantic-dom) 样式。
+
+```tsx
+import React from 'react';
+import { Alert, Button, Flex } from 'antd';
+import type { AlertProps, GetProp } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 12px;
+  `,
+}));
+const styleFn: AlertProps['styles'] = ({
+  props: { type },
+}): GetProp<AlertProps, 'styles', 'Return'> => {
+  if (type === 'success') {
+    return {
+      root: {
+        backgroundColor: 'rgba(82, 196, 26, 0.1)',
+        borderColor: '#b7eb8f',
+      },
+      icon: {
+        color: '#52c41a',
+      },
+    };
+  }
+  if (type === 'warning') {
+    return {
+      root: {
+        backgroundColor: 'rgba(250, 173, 20, 0.1)',
+        borderColor: '#ffe58f',
+      },
+      icon: {
+        color: '#faad14',
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const alertSharedProps: AlertProps = {
+    showIcon: true,
+    classNames: {
+      root: classNames.root,
+    },
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Alert
+        {...alertSharedProps}
+        title="Object styles"
+        type="info"
+        styles={{
+          icon: {
+            fontSize: 18,
+          },
+          section: {
+            fontWeight: 500,
+          },
+        }}
+        action={<Button size="small">Action</Button>}
+      />
+      <Alert {...alertSharedProps} title="Function styles" type="success" styles={styleFn} />
+    </Flex>
+  );
+};
 export default App;
 ```

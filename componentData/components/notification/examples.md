@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
   const openNotification = (placement: NotificationPlacement) => {
     api.info({
-      message: `Notification ${placement}`,
+      title: `Notification ${placement}`,
       description: <Context.Consumer>{({ name }) => `Hello, ${name}!`}</Context.Consumer>,
       placement,
     });
@@ -75,7 +75,7 @@ const App: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
   const openNotification = () => {
     api.open({
-      message: 'Notification Title',
+      title: 'Notification Title',
       description:
         'I will never close automatically. This is a purposely very very long description that has many many characters and words.',
       duration: 0,
@@ -97,13 +97,13 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Button, notification, Space } from 'antd';
+import { Button, Flex, notification } from 'antd';
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 const App: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
   const openNotificationWithIcon = (type: NotificationType) => {
     api[type]({
-      message: 'Notification Title',
+      title: 'Notification Title',
       description:
         'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
     });
@@ -111,12 +111,28 @@ const App: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <Space>
-        <Button onClick={() => openNotificationWithIcon('success')}>Success</Button>
-        <Button onClick={() => openNotificationWithIcon('info')}>Info</Button>
-        <Button onClick={() => openNotificationWithIcon('warning')}>Warning</Button>
-        <Button onClick={() => openNotificationWithIcon('error')}>Error</Button>
-      </Space>
+      <Flex gap={8} wrap="wrap">
+        <Button
+          color="green"
+          variant="outlined"
+          onClick={() => openNotificationWithIcon('success')}
+        >
+          Success
+        </Button>
+        <Button color="blue" variant="outlined" onClick={() => openNotificationWithIcon('info')}>
+          Info
+        </Button>
+        <Button
+          color="yellow"
+          variant="outlined"
+          onClick={() => openNotificationWithIcon('warning')}
+        >
+          Warning
+        </Button>
+        <Button color="red" variant="outlined" onClick={() => openNotificationWithIcon('error')}>
+          Error
+        </Button>
+      </Flex>
     </>
   );
 };
@@ -148,7 +164,7 @@ const App: React.FC = () => {
       </Space>
     );
     api.open({
-      message: 'Notification Title',
+      title: 'Notification Title',
       description:
         'A function will be be called after the notification is closed (automatically after the "duration" time of manually).',
       btn,
@@ -178,7 +194,7 @@ const App: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
   const openNotification = () => {
     api.open({
-      message: 'Notification Title',
+      title: 'Notification Title',
       description:
         'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
       icon: <SmileOutlined style={{ color: '#108ee9' }} />,
@@ -215,7 +231,7 @@ const App: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
   const openNotification = (placement: NotificationPlacement) => {
     api.info({
-      message: `Notification ${placement}`,
+      title: `Notification ${placement}`,
       description:
         'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
       placement,
@@ -275,36 +291,6 @@ const App: React.FC = () => {
 };
 export default App;
 ```
-### 自定义样式
-使用 style 和 className 来定义样式。
-
-```tsx
-import React from 'react';
-import { Button, notification } from 'antd';
-const App: React.FC = () => {
-  const [api, contextHolder] = notification.useNotification();
-  const openNotification = () => {
-    api.open({
-      message: 'Notification Title',
-      description:
-        'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
-      className: 'custom-class',
-      style: {
-        width: 600,
-      },
-    });
-  };
-  return (
-    <>
-      {contextHolder}
-      <Button type="primary" onClick={openNotification}>
-        Open the notification box
-      </Button>
-    </>
-  );
-};
-export default App;
-```
 ### 更新消息内容
 可以通过唯一的 key 来更新内容。
 
@@ -317,13 +303,13 @@ const App: React.FC = () => {
   const openNotification = () => {
     api.open({
       key,
-      message: 'Notification Title',
+      title: 'Notification Title',
       description: 'description.',
     });
     setTimeout(() => {
       api.open({
         key,
-        message: 'New Title',
+        title: 'New Title',
         description: 'New description.',
       });
     }, 1000);
@@ -340,7 +326,7 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 堆叠
-堆叠配置，默认开启。超过 3 个以上的消息会被自动收起，可以通过 `threshold` 来设置不会被收起的最大数量。
+堆叠配置，默认开启。超过阈值后的消息会被自动收起，可以通过 `threshold` 设置触发堆叠的数量。折叠状态下最多展示 3 个消息。
 
 ```tsx
 import React, { useMemo } from 'react';
@@ -358,12 +344,12 @@ const App: React.FC = () => {
   });
   const openNotification = () => {
     api.open({
-      message: 'Notification Title',
+      title: 'Notification Title',
       description: `${Array.from(
         { length: Math.round(Math.random() * 5) + 1 },
         () => 'This is the content of the notification.',
       ).join('\n')}`,
-      duration: null,
+      duration: false,
     });
   };
   const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
@@ -408,7 +394,7 @@ const App: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
   const openNotification = (pauseOnHover: boolean) => () => {
     api.open({
-      message: 'Notification Title',
+      title: 'Notification Title',
       description:
         'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
       showProgress: true,
@@ -432,14 +418,14 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 静态方法（不推荐）
-静态方法无法消费 Context，推荐优先使用 Hooks 版本。
+静态方法无法消费 Context，不能动态响应 ConfigProvider 提供的各项配置，启用 `layer` 时还可能导致样式异常。请优先使用 hooks 版本或者 App 组件提供的 `notification` 实例。
 
 ```tsx
 import React from 'react';
 import { Button, notification } from 'antd';
 const openNotification = () => {
   notification.open({
-    message: 'Notification Title',
+    title: 'Notification Title',
     description:
       'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
     onClick: () => {
@@ -454,6 +440,135 @@ const App: React.FC = () => (
 );
 export default App;
 ```
+### 自定义进度条颜色
+通过配置组件 token 来自定义进度条颜色。
+
+```tsx
+import React from 'react';
+import { Button, ConfigProvider, notification } from 'antd';
+import { createStyles } from 'antd-style';
+const COLOR_BG = 'linear-gradient(135deg,#6253e1, #04befe)';
+const useStyle = createStyles(({ cssVar, prefixCls, css }) => ({
+  linearGradientButton: css`
+    &.${prefixCls}-btn-primary:not([disabled]):not(.${prefixCls}-btn-dangerous) {
+      > span {
+        position: relative;
+      }
+      &::before {
+        content: '';
+        background: ${COLOR_BG};
+        position: absolute;
+        inset: -1px;
+        opacity: 1;
+        transition: all ${cssVar.motionDurationSlow};
+        border-radius: inherit;
+      }
+      &:hover::before {
+        opacity: 0;
+      }
+    }
+  `,
+}));
+const App: React.FC = () => {
+  const { styles } = useStyle();
+  const [api, contextHolder] = notification.useNotification();
+  const openNotification = () => {
+    api.open({
+      title: 'Customize progress bar color',
+      description: 'You can use component token to customize the progress bar color',
+      showProgress: true,
+      duration: 20,
+    });
+  };
+  return (
+    <ConfigProvider
+      button={{
+        className: styles.linearGradientButton,
+      }}
+      theme={{
+        components: {
+          Notification: {
+            progressBg: COLOR_BG,
+          },
+        },
+      }}
+    >
+      {contextHolder}
+      <Button type="primary" onClick={openNotification}>
+        Show custom progress color
+      </Button>
+    </ConfigProvider>
+  );
+};
+export default App;
+```
+### 组件 Token---
+debug: true
+title:
+  zh-CN: 组件 Token
+  en-US: Component Token
+---
+展示新的组件 Token 功能，支持为不同类型的通知设置不同的背景色。可以通过 `colorSuccessBg`、`colorErrorBg`、`colorInfoBg`、`colorWarningBg` 来自定义各种类型通知的背景色。
+
+```tsx
+import React from 'react';
+import { Button, ConfigProvider, Flex, notification } from 'antd';
+type NotificationType = 'success' | 'info' | 'warning' | 'error';
+const CustomThemeDemo: React.FC = () => {
+  const [api, contextHolder] = notification.useNotification();
+  const openNotificationWithIcon = (type: NotificationType) => {
+    api[type]({
+      title: `${type.charAt(0).toUpperCase() + type.slice(1)} Notification`,
+      description: 'This notification uses custom component tokens for enhanced background colors.',
+      duration: 0,
+    });
+  };
+  return (
+    <>
+      <Flex gap={8} wrap="wrap">
+        <Button
+          color="green"
+          variant="outlined"
+          onClick={() => openNotificationWithIcon('success')}
+        >
+          Success
+        </Button>
+        <Button color="blue" variant="outlined" onClick={() => openNotificationWithIcon('info')}>
+          Info
+        </Button>
+        <Button
+          color="yellow"
+          variant="outlined"
+          onClick={() => openNotificationWithIcon('warning')}
+        >
+          Warning
+        </Button>
+        <Button color="red" variant="outlined" onClick={() => openNotificationWithIcon('error')}>
+          Error
+        </Button>
+      </Flex>
+      {contextHolder}
+    </>
+  );
+};
+const App: React.FC = () => (
+  <ConfigProvider
+    theme={{
+      components: {
+        Notification: {
+          colorSuccessBg: 'linear-gradient(30deg, #d9f7be, #f6ffed)',
+          colorErrorBg: 'linear-gradient(30deg, #ffccc7, #fff1f0)',
+          colorInfoBg: 'linear-gradient(30deg, #bae0ff, #e6f4ff)',
+          colorWarningBg: 'linear-gradient(30deg, #ffffb8, #feffe6)',
+        },
+      },
+    }}
+  >
+    <CustomThemeDemo />
+  </ConfigProvider>
+);
+export default App;
+```
 ### _InternalPanelDoNotUseOrYouWillBeFired
 调试用组件，请勿直接使用。
 
@@ -464,7 +579,7 @@ import { Button, notification } from 'antd';
 const { _InternalPanelDoNotUseOrYouWillBeFired: InternalPanel } = notification;
 export default () => (
   <InternalPanel
-    message="Hello World!"
+    title="Hello World!"
     description="Hello World?"
     type="success"
     actions={
@@ -474,4 +589,88 @@ export default () => (
     }
   />
 );
+```
+### 自定义语义结构样式
+通过 `classNames` 和 `styles` 可以自定义 Notification 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Button, notification, Space } from 'antd';
+import type { GetProp, NotificationArgsProps } from 'antd';
+const defaultStyles: GetProp<NotificationArgsProps, 'styles', 'Return'> = {
+  root: {
+    backgroundColor: '#f6ffed',
+    border: '2px solid #95de64',
+    borderRadius: 16,
+    boxShadow: '4px 4px 0 #d9f7be',
+  },
+  icon: {
+    color: '#237804',
+  },
+  title: {
+    color: '#237804',
+    fontWeight: 600,
+  },
+  description: {
+    color: '#3f6600',
+  },
+};
+const styleFn: NotificationArgsProps['styles'] = ({
+  props,
+}): GetProp<NotificationArgsProps, 'styles', 'Return'> => {
+  if (props.type === 'error') {
+    return {
+      ...defaultStyles,
+      root: {
+        ...defaultStyles.root,
+        backgroundColor: '#fff2f0',
+        borderColor: '#ffccc7',
+        boxShadow: '4px 4px 0 #ffccc7',
+      },
+      icon: {
+        color: '#cf1322',
+      },
+      title: {
+        color: '#cf1322',
+      },
+      description: {
+        color: '#5c0011',
+      },
+    };
+  }
+  return defaultStyles;
+};
+const App: React.FC = () => {
+  const [api, contextHolder] = notification.useNotification();
+  const sharedProps: NotificationArgsProps = {
+    title: 'Notification Title',
+    description: 'This is a notification description.',
+    duration: false,
+  };
+  const openDefault = () => {
+    api.info({
+      ...sharedProps,
+      styles: defaultStyles,
+    });
+  };
+  const openError = () => {
+    api.error({
+      ...sharedProps,
+      type: 'error',
+      styles: styleFn,
+    });
+  };
+  return (
+    <>
+      {contextHolder}
+      <Space>
+        <Button type="primary" onClick={openDefault}>
+          Default Notification
+        </Button>
+        <Button onClick={openError}>Error Notification</Button>
+      </Space>
+    </>
+  );
+};
+export default App;
 ```
