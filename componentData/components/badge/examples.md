@@ -7,7 +7,7 @@ import React from 'react';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Space } from 'antd';
 const App: React.FC = () => (
-  <Space size="middle">
+  <Space size="medium">
     <Badge count={5}>
       <Avatar shape="square" size="large" />
     </Badge>
@@ -33,7 +33,7 @@ const App: React.FC = () => {
   const [show, setShow] = useState(true);
   return (
     <Space>
-      <Switch checked={show} onChange={() => setShow(!show)} />
+      <Switch aria-label="Show badge counts" checked={show} onChange={() => setShow(!show)} />
       <Badge count={show ? 11 : 0} showZero color="#faad14" />
       <Badge count={show ? 25 : 0} />
       <Badge count={show ? <ClockCircleOutlined style={{ color: '#f5222d' }} /> : 0} />
@@ -118,7 +118,7 @@ const App: React.FC = () => {
     setShow(checked);
   };
   return (
-    <Space direction="vertical">
+    <Space vertical>
       <Space size="large">
         <Badge count={count}>
           <Avatar shape="square" size="large" />
@@ -133,7 +133,7 @@ const App: React.FC = () => {
         <Badge dot={show}>
           <Avatar shape="square" size="large" />
         </Badge>
-        <Switch onChange={onChange} checked={show} />
+        <Switch aria-label="Show badge dot" onChange={onChange} checked={show} />
       </Space>
     </Space>
   );
@@ -175,8 +175,8 @@ export default App;
 import React from 'react';
 import { Avatar, Badge, Space } from 'antd';
 const App: React.FC = () => (
-  <Space size="middle">
-    <Badge size="default" count={5}>
+  <Space size="medium">
+    <Badge size="medium" count={5}>
       <Avatar shape="square" size="large" />
     </Badge>
     <Badge size="small" count={5}>
@@ -202,7 +202,7 @@ const App: React.FC = () => (
       <Badge status="warning" />
     </Space>
     <br />
-    <Space direction="vertical">
+    <Space vertical>
       <Badge status="success" text="Success" />
       <Badge status="error" text="Error" />
       <Badge status="default" text="Default" />
@@ -236,14 +236,14 @@ const colors = [
 ];
 const App: React.FC = () => (
   <>
-    <Divider orientation="left">Presets</Divider>
-    <Space direction="vertical">
+    <Divider titlePlacement="start">Presets</Divider>
+    <Space vertical>
       {colors.map((color) => (
         <Badge key={color} color={color} text={color} />
       ))}
     </Space>
-    <Divider orientation="left">Custom</Divider>
-    <Space direction="vertical">
+    <Divider titlePlacement="start">Custom</Divider>
+    <Space vertical>
       <Badge color="#f50" text="#f50" />
       <Badge color="rgb(45, 183, 245)" text="rgb(45, 183, 245)" />
       <Badge color="hsl(102, 53%, 61%)" text="hsl(102, 53%, 61%)" />
@@ -260,7 +260,7 @@ export default App;
 import React from 'react';
 import { Badge, Card, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+  <Space vertical size="medium" style={{ width: '100%' }}>
     <Badge.Ribbon text="Hippies">
       <Card title="Pushes open the window" size="small">
         and raises the spyglass.
@@ -305,6 +305,94 @@ const App: React.FC = () => (
 );
 export default App;
 ```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Badge 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Avatar, Badge, Card, Flex, Space } from 'antd';
+import type { BadgeProps, GetProp } from 'antd';
+import { createStaticStyles } from 'antd-style';
+import type { RibbonProps } from 'antd/es/badge/Ribbon';
+const badgeClassNames = createStaticStyles(({ css }) => ({
+  indicator: css`
+    font-size: 10px;
+  `,
+}));
+const ribbonClassNames = createStaticStyles(({ css }) => ({
+  root: css`
+    width: 400px;
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
+  `,
+}));
+const badgeStyles: BadgeProps['styles'] = {
+  root: {
+    borderRadius: 8,
+  },
+};
+const ribbonStyles: RibbonProps['styles'] = {
+  indicator: {
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
+};
+const badgeStylesFn: BadgeProps['styles'] = (info): GetProp<RibbonProps, 'styles', 'Return'> => {
+  if (info.props.size === 'medium') {
+    return {
+      indicator: {
+        fontSize: 14,
+        backgroundColor: '#696FC7',
+      },
+    };
+  }
+  return {};
+};
+const ribbonStylesFn: RibbonProps['styles'] = (info): GetProp<RibbonProps, 'styles', 'Return'> => {
+  if (info.props.color === '#696FC7') {
+    return {
+      content: {
+        fontWeight: 'bold',
+      },
+      indicator: {
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  return (
+    <Space size="large" vertical>
+      <Flex gap="medium">
+        <Badge size="small" count={5} classNames={badgeClassNames} styles={badgeStyles}>
+          <Avatar shape="square" size="large" />
+        </Badge>
+        <Badge count={5} classNames={badgeClassNames} styles={badgeStylesFn}>
+          <Avatar shape="square" size="large" />
+        </Badge>
+      </Flex>
+      <Flex vertical gap="medium">
+        <Badge.Ribbon text="Custom Ribbon" classNames={ribbonClassNames} styles={ribbonStyles}>
+          <Card title="Card with custom ribbon" size="small">
+            This card has a customized ribbon with semantic classNames and styles.
+          </Card>
+        </Badge.Ribbon>
+        <Badge.Ribbon
+          text="Custom Ribbon"
+          color="#696FC7"
+          classNames={ribbonClassNames}
+          styles={ribbonStylesFn}
+        >
+          <Card title="Card with custom ribbon" size="small">
+            This card has a customized ribbon with semantic classNames and styles.
+          </Card>
+        </Badge.Ribbon>
+      </Flex>
+    </Space>
+  );
+};
+export default App;
+```
 ### Ribbon Debug
 Buggy!
 
@@ -312,7 +400,7 @@ Buggy!
 import React from 'react';
 import { Badge, Card, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical" style={{ width: '100%' }}>
+  <Space vertical style={{ width: '100%' }}>
     <Badge.Ribbon text="啦啦啦啦">
       <Card>推开窗户举起望远镜</Card>
     </Badge.Ribbon>
@@ -339,8 +427,8 @@ export default App;
 import React from 'react';
 import { Avatar, Badge, Space } from 'antd';
 const App: React.FC = () => (
-  <Space size="middle" wrap>
-    <Space size="middle" wrap>
+  <Space size="medium" wrap>
+    <Space size="medium" wrap>
       <Badge count={5} status="success">
         <Avatar shape="square" size="large" />
       </Badge>
@@ -369,7 +457,7 @@ const App: React.FC = () => (
         <Avatar shape="square" size="large" />
       </Badge>
     </Space>
-    <Space size="middle" wrap>
+    <Space size="medium" wrap>
       <Badge count={0} showZero />
       <Badge count={0} showZero color="blue" />
       <Badge count={0} showZero color="#f0f" />
@@ -379,6 +467,9 @@ const App: React.FC = () => (
       <Badge count={0} showZero color="blue">
         <Avatar shape="square" size="large" />
       </Badge>
+      <Badge count={0} color="#f0f" />
+      <Badge status="success" text={0} showZero />
+      <Badge status="warning" text={0} />
     </Space>
   </Space>
 );
@@ -438,14 +529,14 @@ const AvatarItem = ({ color }: { color: string }) => (
 );
 const App: React.FC = () => (
   <>
-    <Space wrap size={['large', 'middle']}>
+    <Space wrap size={['large', 'medium']}>
       {colors.map((color) => (
         <Badge color={color} count={44} key={color}>
           <AvatarItem color={color} />
         </Badge>
       ))}
     </Space>
-    <Space wrap size={['large', 'middle']}>
+    <Space wrap size={['large', 'medium']}>
       {colors.map((color) => (
         <Badge status="processing" color={color} text="loading" key={color} />
       ))}
@@ -472,11 +563,12 @@ export default () => (
           dotSize: 4,
           textFontWeight: 'bold',
           statusSize: 8,
+          paddingInline: 12,
         },
       },
     }}
   >
-    <Space direction="vertical">
+    <Space vertical>
       <Badge count={5}>
         <Avatar shape="square" size="large" />
       </Badge>
