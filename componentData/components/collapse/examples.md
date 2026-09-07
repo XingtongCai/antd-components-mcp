@@ -50,16 +50,16 @@ const text = `
 `;
 const App: React.FC = () => (
   <>
-    <Divider orientation="left">Default Size</Divider>
+    <Divider titlePlacement="start">Medium Size</Divider>
     <Collapse
-      items={[{ key: '1', label: 'This is default size panel header', children: <p>{text}</p> }]}
+      items={[{ key: '1', label: 'This is medium size panel header', children: <p>{text}</p> }]}
     />
-    <Divider orientation="left">Small Size</Divider>
+    <Divider titlePlacement="start">Small Size</Divider>
     <Collapse
       size="small"
       items={[{ key: '1', label: 'This is small size panel header', children: <p>{text}</p> }]}
     />
-    <Divider orientation="left">Large Size</Divider>
+    <Divider titlePlacement="start">Large Size</Divider>
     <Collapse
       size="large"
       items={[{ key: '1', label: 'This is large size panel header', children: <p>{text}</p> }]}
@@ -231,6 +231,58 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 面板图标
+在面板标题中加入图标。第三方图标库（如 lucide、react-icons）渲染出的裸 `<svg>` 也会与标题文字垂直居中对齐。
+
+```tsx
+import React from 'react';
+import { SmileOutlined } from '@ant-design/icons';
+import type { CollapseProps } from 'antd';
+import { Collapse } from 'antd';
+// Icons from third-party libraries (e.g. lucide, react-icons) render as a bare `<svg>`
+// rather than an `.anticon` wrapper. It stays vertically centred with the title text.
+const ChartIcon: React.FC = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path d="M3 3v18h18" />
+    <path d="M7 14l4-4 3 3 5-6" />
+  </svg>
+);
+const text = `
+  A dog is a type of domesticated animal.
+  Known for its loyalty and faithfulness,
+  it can be found as a welcome guest in many households across the world.
+`;
+const items: CollapseProps['items'] = [
+  {
+    key: '1',
+    label: (
+      <>
+        <SmileOutlined /> Panel with an Ant Design icon
+      </>
+    ),
+    children: <p>{text}</p>,
+  },
+  {
+    key: '2',
+    label: (
+      <>
+        <ChartIcon /> Panel with a third-party icon
+      </>
+    ),
+    children: <p>{text}</p>,
+  },
+];
+const App: React.FC = () => <Collapse defaultActiveKey={['1']} items={items} />;
+export default App;
+```
 ### 隐藏箭头
 你可以通过 `showArrow={false}` 隐藏 `CollapsePanel` 组件的箭头图标。
 
@@ -272,17 +324,16 @@ import React, { useState } from 'react';
 import { SettingOutlined } from '@ant-design/icons';
 import type { CollapseProps } from 'antd';
 import { Collapse, Select } from 'antd';
-const { Option } = Select;
 const text = `
   A dog is a type of domesticated animal.
   Known for its loyalty and faithfulness,
   it can be found as a welcome guest in many households across the world.
 `;
-type ExpandIconPosition = 'start' | 'end';
 const App: React.FC = () => {
-  const [expandIconPosition, setExpandIconPosition] = useState<ExpandIconPosition>('start');
-  const onPositionChange = (newExpandIconPosition: ExpandIconPosition) => {
-    setExpandIconPosition(newExpandIconPosition);
+  const [expandIconPlacement, setExpandIconPlacement] =
+    useState<CollapseProps['expandIconPlacement']>('start');
+  const onPlacementChange = (newExpandIconPlacement: CollapseProps['expandIconPlacement']) => {
+    setExpandIconPlacement(newExpandIconPlacement);
   };
   const onChange = (key: string | string[]) => {
     console.log(key);
@@ -320,15 +371,20 @@ const App: React.FC = () => {
       <Collapse
         defaultActiveKey={['1']}
         onChange={onChange}
-        expandIconPosition={expandIconPosition}
+        expandIconPlacement={expandIconPlacement}
         items={items}
       />
       <br />
-      <span>Expand Icon Position: </span>
-      <Select value={expandIconPosition} style={{ margin: '0 8px' }} onChange={onPositionChange}>
-        <Option value="start">start</Option>
-        <Option value="end">end</Option>
-      </Select>
+      <span>Expand Icon Placement: </span>
+      <Select
+        value={expandIconPlacement}
+        style={{ margin: '0 8px' }}
+        onChange={onPlacementChange}
+        options={[
+          { label: 'start', value: 'start' },
+          { label: 'end', value: 'end' },
+        ]}
+      />
     </>
   );
 };
@@ -372,47 +428,138 @@ export default App;
 ```tsx
 import React from 'react';
 import { Collapse, Space } from 'antd';
+import { createStyles } from 'antd-style';
 const text = `
   A dog is a type of domesticated animal.
   Known for its loyalty and faithfulness,
   it can be found as a welcome guest in many households across the world.
 `;
-const App: React.FC = () => (
-  <Space direction="vertical">
-    <Collapse
-      collapsible="header"
-      defaultActiveKey={['1']}
-      items={[
-        {
-          key: '1',
-          label: 'This panel can only be collapsed by clicking text',
-          children: <p>{text}</p>,
-        },
-      ]}
-    />
-    <Collapse
-      collapsible="icon"
-      defaultActiveKey={['1']}
-      items={[
-        {
-          key: '1',
-          label: 'This panel can only be collapsed by clicking icon',
-          children: <p>{text}</p>,
-        },
-      ]}
-    />
-    <Collapse
-      collapsible="disabled"
-      items={[
-        {
-          key: '1',
-          label: "This panel can't be collapsed",
-          children: <p>{text}</p>,
-        },
-      ]}
-    />
-  </Space>
+const useStyles = createStyles((props) => {
+  const { css } = props;
+  return {
+    content: css`
+      width: 100%;
+    `,
+  };
+});
+const App: React.FC = () => {
+  const { styles } = useStyles();
+  return (
+    <Space className={styles.content} vertical>
+      <Collapse
+        collapsible="header"
+        defaultActiveKey={['1']}
+        items={[
+          {
+            key: '1',
+            label: 'This panel can be collapsed by clicking text or icon',
+            children: <p>{text}</p>,
+          },
+        ]}
+      />
+      <Collapse
+        collapsible="icon"
+        defaultActiveKey={['1']}
+        items={[
+          {
+            key: '1',
+            label: 'This panel can only be collapsed by clicking icon',
+            children: <p>{text}</p>,
+          },
+        ]}
+      />
+      <Collapse
+        collapsible="disabled"
+        items={[
+          {
+            key: '1',
+            label: "This panel can't be collapsed",
+            children: <p>{text}</p>,
+          },
+        ]}
+      />
+    </Space>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Collapse 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import type { CollapseProps, GetProp } from 'antd';
+import { Collapse, Flex } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    background-color: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+  `,
+}));
+const element = (
+  <p>
+    A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found
+    as a welcome guest in many households across the world.
+  </p>
 );
+const items: CollapseProps['items'] = [
+  {
+    key: '1',
+    label: 'This is panel header 1',
+    children: element,
+  },
+  {
+    key: '2',
+    label: 'This is panel header 2',
+    children: element,
+  },
+  {
+    key: '3',
+    label: 'This is panel header 3',
+    children: element,
+  },
+];
+const styles: CollapseProps['styles'] = {
+  root: {
+    backgroundColor: '#fafafa',
+    border: '1px solid #e0e0e0',
+    borderRadius: 8,
+  },
+  header: {
+    backgroundColor: '#f0f0f0',
+    padding: '12px 16px',
+    color: '#141414',
+  },
+};
+const stylesFn: CollapseProps['styles'] = ({
+  props,
+}): GetProp<CollapseProps, 'styles', 'Return'> => {
+  if (props.size === 'large') {
+    return {
+      root: {
+        backgroundColor: '#fff',
+        border: '1px solid #696FC7',
+        borderRadius: 8,
+      },
+      header: {
+        backgroundColor: '#F5EFFF',
+        padding: '12px 16px',
+        color: '#141414',
+      },
+    };
+  }
+};
+const App: React.FC = () => {
+  const sharedProps: CollapseProps = { classNames, items };
+  return (
+    <Flex vertical gap="medium">
+      <Collapse {...sharedProps} defaultActiveKey={['1']} styles={styles} />
+      <Collapse {...sharedProps} defaultActiveKey={['2']} styles={stylesFn} size="large" />
+    </Flex>
+  );
+};
 export default App;
 ```
 ### 组件 Token
