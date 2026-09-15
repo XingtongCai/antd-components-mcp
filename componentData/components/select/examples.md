@@ -58,11 +58,9 @@ const onSearch = (value: string) => {
 };
 const App: React.FC = () => (
   <Select
-    showSearch
+    showSearch={{ optionFilterProp: 'label', onSearch }}
     placeholder="Select a person"
-    optionFilterProp="label"
     onChange={onChange}
-    onSearch={onSearch}
     options={[
       {
         value: 'jack',
@@ -89,15 +87,37 @@ import React from 'react';
 import { Select } from 'antd';
 const App: React.FC = () => (
   <Select
-    showSearch
+    showSearch={{
+      filterOption: (input, option) =>
+        (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+    }}
     placeholder="Select a person"
-    filterOption={(input, option) =>
-      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-    }
     options={[
       { value: '1', label: 'Jack' },
       { value: '2', label: 'Lucy' },
       { value: '3', label: 'Tom' },
+    ]}
+  />
+);
+export default App;
+```
+### 多字段搜索
+使用 `optionFilterProp` 多字段搜索。
+
+```tsx
+import React from 'react';
+import { Select } from 'antd';
+const App: React.FC = () => (
+  <Select
+    placeholder="Select an option"
+    showSearch={{
+      optionFilterProp: ['label', 'otherField'],
+    }}
+    options={[
+      { value: 'a11', label: 'a11', otherField: 'c11' },
+      { value: 'b22', label: 'b22', otherField: 'b11' },
+      { value: 'c33', label: 'c33', otherField: 'b33' },
+      { value: 'd44', label: 'd44', otherField: 'd44' },
     ]}
   />
 );
@@ -121,7 +141,7 @@ const handleChange = (value: string[]) => {
   console.log(`selected ${value}`);
 };
 const App: React.FC = () => (
-  <Space style={{ width: '100%' }} direction="vertical">
+  <Space style={{ width: '100%' }} vertical>
     <Select
       mode="multiple"
       allowClear
@@ -163,7 +183,7 @@ const handleChange = (value: string | string[]) => {
   console.log(`Selected: ${value}`);
 };
 const App: React.FC = () => {
-  const [size, setSize] = useState<SizeType>('middle');
+  const [size, setSize] = useState<SizeType>('medium');
   const handleSizeChange = (e: RadioChangeEvent) => {
     setSize(e.target.value);
   };
@@ -171,12 +191,12 @@ const App: React.FC = () => {
     <>
       <Radio.Group value={size} onChange={handleSizeChange}>
         <Radio.Button value="large">Large</Radio.Button>
-        <Radio.Button value="middle">Default</Radio.Button>
+        <Radio.Button value="medium">Medium</Radio.Button>
         <Radio.Button value="small">Small</Radio.Button>
       </Radio.Group>
       <br />
       <br />
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space vertical style={{ width: '100%' }}>
         <Select
           size={size}
           defaultValue="a1"
@@ -214,49 +234,54 @@ export default App;
 ```tsx
 import React from 'react';
 import { Select, Space } from 'antd';
-const handleChange = (value: string[]) => {
-  console.log(`selected ${value}`);
-};
 const options = [
   {
-    label: 'China',
-    value: 'china',
-    emoji: '🇨🇳',
-    desc: 'China (中国)',
+    label: 'Happy',
+    value: 'happy',
+    emoji: '😄',
+    desc: 'Feeling Good',
   },
   {
-    label: 'USA',
-    value: 'usa',
-    emoji: '🇺🇸',
-    desc: 'USA (美国)',
+    label: 'Sad',
+    value: 'sad',
+    emoji: '😢',
+    desc: 'Feeling Blue',
   },
   {
-    label: 'Japan',
-    value: 'japan',
-    emoji: '🇯🇵',
-    desc: 'Japan (日本)',
+    label: 'Angry',
+    value: 'angry',
+    emoji: '😡',
+    desc: 'Furious',
   },
   {
-    label: 'Korea',
-    value: 'korea',
-    emoji: '🇰🇷',
-    desc: 'Korea (韩国)',
+    label: 'Cool',
+    value: 'cool',
+    emoji: '😎',
+    desc: 'Chilling',
+  },
+  {
+    label: 'Sleepy',
+    value: 'sleepy',
+    emoji: '😴',
+    desc: 'Need Sleep',
   },
 ];
 const App: React.FC = () => (
   <Select
     mode="multiple"
     style={{ width: '100%' }}
-    placeholder="select one country"
-    defaultValue={['china']}
-    onChange={handleChange}
+    placeholder="Please select your current mood."
+    defaultValue={['happy']}
+    onChange={(value) => {
+      console.log(`selected ${value}`);
+    }}
     options={options}
     optionRender={(option) => (
       <Space>
         <span role="img" aria-label={option.data.label}>
           {option.data.emoji}
         </span>
-        {option.data.desc}
+        {`${option.data.label} (${option.data.desc})`}
       </Space>
     )}
   />
@@ -271,13 +296,13 @@ import React from 'react';
 import { Select } from 'antd';
 const App: React.FC = () => (
   <Select
-    showSearch
+    showSearch={{
+      optionFilterProp: 'label',
+      filterSort: (optionA, optionB) =>
+        (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase()),
+    }}
     style={{ width: 200 }}
     placeholder="Search to Select"
-    optionFilterProp="label"
-    filterSort={(optionA, optionB) =>
-      (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
-    }
     options={[
       {
         value: '1',
@@ -413,78 +438,6 @@ const App: React.FC = () => {
 };
 export default App;
 ```
-### 搜索框
-搜索和远程数据结合。
-
-```tsx
-/* eslint-disable compat/compat */
-import React, { useState } from 'react';
-import { Select } from 'antd';
-import type { SelectProps } from 'antd';
-import type { AnyObject } from 'antd/es/_util/type';
-let timeout: ReturnType<typeof setTimeout> | null;
-let currentValue: string;
-const toURLSearchParams = <T extends AnyObject>(record: T) => {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(record)) {
-    params.append(key, value);
-  }
-  return params;
-};
-const fetchData = (value: string, callback: (data: { value: string; text: string }[]) => void) => {
-  if (timeout) {
-    clearTimeout(timeout);
-    timeout = null;
-  }
-  currentValue = value;
-  const params = toURLSearchParams({ code: 'utf-8', q: value });
-  const fake = () => {
-    fetch(`https://suggest.taobao.com/sug?${params.toString()}`)
-      .then((response) => response.json())
-      .then(({ result }) => {
-        if (currentValue === value) {
-          const data = result.map((item: any) => ({ value: item[0], text: item[0] }));
-          callback(data);
-        }
-      });
-  };
-  if (value) {
-    timeout = setTimeout(fake, 300);
-  } else {
-    callback([]);
-  }
-};
-const SearchInput: React.FC<{ placeholder: string; style: React.CSSProperties }> = (props) => {
-  const [data, setData] = useState<SelectProps['options']>([]);
-  const [value, setValue] = useState<string>();
-  const handleSearch = (newValue: string) => {
-    fetchData(newValue, setData);
-  };
-  const handleChange = (newValue: string) => {
-    setValue(newValue);
-  };
-  return (
-    <Select
-      showSearch
-      value={value}
-      placeholder={props.placeholder}
-      style={props.style}
-      defaultActiveFirstOption={false}
-      suffixIcon={null}
-      filterOption={false}
-      onSearch={handleSearch}
-      onChange={handleChange}
-      notFoundContent={null}
-      options={(data || []).map((d) => ({
-        value: d.value,
-        label: d.text,
-      }))}
-    />
-  );
-};
-const App: React.FC = () => <SearchInput placeholder="input search text" style={{ width: 200 }} />;
-export default App;
-```
 ### 获得选项的文本
 默认情况下 `onChange` 里只能拿到 `value`，如果需要拿到选中的节点文本 `label`，可以使用 `labelInValue` 属性。
 选中项的 `label` 会被包装到 `value` 中传递给 `onChange` 等函数，此时 `value` 是一个对象。
@@ -543,12 +496,38 @@ const App: React.FC = () => (
 );
 export default App;
 ```
+### 自定义分词
+自定义分词函数，按业务规则拆分输入内容。
+
+```tsx
+import React from 'react';
+import { Select } from 'antd';
+const tokenize = (input: string): string[] => {
+  const tokens: string[] = [];
+  const regex = /"([^"]*)"|([^,\n]+)/g;
+  let match: RegExpExecArray | null = regex.exec(input);
+  while (match) {
+    tokens.push((match[1] ?? match[2]).trim());
+    match = regex.exec(input);
+  }
+  return tokens.filter(Boolean);
+};
+const App: React.FC = () => (
+  <Select
+    mode="tags"
+    style={{ width: '100%' }}
+    tokenSeparators={tokenize}
+    placeholder='Try paste: "San Francisco, CA", New York'
+  />
+);
+export default App;
+```
 ### 搜索用户
 一个带有远程搜索，防抖控制，请求时序控制，加载状态的多选示例。
 
 ```tsx
 import React, { useMemo, useRef, useState } from 'react';
-import { Select, Spin, Avatar } from 'antd';
+import { Avatar, Select, Spin } from 'antd';
 import type { SelectProps } from 'antd';
 import debounce from 'lodash/debounce';
 export interface DebounceSelectProps<ValueType = any>
@@ -587,14 +566,17 @@ function DebounceSelect<
   return (
     <Select
       labelInValue
-      filterOption={false}
-      onSearch={debounceFetcher}
+      showSearch={{
+        autoClearSearchValue: false,
+        filterOption: false,
+        onSearch: debounceFetcher,
+      }}
       notFoundContent={fetching ? <Spin size="small" /> : 'No results found'}
       {...props}
       options={options}
       optionRender={(option) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {option.data.avatar && <Avatar src={option.data.avatar} style={{ marginRight: 8 }} />}
+          {option.data.avatar && <Avatar src={option.data.avatar} style={{ marginInlineEnd: 8 }} />}
           {option.label}
         </div>
       )}
@@ -613,11 +595,15 @@ async function fetchUserList(username: string): Promise<UserValue[]> {
     .then((res) => res.json())
     .then((res) => {
       const results = Array.isArray(res) ? res : [];
-      return results.map((user) => ({
+      return results.map<UserValue>((user) => ({
         label: user.name,
         value: user.id,
         avatar: user.avatar,
       }));
+    })
+    .catch(() => {
+      console.log('fetch mock data failed');
+      return [];
     });
 }
 const App: React.FC = () => {
@@ -656,6 +642,7 @@ const App: React.FC = () => (
     <Select
       prefix="User"
       defaultValue="lucy"
+      placeholder="Select User"
       style={{ width: 200 }}
       onChange={handleChange}
       options={[
@@ -664,10 +651,13 @@ const App: React.FC = () => (
         { value: 'Yiminghe', label: 'yiminghe' },
         { value: 'disabled', label: 'Disabled', disabled: true },
       ]}
+      allowClear
+      showSearch
     />
     <Select
       suffixIcon={smileIcon}
       defaultValue="lucy"
+      placeholder="Select"
       style={{ width: 120 }}
       onChange={handleChange}
       options={[
@@ -680,6 +670,7 @@ const App: React.FC = () => (
     <Select
       suffixIcon={mehIcon}
       defaultValue="lucy"
+      placeholder="Select"
       style={{ width: 120 }}
       disabled
       options={[{ value: 'lucy', label: 'Lucy' }]}
@@ -688,6 +679,7 @@ const App: React.FC = () => (
     <Select
       prefix="User"
       defaultValue={['lucy']}
+      placeholder="Select"
       mode="multiple"
       style={{ width: 200 }}
       onChange={handleChange}
@@ -701,6 +693,7 @@ const App: React.FC = () => (
     <Select
       suffixIcon={smileIcon}
       defaultValue={['lucy']}
+      placeholder="Select"
       mode="multiple"
       style={{ width: 120 }}
       onChange={handleChange}
@@ -714,6 +707,7 @@ const App: React.FC = () => (
     <Select
       suffixIcon={mehIcon}
       defaultValue={['lucy']}
+      placeholder="Select"
       mode="multiple"
       style={{ width: 120 }}
       disabled
@@ -724,7 +718,7 @@ const App: React.FC = () => (
 export default App;
 ```
 ### 扩展菜单
-使用 `dropdownRender` 对下拉菜单进行自由扩展。如果希望点击自定义内容后关闭浮层，你需要使用受控模式自行控制（[codesandbox](https://codesandbox.io/s/ji-ben-shi-yong-antd-4-21-7-forked-gnp4cy?file=/demo.js)）。
+使用 `popupRender` 对下拉菜单进行自由扩展。如果希望点击自定义内容后关闭浮层，你需要使用受控模式自行控制（[codesandbox](https://codesandbox.io/s/ji-ben-shi-yong-antd-4-21-7-forked-gnp4cy?file=/demo.js)）。
 
 ```tsx
 import React, { useRef, useState } from 'react';
@@ -913,90 +907,96 @@ export default App;
 ```tsx
 import React from 'react';
 import { Flex, Select } from 'antd';
+import type { SelectProps } from 'antd';
+const sharedSelectProps: SelectProps<string> = {
+  value: 'lucy',
+  variant: 'filled' as const,
+  style: { flex: '1 1 50%', minWidth: 0 },
+  options: [
+    { value: 'jack', label: 'Jack' },
+    { value: 'lucy', label: 'Lucy' },
+    { value: 'Yiminghe', label: 'yiminghe' },
+  ],
+};
 const App: React.FC = () => (
   <Flex gap={12} vertical>
     <Flex gap={8}>
-      <Select
-        value="lucy"
-        disabled
-        variant="filled"
-        style={{ flex: 1 }}
-        options={[
-          { value: 'jack', label: 'Jack' },
-          { value: 'lucy', label: 'Lucy' },
-          { value: 'Yiminghe', label: 'yiminghe' },
-        ]}
-      />
-      <Select
-        value="lucy"
-        disabled
-        mode="multiple"
-        variant="filled"
-        placeholder="Outlined"
-        style={{ flex: 1 }}
-        options={[
-          { value: 'jack', label: 'Jack' },
-          { value: 'lucy', label: 'Lucy' },
-          { value: 'Yiminghe', label: 'yiminghe' },
-        ]}
-      />
+      <Select {...sharedSelectProps} disabled />
+      <Select {...sharedSelectProps} disabled mode="multiple" placeholder="Outlined" />
     </Flex>
     <Flex gap={8}>
-      <Select
-        value="lucy"
-        status="error"
-        variant="filled"
-        style={{ flex: 1 }}
-        options={[
-          { value: 'jack', label: 'Jack' },
-          { value: 'lucy', label: 'Lucy' },
-          { value: 'Yiminghe', label: 'yiminghe' },
-        ]}
-      />
-      <Select
-        value="lucy"
-        status="error"
-        mode="multiple"
-        variant="filled"
-        placeholder="Outlined"
-        style={{ flex: 1 }}
-        options={[
-          { value: 'jack', label: 'Jack' },
-          { value: 'lucy', label: 'Lucy' },
-          { value: 'Yiminghe', label: 'yiminghe' },
-        ]}
-      />
+      <Select {...sharedSelectProps} status="error" />
+      <Select {...sharedSelectProps} status="error" mode="multiple" placeholder="Outlined" />
     </Flex>
     <Flex gap={8}>
+      <Select {...sharedSelectProps} disabled status="error" />
       <Select
+        {...sharedSelectProps}
         disabled
-        value="lucy"
-        status="error"
-        variant="filled"
-        style={{ flex: 1 }}
-        options={[
-          { value: 'jack', label: 'Jack' },
-          { value: 'lucy', label: 'Lucy' },
-          { value: 'Yiminghe', label: 'yiminghe' },
-        ]}
-      />
-      <Select
-        disabled
-        value="lucy"
         status="error"
         mode="multiple"
-        variant="filled"
         placeholder="Outlined"
-        style={{ flex: 1 }}
-        options={[
-          { value: 'jack', label: 'Jack' },
-          { value: 'lucy', label: 'Lucy' },
-          { value: 'Yiminghe', label: 'yiminghe' },
-        ]}
       />
     </Flex>
   </Flex>
 );
+export default App;
+```
+### 清除后缀
+展示 `allowClear` 隐藏后缀内容时的边界场景。
+
+```tsx
+import React from 'react';
+import { Flex, Select } from 'antd';
+const longLabel = 'A very very very very very very very long selected label';
+const options = [
+  { value: 'long', label: longLabel },
+  { value: 'short', label: 'Short option' },
+];
+const selectStyle: React.CSSProperties = { width: 280 };
+const App: React.FC = () => {
+  const suffixIcon = (
+    <button
+      type="button"
+      onMouseDown={(event) => event.stopPropagation()}
+      onClick={() => console.log('suffix clicked')}
+      style={{
+        border: '1px solid #d9d9d9',
+        borderRadius: 4,
+        padding: '0 8px',
+        color: 'rgba(0, 0, 0, 0.88)',
+        background: '#fff',
+        cursor: 'pointer',
+      }}
+    >
+      Suffix
+    </button>
+  );
+  return (
+    <Flex vertical gap="middle">
+      <Flex vertical gap="small">
+        <span>Interactive suffix</span>
+        <Select
+          allowClear
+          defaultValue="long"
+          suffixIcon={suffixIcon}
+          options={options}
+          style={selectStyle}
+        />
+      </Flex>
+      <Flex vertical gap="small">
+        <span>No suffix</span>
+        <Select
+          allowClear
+          defaultValue="long"
+          suffixIcon={null}
+          options={options}
+          style={selectStyle}
+        />
+      </Flex>
+    </Flex>
+  );
+};
 export default App;
 ```
 ### 自定义选择标签
@@ -1101,7 +1101,7 @@ const App: React.FC = () => {
     onChange: setValue,
   };
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
+    <Space vertical style={{ width: '100%' }}>
       <Select {...sharedProps} {...selectProps} />
       <Select {...sharedProps} disabled />
       <Select
@@ -1163,7 +1163,7 @@ export default App;
 import React from 'react';
 import { Select, Space } from 'antd';
 const App: React.FC = () => (
-  <Space direction="vertical" style={{ width: '100%' }}>
+  <Space vertical style={{ width: '100%' }}>
     <Select status="error" style={{ width: '100%' }} />
     <Select status="warning" style={{ width: '100%' }} />
   </Space>
@@ -1179,9 +1179,9 @@ import type { RadioChangeEvent, SelectProps } from 'antd';
 import { Radio, Select } from 'antd';
 type SelectCommonPlacement = SelectProps['placement'];
 const App: React.FC = () => {
-  const [placement, SetPlacement] = useState<SelectCommonPlacement>('topLeft');
+  const [placement, setPlacement] = useState<SelectCommonPlacement>('topLeft');
   const placementChange = (e: RadioChangeEvent) => {
-    SetPlacement(e.target.value);
+    setPlacement(e.target.value);
   };
   return (
     <>
@@ -1235,11 +1235,11 @@ const randomOptions = (count?: number) => {
   }));
 };
 const App: React.FC = () => {
-  const [placement, SetPlacement] = useState<SelectCommonPlacement>('topLeft');
+  const [placement, setPlacement] = useState<SelectCommonPlacement>('topLeft');
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState(() => randomOptions(3));
   const placementChange = (e: RadioChangeEvent) => {
-    SetPlacement(e.target.value);
+    setPlacement(e.target.value);
   };
   return (
     <div
@@ -1282,12 +1282,12 @@ const App: React.FC = () => {
 };
 export default App;
 ```
-### 4.0 Debug
+### Debug 专用
 调试使用。
 
 ```tsx
 import React from 'react';
-import { Button, Input, Select, Space } from 'antd';
+import { Button, Flex, Input, Select, Space } from 'antd';
 const style: React.CSSProperties = {
   width: 500,
   position: 'relative',
@@ -1299,39 +1299,69 @@ const handleChange = (value: string | string[]) => {
   console.log(`selected ${value}`);
 };
 const App: React.FC = () => (
-  <Space style={style} wrap>
-    <Input style={{ width: 100 }} value="222" />
-    <Select
-      style={{ width: 120 }}
-      onChange={handleChange}
-      showSearch
-      placeholder="233"
-      options={[
-        { value: 'jack', label: 'Jack' },
-        { value: 'lucy', label: 'Lucy' },
-        { value: 'disabled', disabled: true, label: 'Disabled' },
-        { value: 'Yiminghe', label: 'yiminghe' },
-        { value: 'long', label: 'I am super super long!' },
-      ]}
-    />
-    <Select
-      mode="multiple"
-      style={{ width: 120 }}
-      defaultValue={['lucy']}
-      onChange={handleChange}
-      showSearch
-      placeholder="233"
-      options={[
-        { value: 'jack', label: 'Jack' },
-        { value: 'lucy', label: 'Lucy' },
-        { value: 'disabled', disabled: true, label: 'Disabled' },
-        { value: 'Yiminghe', label: 'yiminghe' },
-        { value: 'long', label: 'I am super super long!' },
-      ]}
-    />
-    <span className="debug-align">AntDesign</span>
-    <Button>222</Button>
-  </Space>
+  <Flex vertical gap="medium">
+    <Space style={style} wrap>
+      <Input style={{ width: 100 }} value="222" />
+      <Select
+        style={{ width: 120 }}
+        onChange={handleChange}
+        showSearch
+        placeholder="233"
+        options={[
+          { value: 'jack', label: 'Jack' },
+          { value: 'lucy', label: 'Lucy' },
+          { value: 'disabled', disabled: true, label: 'Disabled' },
+          { value: 'Yiminghe', label: 'yiminghe' },
+          { value: 'long', label: 'I am super super long!' },
+        ]}
+      />
+      <Select
+        mode="multiple"
+        style={{ width: 120 }}
+        defaultValue={['lucy']}
+        onChange={handleChange}
+        showSearch
+        placeholder="233"
+        options={[
+          { value: 'jack', label: 'Jack' },
+          { value: 'lucy', label: 'Lucy' },
+          { value: 'disabled', disabled: true, label: 'Disabled' },
+          { value: 'Yiminghe', label: 'yiminghe' },
+          { value: 'long', label: 'I am super super long!' },
+        ]}
+      />
+      <span className="debug-align">AntDesign</span>
+      <Button>222</Button>
+      {/* https://github.com/ant-design/ant-design/issues/56960 */}
+      <Select
+        style={{ width: 120 }}
+        defaultValue=" "
+        placeholder="Please select"
+        options={[
+          { value: 'jack', label: 'Jack' },
+          { value: 'lucy', label: 'Lucy' },
+          { value: 'disabled', disabled: true, label: 'Disabled' },
+          { value: 'Yiminghe', label: 'yiminghe' },
+          { value: 'long', label: 'I am super super long!' },
+        ]}
+      />
+    </Space>
+    <div style={{ width: 200 }}>
+      {/* https://github.com/ant-design/ant-design/issues/54179 */}
+      <Select
+        mode="multiple"
+        style={{ width: '100%' }}
+        defaultValue={[1]}
+        options={[
+          {
+            value: 1,
+            label: '哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈',
+          },
+        ]}
+      />
+    </div>
+    <Select defaultValue="" />
+  </Flex>
 );
 export default App;
 ```
@@ -1340,12 +1370,12 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { Select, Space, Switch } from 'antd';
+import { Flex, Select, Switch } from 'antd';
 const { _InternalPanelDoNotUseOrYouWillBeFired: InternalSelect } = Select;
 const App: React.FC = () => {
   const [open, setOpen] = React.useState(true);
   return (
-    <Space direction="vertical" style={{ display: 'flex' }}>
+    <Flex vertical gap="small" align="start">
       <Switch checked={open} onChange={() => setOpen(!open)} />
       <InternalSelect
         defaultValue="lucy"
@@ -1359,7 +1389,7 @@ const App: React.FC = () => {
         ]}
         virtual={false}
       />
-    </Space>
+    </Flex>
   );
 };
 export default App;
@@ -1563,7 +1593,7 @@ for (let i = 10; i < 36; i++) {
   });
 }
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <ConfigProvider
       theme={{
         components: {
@@ -1578,7 +1608,7 @@ const App: React.FC = () => (
         },
       }}
     >
-      <Space style={{ width: '100%' }} direction="vertical">
+      <Space style={{ width: '100%' }} vertical>
         <Select
           mode="multiple"
           allowClear
@@ -1604,7 +1634,7 @@ const App: React.FC = () => (
         },
       }}
     >
-      <Space style={{ width: '100%' }} direction="vertical">
+      <Space style={{ width: '100%' }} vertical>
         <Select
           mode="multiple"
           allowClear
@@ -1634,7 +1664,7 @@ const App: React.FC = () => (
         },
       }}
     >
-      <Space style={{ width: '100%' }} direction="vertical">
+      <Space style={{ width: '100%' }} vertical>
         <Select style={{ width: '100%' }} defaultValue="a10" options={options} />
         <Select
           mode="multiple"
@@ -1687,6 +1717,66 @@ const App: React.FC = () => {
         { value: 'Elle Blair', label: 'Elle Blair' },
       ]}
     />
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Select 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { MehOutlined } from '@ant-design/icons';
+import { Flex, Select } from 'antd';
+import type { GetProp, SelectProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    border-radius: 8px;
+    width: 300px;
+  `,
+}));
+const options: SelectProps['options'] = [
+  { value: 'GuangZhou', label: 'GuangZhou' },
+  { value: 'ShenZhen', label: 'ShenZhen' },
+];
+const stylesObject: SelectProps['styles'] = {
+  prefix: {
+    color: '#1890ff',
+  },
+  suffix: {
+    color: '#1890ff',
+  },
+};
+const stylesFn: SelectProps['styles'] = ({ props }): GetProp<SelectProps, 'styles', 'Return'> => {
+  if (props.variant === 'filled') {
+    return {
+      prefix: {
+        color: '#722ed1',
+      },
+      suffix: {
+        color: '#722ed1',
+      },
+      popup: {
+        root: {
+          border: '1px solid #722ed1',
+        },
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const sharedProps: SelectProps = {
+    options,
+    classNames,
+    prefix: <MehOutlined />,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Select {...sharedProps} styles={stylesObject} placeholder="Object" />
+      <Select {...sharedProps} styles={stylesFn} placeholder="Function" variant="filled" />
+    </Flex>
   );
 };
 export default App;

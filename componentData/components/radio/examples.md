@@ -110,44 +110,56 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import type { RadioChangeEvent } from 'antd';
-import { Input, Radio } from 'antd';
-const style: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 8,
+import type { RadioChangeEvent, RadioGroupProps } from 'antd';
+import { Flex, Input, Radio } from 'antd';
+const labelStyle: React.CSSProperties = {
+  height: 32,
+  lineHeight: '32px',
 };
+const buttonOptions: RadioGroupProps['options'] = [
+  { label: 'Apple', value: 'Apple', className: 'label-1' },
+  { label: 'Pear', value: 'Pear', className: 'label-2' },
+  { label: 'Orange', value: 'Orange', title: 'Orange', className: 'label-3' },
+];
 const App: React.FC = () => {
   const [value, setValue] = useState(1);
   const onChange = (e: RadioChangeEvent) => {
     setValue(e.target.value);
   };
   return (
-    <Radio.Group
-      style={style}
-      onChange={onChange}
-      value={value}
-      options={[
-        { value: 1, label: 'Option A' },
-        { value: 2, label: 'Option B' },
-        { value: 3, label: 'Option C' },
-        {
-          value: 4,
-          label: (
-            <>
-              More...
-              {value === 4 && (
-                <Input
-                  variant="filled"
-                  placeholder="please input"
-                  style={{ width: 120, marginInlineStart: 12 }}
-                />
-              )}
-            </>
-          ),
-        },
-      ]}
-    />
+    <Flex align="start" gap="large">
+      <div style={{ flex: 1 }}>
+        <Radio.Group
+          vertical
+          onChange={onChange}
+          value={value}
+          options={[
+            { value: 1, style: labelStyle, label: 'Option A' },
+            { value: 2, style: labelStyle, label: 'Option B' },
+            { value: 3, style: labelStyle, label: 'Option C' },
+            {
+              value: 4,
+              style: labelStyle,
+              label: (
+                <>
+                  More...
+                  {value === 4 && (
+                    <Input
+                      variant="filled"
+                      placeholder="please input"
+                      style={{ width: 120, marginInlineStart: 12 }}
+                    />
+                  )}
+                </>
+              ),
+            },
+          ]}
+        />
+      </div>
+      <div style={{ flex: 1 }}>
+        <Radio.Group options={buttonOptions} optionType="button" vertical />
+      </div>
+    </Flex>
   );
 };
 export default App;
@@ -165,7 +177,7 @@ const options: CheckboxGroupProps<string>['options'] = [
   { label: 'Orange', value: 'Orange' },
 ];
 const App: React.FC = () => (
-  <Flex vertical gap="middle">
+  <Flex vertical gap="medium">
     <Radio.Group block options={options} defaultValue="Apple" />
     <Radio.Group
       block
@@ -252,7 +264,7 @@ const onChange = (e: RadioChangeEvent) => {
   console.log(`radio checked:${e.target.value}`);
 };
 const App: React.FC = () => (
-  <Flex vertical gap="middle">
+  <Flex vertical gap="medium">
     <Radio.Group onChange={onChange} defaultValue="a">
       <Radio.Button value="a">Hangzhou</Radio.Button>
       <Radio.Button value="b">Shanghai</Radio.Button>
@@ -304,7 +316,7 @@ export default App;
 import React from 'react';
 import { Flex, Radio } from 'antd';
 const App: React.FC = () => (
-  <Flex vertical gap="middle">
+  <Flex vertical gap="medium">
     <Radio.Group defaultValue="a" size="large">
       <Radio.Button value="a">Hangzhou</Radio.Button>
       <Radio.Button value="b">Shanghai</Radio.Button>
@@ -334,7 +346,7 @@ export default App;
 import React from 'react';
 import { Flex, Radio } from 'antd';
 const App: React.FC = () => (
-  <Flex vertical gap="middle">
+  <Flex vertical gap="medium">
     <Radio.Group defaultValue="a" buttonStyle="solid">
       <Radio.Button value="a">Hangzhou</Radio.Button>
       <Radio.Button value="b">Shanghai</Radio.Button>
@@ -353,21 +365,114 @@ const App: React.FC = () => (
 );
 export default App;
 ```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义单选框的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Radio } from 'antd';
+import type { GetProp, RadioProps } from 'antd';
+import { createStyles } from 'antd-style';
+import { clsx } from 'clsx';
+const useStyles = createStyles(({ token, css }) => ({
+  root: css`
+    border-radius: ${token.borderRadius}px;
+    background-color: ${token.colorBgContainer};
+  `,
+  icon: css`
+    border-color: ${token.colorWarning};
+  `,
+  label: css`
+    color: ${token.colorTextDisabled};
+    font-weight: bold;
+  `,
+  iconChecked: css`
+    background-color: ${token.colorWarning};
+  `,
+  labelChecked: css`
+    color: ${token.colorWarning};
+  `,
+}));
+// Object style
+const styles: RadioProps['styles'] = {
+  icon: {
+    borderRadius: 6,
+  },
+  label: {
+    color: 'blue',
+  },
+};
+const App: React.FC = () => {
+  const [value, setValue] = React.useState<'styles' | 'classNames'>('styles');
+  const { styles: classNamesStyles } = useStyles();
+  // Function classNames - dynamically adjust based on checked state
+  const classNamesFn: RadioProps['classNames'] = (
+    info,
+  ): GetProp<RadioProps, 'classNames', 'Return'> => {
+    if (info.props.checked) {
+      return {
+        root: clsx(classNamesStyles.root),
+        icon: clsx(classNamesStyles.icon, classNamesStyles.iconChecked),
+        label: clsx(classNamesStyles.label, classNamesStyles.labelChecked),
+      };
+    }
+    return {
+      root: classNamesStyles.root,
+      icon: classNamesStyles.icon,
+      label: classNamesStyles.label,
+    };
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Radio
+        name="style-class"
+        styles={styles}
+        checked={value === 'styles'}
+        onChange={() => setValue('styles')}
+      >
+        Object styles
+      </Radio>
+      <Radio
+        name="style-class"
+        classNames={classNamesFn}
+        checked={value === 'classNames'}
+        onChange={() => setValue('classNames')}
+      >
+        Function classNames
+      </Radio>
+    </Flex>
+  );
+};
+export default App;
+```
 ### 测试 Badge 的样式
 测试 Badge 的样式。
 
 ```tsx
 import React from 'react';
-import { Badge, Radio } from 'antd';
+import { Badge, Flex, Radio } from 'antd';
 const App: React.FC = () => (
-  <Radio.Group buttonStyle="solid">
-    <Badge count={1}>
-      <Radio.Button value={1}>Click Me</Radio.Button>
-    </Badge>
-    <Badge count={2}>
-      <Radio.Button value={2}>Not Me</Radio.Button>
-    </Badge>
-  </Radio.Group>
+  <Flex vertical gap="middle" align="start">
+    <Radio.Group buttonStyle="solid">
+      <Badge count={1}>
+        <Radio.Button value={1}>Click Me</Radio.Button>
+      </Badge>
+      <Badge count={2}>
+        <Radio.Button value={2}>Not Me</Radio.Button>
+      </Badge>
+    </Radio.Group>
+    <Radio.Group vertical buttonStyle="solid">
+      <Badge count={1}>
+        <Radio.Button value="vertical-1">Click Me</Radio.Button>
+      </Badge>
+      <Badge count={0}>
+        <Radio.Button value="vertical-0">Hidden Badge</Radio.Button>
+      </Badge>
+      <Badge count={2}>
+        <Radio.Button value="vertical-2">Not Me</Radio.Button>
+      </Badge>
+    </Radio.Group>
+  </Flex>
 );
 export default App;
 ```
@@ -419,7 +524,7 @@ const App: React.FC = () => (
       },
     }}
   >
-    <Space direction="vertical">
+    <Space vertical>
       <Radio checked>Test</Radio>
       <Radio checked disabled>
         Disabled

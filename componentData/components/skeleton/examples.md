@@ -33,14 +33,14 @@ export default App;
 import React, { useState } from 'react';
 import { DotChartOutlined } from '@ant-design/icons';
 import type { RadioChangeEvent } from 'antd';
-import { Flex, Divider, Form, Radio, Skeleton, Space, Switch } from 'antd';
-type SizeType = 'default' | 'small' | 'large';
+import { Divider, Flex, Form, Radio, Skeleton, Space, Switch } from 'antd';
+type SizeType = 'large' | 'medium' | 'small';
 type ButtonShapeType = 'circle' | 'square' | 'round' | 'default';
 type AvatarShapeType = 'circle' | 'square';
 const App: React.FC = () => {
   const [active, setActive] = useState(false);
   const [block, setBlock] = useState(false);
-  const [size, setSize] = useState<SizeType>('default');
+  const [size, setSize] = useState<SizeType>('medium');
   const [buttonShape, setButtonShape] = useState<ButtonShapeType>('default');
   const [avatarShape, setAvatarShape] = useState<AvatarShapeType>('circle');
   const handleActiveChange = (checked: boolean) => {
@@ -59,7 +59,7 @@ const App: React.FC = () => {
     setAvatarShape(e.target.value);
   };
   return (
-    <Flex gap="middle" vertical>
+    <Flex gap="medium" vertical>
       <Space>
         <Skeleton.Button active={active} size={size} shape={buttonShape} block={block} />
         <Skeleton.Avatar active={active} size={size} shape={avatarShape} />
@@ -85,8 +85,8 @@ const App: React.FC = () => {
           </Form.Item>
           <Form.Item label="Size">
             <Radio.Group value={size} onChange={handleSizeChange}>
-              <Radio.Button value="default">Default</Radio.Button>
               <Radio.Button value="large">Large</Radio.Button>
+              <Radio.Button value="medium">Medium</Radio.Button>
               <Radio.Button value="small">Small</Radio.Button>
             </Radio.Group>
           </Form.Item>
@@ -126,7 +126,7 @@ const App: React.FC = () => {
     }, 3000);
   };
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size={16}>
+    <Space vertical style={{ width: '100%' }} size={16}>
       <Skeleton loading={loading}>
         <h4 style={{ marginBottom: 16 }}>Ant Design, a design language</h4>
         <p>
@@ -158,7 +158,7 @@ interface IconTextProps {
 const listData = Array.from({ length: 3 }).map((_, i) => ({
   href: 'https://ant.design',
   title: `ant design part ${i + 1}`,
-  avatar: `https://api.dicebear.com/7.x/miniavs/svg?seed=${i}`,
+  avatar: `https://api.dicebear.com/10.x/lorelei/svg?seed=${i}`,
   description:
     'Ant Design, a design language for background applications, is refined by Ant UED Team.',
   content:
@@ -197,6 +197,7 @@ const App: React.FC = () => {
             extra={
               !loading && (
                 <img
+                  draggable={false}
                   width={272}
                   alt="logo"
                   src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
@@ -216,6 +217,67 @@ const App: React.FC = () => {
         )}
       />
     </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象或者函数可以自定义 Skeleton 组件的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Skeleton } from 'antd';
+import type { GetProp, SkeletonProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classnames = createStaticStyles(({ css }) => ({
+  root: css`
+    border-radius: 10px;
+    padding: 12px;
+  `,
+  header: css`
+    margin-bottom: 12px;
+  `,
+}));
+const paragraphStyles = createStaticStyles(({ css }) => ({
+  paragraph: css`
+    & > li {
+      background-color: rgba(229, 243, 254, 0.5);
+    }
+  `,
+}));
+const styles: SkeletonProps['styles'] = {
+  avatar: {
+    border: '1px solid #aaa',
+  },
+  title: {
+    border: '1px solid #aaa',
+  },
+};
+const stylesFn: SkeletonProps['styles'] = (info): GetProp<SkeletonProps, 'styles', 'Return'> => {
+  if (info.props.active) {
+    return {
+      root: {
+        border: '1px solid rgba(229, 243, 254, 0.3)',
+      },
+      title: {
+        backgroundColor: 'rgba(229, 243, 254, 0.5)',
+        height: 20,
+        borderRadius: 20,
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  return (
+    <Flex gap="medium">
+      <Skeleton classNames={classnames} styles={styles} avatar paragraph={false} />
+      <Skeleton
+        classNames={{ ...classnames, paragraph: paragraphStyles.paragraph }}
+        styles={stylesFn}
+        active
+      />
+    </Flex>
   );
 };
 export default App;
