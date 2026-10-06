@@ -131,30 +131,30 @@ interface DataType {
 const dataSource: DataType[] = [
   {
     key: '1',
-    name: '胡彦斌',
+    name: 'John Brown',
     age: 32,
-    address: '西湖区湖底公园1号',
+    address: 'No. 1 Lake Park',
   },
   {
     key: '2',
-    name: '胡彦祖',
+    name: 'Jim Green',
     age: 42,
-    address: '西湖区湖底公园1号',
+    address: 'No. 1 Lake Park',
   },
 ];
 const columns: TableProps<DataType>['columns'] = [
   {
-    title: '姓名',
+    title: 'Name',
     dataIndex: 'name',
     key: 'name',
   },
   {
-    title: '年龄',
+    title: 'Age',
     dataIndex: 'age',
     key: 'age',
   },
   {
-    title: '住址',
+    title: 'Address',
     dataIndex: 'address',
     key: 'address',
   },
@@ -381,7 +381,7 @@ const items: DescriptionsProps['items'] = [
   },
 ];
 const App: React.FC = () => {
-  const [size, setSize] = useState<'default' | 'middle' | 'small'>('default');
+  const [size, setSize] = useState<'large' | 'medium' | 'small'>('large');
   const onChange = (e: RadioChangeEvent) => {
     console.log('size checked', e.target.value);
     setSize(e.target.value);
@@ -389,8 +389,8 @@ const App: React.FC = () => {
   return (
     <div>
       <Radio.Group onChange={onChange} value={size}>
-        <Radio value="default">default</Radio>
-        <Radio value="middle">middle</Radio>
+        <Radio value="large">large</Radio>
+        <Radio value="medium">medium</Radio>
         <Radio value="small">small</Radio>
       </Radio.Group>
       <br />
@@ -680,15 +680,77 @@ const App: React.FC = () => {
       <Divider />
       <Descriptions
         title="Root style"
-        styles={{
-          label: labelStyle,
-          content: contentStyle,
-        }}
+        styles={{ label: labelStyle, content: contentStyle }}
         bordered={border}
         layout={layout}
         items={rootStyleItems}
       />
     </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Descriptions 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Descriptions, Flex } from 'antd';
+import type { DescriptionsProps, GetProp } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    padding: 10px;
+  `,
+}));
+const items: DescriptionsProps['items'] = [
+  {
+    key: '1',
+    label: 'Product',
+    children: 'Cloud Database',
+  },
+  {
+    key: '2',
+    label: 'Billing Mode',
+    children: 'Prepaid',
+  },
+  {
+    key: '3',
+    label: 'Automatic Renewal',
+    children: 'YES',
+  },
+];
+const styles: DescriptionsProps['styles'] = {
+  label: {
+    color: '#000',
+  },
+};
+const stylesFn: DescriptionsProps['styles'] = (
+  info,
+): GetProp<DescriptionsProps, 'styles', 'Return'> => {
+  if (info.props.size === 'large') {
+    return {
+      root: {
+        borderRadius: 8,
+        border: '1px solid #CDC1FF',
+      },
+      label: { color: '#A294F9' },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  const descriptionsProps: DescriptionsProps = {
+    title: 'User Info',
+    items,
+    bordered: true,
+    classNames,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Descriptions {...descriptionsProps} styles={styles} size="small" />
+      <Descriptions {...descriptionsProps} styles={stylesFn} size="large" />
+    </Flex>
   );
 };
 export default App;
@@ -804,7 +866,7 @@ const items: DescriptionsProps['items'] = [
   },
 ];
 const App: React.FC = () => {
-  const [size, setSize] = useState<'default' | 'middle' | 'small'>('default');
+  const [size, setSize] = useState<'large' | 'medium' | 'small'>('large');
   const onChange = (e: RadioChangeEvent) => {
     console.log('size checked', e.target.value);
     setSize(e.target.value);
@@ -829,8 +891,8 @@ const App: React.FC = () => {
     >
       <div>
         <Radio.Group onChange={onChange} value={size}>
-          <Radio value="default">default</Radio>
-          <Radio value="middle">middle</Radio>
+          <Radio value="large">large</Radio>
+          <Radio value="medium">medium</Radio>
           <Radio value="small">small</Radio>
         </Radio.Group>
         <br />
