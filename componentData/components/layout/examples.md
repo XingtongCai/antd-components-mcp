@@ -39,7 +39,7 @@ const layoutStyle = {
   maxWidth: 'calc(50% - 8px)',
 };
 const App: React.FC = () => (
-  <Flex gap="middle" wrap>
+  <Flex gap="medium" wrap>
     <Layout style={layoutStyle}>
       <Header style={headerStyle}>Header</Header>
       <Content style={contentStyle}>Content</Content>
@@ -95,6 +95,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Header style={{ display: 'flex', alignItems: 'center' }}>
@@ -123,9 +124,7 @@ const App: React.FC = () => {
           Content
         </div>
       </Content>
-      <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
-      </Footer>
+      <Footer style={{ textAlign: 'center' }}>Ant Design ©{currentYear} Created by Ant UED</Footer>
     </Layout>
   );
 };
@@ -165,6 +164,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Header style={{ display: 'flex', alignItems: 'center' }}>
@@ -197,9 +197,7 @@ const App: React.FC = () => {
           <Content style={{ padding: '0 24px', minHeight: 280 }}>Content</Content>
         </Layout>
       </div>
-      <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
-      </Footer>
+      <Footer style={{ textAlign: 'center' }}>Ant Design ©{currentYear} Created by Ant UED</Footer>
     </Layout>
   );
 };
@@ -257,7 +255,7 @@ const App: React.FC = () => {
             mode="inline"
             defaultSelectedKeys={['1']}
             defaultOpenKeys={['sub1']}
-            style={{ height: '100%', borderRight: 0 }}
+            style={{ height: '100%', borderInlineEnd: 0 }}
             items={items2}
           />
         </Sider>
@@ -331,6 +329,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
@@ -353,7 +352,7 @@ const App: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+          Ant Design ©{currentYear} Created by Ant UED
         </Footer>
       </Layout>
     </Layout>
@@ -437,6 +436,90 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 折叠覆盖布局
+通过贴附在 Sider 边缘的自定义触发器控制收起展开。展开后的 Sider 可以通过业务样式脱离文档流并覆盖内容，避免挤压内容区域。
+
+```tsx
+import React from 'react';
+import {
+  DesktopOutlined,
+  FileOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  PieChartOutlined,
+  TeamOutlined,
+} from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Layout, Menu, theme } from 'antd';
+const { Header, Content, Footer, Sider } = Layout;
+const layoutStyle: React.CSSProperties = {
+  position: 'relative',
+  minHeight: 360,
+};
+const siderStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  insetInlineStart: 0,
+  zIndex: 10,
+};
+const items: MenuProps['items'] = [
+  PieChartOutlined,
+  DesktopOutlined,
+  TeamOutlined,
+  FileOutlined,
+].map((icon, index) => ({
+  key: String(index + 1),
+  icon: React.createElement(icon),
+  label: `nav ${index + 1}`,
+}));
+const App: React.FC = () => {
+  const [collapsed, setCollapsed] = React.useState(false);
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
+  const currentYear = new Date().getFullYear();
+  return (
+    <Layout style={layoutStyle}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        collapsedWidth="0"
+        style={siderStyle}
+        trigger={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        onCollapse={setCollapsed}
+      >
+        <div className="demo-logo-vertical" />
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} items={items} />
+      </Sider>
+      <Layout>
+        <Header
+          style={{
+            padding: 0,
+            background: colorBgContainer,
+          }}
+        />
+        <Content style={{ margin: '24px 16px 0' }}>
+          <div
+            style={{
+              padding: 24,
+              minHeight: 240,
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+            Content keeps its full width when the sider overlays it.
+          </div>
+        </Content>
+        <Footer style={{ textAlign: 'center' }}>
+          Ant Design ©{currentYear} Created by Ant UED
+        </Footer>
+      </Layout>
+    </Layout>
+  );
+};
+export default App;
+```
 ### 响应式布局
 Layout.Sider 支持响应式布局。
 > 说明：配置 `breakpoint` 属性即生效，视窗宽度小于 `breakpoint` 时 Sider 缩小为 `collapsedWidth` 宽度，若将 `collapsedWidth` 设置为 0，会出现特殊 trigger。
@@ -457,6 +540,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Sider
@@ -487,7 +571,7 @@ const App: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+          Ant Design ©{currentYear} Created by Ant UED
         </Footer>
       </Layout>
     </Layout>
@@ -510,6 +594,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout>
       <Header
@@ -547,9 +632,7 @@ const App: React.FC = () => {
           Content
         </div>
       </Content>
-      <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
-      </Footer>
+      <Footer style={{ textAlign: 'center' }}>Ant Design ©{currentYear} Created by Ant UED</Footer>
     </Layout>
   );
 };
@@ -579,7 +662,6 @@ const siderStyle: React.CSSProperties = {
   position: 'sticky',
   insetInlineStart: 0,
   top: 0,
-  bottom: 0,
   scrollbarWidth: 'thin',
   scrollbarGutter: 'stable',
 };
@@ -601,6 +683,7 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
   return (
     <Layout hasSider>
       <Sider style={siderStyle}>
@@ -631,7 +714,7 @@ const App: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+          Ant Design ©{currentYear} Created by Ant UED
         </Footer>
       </Layout>
     </Layout>
@@ -820,7 +903,7 @@ const App: React.FC = () => {
               mode="inline"
               defaultSelectedKeys={['1']}
               defaultOpenKeys={['sub1']}
-              style={{ borderRight: 0 }}
+              style={{ borderInlineEnd: 0 }}
               items={items2}
             />
           </Sider>

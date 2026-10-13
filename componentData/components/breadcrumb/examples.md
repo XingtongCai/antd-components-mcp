@@ -5,33 +5,51 @@
 ```tsx
 import React from 'react';
 import { Breadcrumb } from 'antd';
-const App: React.FC = () => (
-  <Breadcrumb
-    items={[
-      {
-        title: 'Home',
-      },
-      {
-        title: <a href="">Application Center</a>,
-      },
-      {
-        title: <a href="">Application List</a>,
-      },
-      {
-        title: 'An Application',
-      },
-    ]}
-  />
-);
+const App: React.FC = () => {
+  return (
+    <Breadcrumb
+      items={[
+        {
+          title: 'Home',
+        },
+        {
+          title: <a href="">Application Center</a>,
+        },
+        {
+          title: <a href="">Application List</a>,
+        },
+        {
+          title: 'An Application',
+        },
+      ]}
+    />
+  );
+};
 export default App;
 ```
 ### 带有图标的
-图标放在文字前面。
+图标放在文字前面。第三方图标库（如 lucide、react-icons）渲染出的裸 `<svg>` 也会与文字垂直居中并保持间距。
 
 ```tsx
 import React from 'react';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import { Breadcrumb } from 'antd';
+// Icons from third-party libraries (e.g. lucide, react-icons) render as a bare `<svg>`
+// rather than an `.anticon` wrapper. It stays centred with, and spaced from, the label.
+const ChartIcon: React.FC = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path d="M3 3v18h18" />
+    <path d="M7 14l4-4 3 3 5-6" />
+  </svg>
+);
 const App: React.FC = () => (
   <Breadcrumb
     items={[
@@ -45,6 +63,15 @@ const App: React.FC = () => (
           <>
             <UserOutlined />
             <span>Application List</span>
+          </>
+        ),
+      },
+      {
+        href: '',
+        title: (
+          <>
+            <ChartIcon />
+            <span>Dashboard</span>
           </>
         ),
       },
@@ -197,6 +224,68 @@ const App: React.FC = () => (
     ]}
   />
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Breadcrumb 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Breadcrumb, Flex } from 'antd';
+import type { BreadcrumbProps, GetProp } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    padding: 8px;
+    border-radius: 4px;
+  `,
+  item: css`
+    color: #1890ff;
+  `,
+  separator: css`
+    color: rgba(0, 0, 0, 0.45);
+  `,
+}));
+const styles: BreadcrumbProps['styles'] = {
+  root: { border: '1px solid #f0f0f0', padding: 8, borderRadius: 4 },
+  item: { color: '#1890ff' },
+  separator: { color: 'rgba(0, 0, 0, 0.45)' },
+};
+const stylesFn: BreadcrumbProps['styles'] = (
+  info,
+): GetProp<BreadcrumbProps, 'styles', 'Return'> => {
+  const items = info.props.items || [];
+  if (items.length > 2) {
+    return {
+      root: { border: '1px solid #F5EFFF', padding: 8, borderRadius: 4 },
+      item: { color: '#8F87F1' },
+    };
+  }
+  return {};
+};
+const items = [
+  { title: 'Ant Design' },
+  { title: <a href="">Component</a> },
+  { title: 'Breadcrumb' },
+];
+const App: React.FC = () => {
+  return (
+    <Flex vertical gap="medium">
+      <Breadcrumb
+        classNames={classNames}
+        items={items.slice(0, 2)}
+        styles={styles}
+        aria-label="Breadcrumb with Object"
+      />
+      <Breadcrumb
+        classNames={classNames}
+        items={items}
+        styles={stylesFn}
+        aria-label="Breadcrumb with Function"
+      />
+    </Flex>
+  );
+};
 export default App;
 ```
 ### 组件 Token
