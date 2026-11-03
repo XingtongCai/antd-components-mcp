@@ -291,6 +291,68 @@ const App: React.FC = () => {
 };
 export default App;
 ```
+### 每个链接单独的滚动偏移量
+通过为每个 Anchor.Link 设置 `targetOffset` 属性，可以为每个链接单独设置滚动偏移量。链接级别的 `targetOffset` 优先级高于全局的 `targetOffset`。
+
+```tsx
+import React from 'react';
+import { Anchor, Col, Row } from 'antd';
+const style: React.CSSProperties = {
+  height: '20px',
+  backgroundColor: 'rgba(0, 0, 0, 0.85)',
+  position: 'fixed',
+  top: 0,
+  insetInlineStart: 0,
+  width: '75%',
+  color: '#fff',
+};
+const App: React.FC = () => {
+  const topRef = React.useRef<HTMLDivElement>(null);
+  return (
+    <Row>
+      <Col span={18}>
+        <div id="part-1" style={{ height: '100vh', background: 'rgba(255,0,0,0.2)' }} />
+        <div id="part-2" style={{ height: '100vh', background: 'rgba(0,255,0,0.2)' }} />
+        <div id="part-3" style={{ height: '100vh', background: 'rgba(0, 0, 255, 0.2)' }} />
+        <div id="part-4" style={{ height: '100vh', background: 'rgba(0, 255, 229, 0.2)' }} />
+      </Col>
+      <Col span={6}>
+        <Anchor
+          targetOffset={20}
+          items={[
+            {
+              key: 'part-1',
+              href: '#part-1',
+              title: 'Part 1',
+            },
+            {
+              key: 'part-2',
+              href: '#part-2',
+              title: 'Part 2 (uses link targetOffset: 50)',
+              targetOffset: 50,
+            },
+            {
+              key: 'part-3',
+              href: '#part-3',
+              title: 'Part 3 (uses link targetOffset: 50)',
+              targetOffset: 50,
+            },
+            {
+              key: 'part-4',
+              href: '#part-4',
+              title: 'Part 4 (uses global targetOffset: 20)',
+            },
+          ]}
+        />
+      </Col>
+      <div style={style} ref={topRef}>
+        <div>Fixed Top Block</div>
+      </div>
+    </Row>
+  );
+};
+export default App;
+```
 ### 监听锚点链接改变
 监听锚点链接改变
 
@@ -393,6 +455,63 @@ const App: React.FC = () => (
     </Link>
   </Anchor>
 );
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Anchor 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Anchor, Col, Row } from 'antd';
+import type { AnchorProps, GetProp } from 'antd';
+const classNamesObject: AnchorProps['classNames'] = {
+  root: 'demo-anchor-root',
+  item: 'demo-anchor-item',
+  itemTitle: 'demo-anchor-title',
+  indicator: 'demo-anchor-indicator',
+};
+const stylesFn: AnchorProps['styles'] = (info): GetProp<AnchorProps, 'styles', 'Return'> => {
+  if (info.props.direction === 'vertical') {
+    return {
+      root: {
+        backgroundColor: 'rgba(255,251,230,0.5)',
+        height: '100vh',
+      },
+    };
+  }
+  return {};
+};
+const items: NonNullable<AnchorProps['items']> = [
+  {
+    key: 'part-1',
+    href: '#part-1',
+    title: 'Part 1',
+  },
+  {
+    key: 'part-2',
+    href: '#part-2',
+    title: 'Part 2',
+  },
+  {
+    key: 'part-3',
+    href: '#part-3',
+    title: 'Part 3',
+  },
+];
+const App: React.FC = () => {
+  return (
+    <Row>
+      <Col span={16}>
+        <div id="part-1" style={{ height: '100vh', background: 'rgba(255,0,0,0.08)' }} />
+        <div id="part-2" style={{ height: '100vh', background: 'rgba(0,255,0,0.08)' }} />
+        <div id="part-3" style={{ height: '100vh', background: 'rgba(0,0,255,0.08)' }} />
+      </Col>
+      <Col span={8}>
+        <Anchor replace items={items} styles={stylesFn} classNames={classNamesObject} />
+      </Col>
+    </Row>
+  );
+};
 export default App;
 ```
 ### 组件 Token

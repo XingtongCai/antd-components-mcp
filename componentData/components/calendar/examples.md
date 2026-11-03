@@ -22,7 +22,32 @@ export default App;
 import React from 'react';
 import type { BadgeProps, CalendarProps } from 'antd';
 import { Badge, Calendar } from 'antd';
+import { createStyles } from 'antd-style';
 import type { Dayjs } from 'dayjs';
+const useStyles = createStyles((props) => {
+  const { prefixCls, css } = props;
+  return {
+    events: css`
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      .${prefixCls}-badge-status {
+        width: 100%;
+        overflow: hidden;
+        font-size: 12px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    `,
+    notesMonth: css`
+      font-size: 28px;
+      text-align: center;
+      section {
+        font-size: 28px;
+      }
+    `,
+  };
+});
 const getListData = (value: Dayjs) => {
   let listData: { type: string; content: string }[] = []; // Specify the type of listData
   switch (value.date()) {
@@ -50,6 +75,7 @@ const getListData = (value: Dayjs) => {
       ];
       break;
     default:
+      break;
   }
   return listData || [];
 };
@@ -57,12 +83,14 @@ const getMonthData = (value: Dayjs) => {
   if (value.month() === 8) {
     return 1394;
   }
+  return undefined;
 };
 const App: React.FC = () => {
+  const { styles } = useStyles();
   const monthCellRender = (value: Dayjs) => {
     const num = getMonthData(value);
     return num ? (
-      <div className="notes-month">
+      <div className={styles.notesMonth}>
         <section>{num}</section>
         <span>Backlog number</span>
       </div>
@@ -71,7 +99,7 @@ const App: React.FC = () => {
   const dateCellRender = (value: Dayjs) => {
     const listData = getListData(value);
     return (
-      <ul className="events">
+      <ul className={styles.events}>
         {listData.map((item) => (
           <li key={item.content}>
             <Badge status={item.type as BadgeProps['status']} text={item.content} />
@@ -81,11 +109,181 @@ const App: React.FC = () => {
     );
   };
   const cellRender: CalendarProps<Dayjs>['cellRender'] = (current, info) => {
-    if (info.type === 'date') return dateCellRender(current);
-    if (info.type === 'month') return monthCellRender(current);
+    if (info.type === 'date') {
+      return dateCellRender(current);
+    }
+    if (info.type === 'month') {
+      return monthCellRender(current);
+    }
     return info.originNode;
   };
   return <Calendar cellRender={cellRender} />;
+};
+export default App;
+```
+### 跨日期事件
+通过 `cellRender` 渲染跨日期事件范围。示例根据日期判断事件的开始、持续、结束或单日状态，并用连续色条展示。
+
+```tsx
+import React from 'react';
+import { Calendar, theme } from 'antd';
+import type { CalendarProps } from 'antd';
+import { createStyles } from 'antd-style';
+import { clsx } from 'clsx';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
+const useStyle = createStyles(({ cssVar, css }) => {
+  const barRadius = 999;
+  const {
+    controlHeight,
+    marginXXS,
+    controlHeightSM,
+    colorTextLightSolid,
+    fontSizeSM,
+    paddingXS,
+    marginXS,
+    paddingXXS,
+  } = cssVar;
+  return {
+    itemContent: css`
+      overflow: visible;
+    `,
+    cell: css`
+      min-height: ${controlHeight};
+    `,
+    list: css`
+      display: flex;
+      flex-direction: column;
+      gap: ${marginXXS};
+      margin-top: ${marginXXS};
+    `,
+    bar: css`
+      display: block;
+      height: calc(${controlHeightSM} - ${marginXXS});
+      overflow: hidden;
+      color: ${colorTextLightSolid};
+      font-size: ${fontSizeSM};
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    `,
+    barStart: css`
+      margin-inline-end: calc(-1 * (${paddingXS} + ${marginXS} / 2));
+      padding-inline-start: calc(${paddingXXS} + ${paddingXXS});
+      border-start-start-radius: ${barRadius}px;
+      border-end-start-radius: ${barRadius}px;
+    `,
+    barMiddle: css`
+      margin-inline: calc(-1 * (${paddingXS} + ${marginXS} / 2));
+    `,
+    barEnd: css`
+      margin-inline-start: calc(-1 * (${paddingXS} + ${marginXS} / 2));
+      border-start-end-radius: ${barRadius}px;
+      border-end-end-radius: ${barRadius}px;
+    `,
+    barSingle: css`
+      padding-inline-start: calc(${paddingXXS} + ${paddingXXS});
+      border-radius: ${barRadius}px;
+    `,
+  };
+});
+export interface CalendarEvent {
+  key: string;
+  title: string;
+  start: Dayjs;
+  end: Dayjs;
+  color: string;
+}
+const getEvents = (token: ReturnType<typeof theme.useToken>['token']): CalendarEvent[] => [
+  {
+    key: 'release',
+    title: 'Release window',
+    start: dayjs('2026-01-08'),
+    end: dayjs('2026-01-10'),
+    color: token.colorPrimary,
+  },
+  {
+    key: 'design-review',
+    title: 'Design review',
+    start: dayjs('2026-01-14'),
+    end: dayjs('2026-01-14'),
+    color: token.colorSuccess,
+  },
+  {
+    key: 'maintenance',
+    title: 'Maintenance',
+    start: dayjs('2026-01-21'),
+    end: dayjs('2026-01-24'),
+    color: token.colorWarning,
+  },
+  {
+    key: 'bug-fix',
+    title: 'Bug fix',
+    start: dayjs('2026-01-30'),
+    end: dayjs('2026-01-31'),
+    color: token.colorError,
+  },
+];
+const isInRange = (current: Dayjs, event: CalendarEvent) => {
+  return !current.isBefore(event.start, 'day') && !current.isAfter(event.end, 'day');
+};
+const getRangePosition = (current: Dayjs, event: CalendarEvent) => {
+  const starts = current.isSame(event.start, 'day');
+  const ends = current.isSame(event.end, 'day');
+  if (starts && ends) {
+    return 'single';
+  }
+  if (starts) {
+    return 'start';
+  }
+  if (ends) {
+    return 'end';
+  }
+  return 'middle';
+};
+const App: React.FC = () => {
+  const { token } = theme.useToken();
+  const { styles } = useStyle();
+  const events = React.useMemo(() => getEvents(token), [token]);
+  const cellRender = React.useCallback<NonNullable<CalendarProps<Dayjs>['cellRender']>>(
+    (current, info) => {
+      if (info.type !== 'date') {
+        return null;
+      }
+      const currentEvents = events.filter((event) => isInRange(current, event));
+      return (
+        <div className={styles.cell}>
+          <div className={styles.list}>
+            {currentEvents.map((event) => {
+              const position = getRangePosition(current, event);
+              const rangeClassName = {
+                start: styles.barStart,
+                middle: styles.barMiddle,
+                end: styles.barEnd,
+                single: styles.barSingle,
+              }[position];
+              return (
+                <span
+                  key={event.key}
+                  className={clsx(styles.bar, rangeClassName)}
+                  style={{ backgroundColor: event.color }}
+                >
+                  {position === 'start' || position === 'single' ? event.title : null}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      );
+    },
+    [events, styles],
+  );
+  return (
+    <Calendar
+      classNames={{ itemContent: styles.itemContent }}
+      defaultValue={dayjs('2026-01-01')}
+      cellRender={cellRender}
+    />
+  );
 };
 export default App;
 ```
@@ -104,7 +302,7 @@ const App: React.FC = () => {
   const { token } = theme.useToken();
   const wrapperStyle: React.CSSProperties = {
     width: 300,
-    border: `1px solid ${token.colorBorderSecondary}`,
+    border: `${token.lineWidth}px ${token.lineType} ${token.colorBorderSecondary}`,
     borderRadius: token.borderRadiusLG,
   };
   return (
@@ -135,7 +333,7 @@ const App: React.FC = () => {
   };
   return (
     <>
-      <Alert message={`You selected date: ${selectedValue?.format('YYYY-MM-DD')}`} />
+      <Alert title={`You selected date: ${selectedValue?.format('YYYY-MM-DD')}`} />
       <Calendar value={value} onSelect={onSelect} onPanelChange={onPanelChange} />
     </>
   );
@@ -150,11 +348,12 @@ import React from 'react';
 import { Calendar, Col, Radio, Row, Select } from 'antd';
 import type { CalendarProps } from 'antd';
 import { createStyles } from 'antd-style';
-import classNames from 'classnames';
+import type { DefaultOptionType } from 'antd/es/select';
+import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { HolidayUtil, Lunar } from 'lunar-typescript';
-const useStyle = createStyles(({ token, css, cx }) => {
+const useStyle = createStyles(({ cssVar, token, css, cx }) => {
   const lunar = css`
     color: ${token.colorTextTertiary};
     font-size: ${token.fontSizeSM}px;
@@ -168,7 +367,7 @@ const useStyle = createStyles(({ token, css, cx }) => {
   return {
     wrapper: css`
       width: 450px;
-      border: 1px solid ${token.colorBorderSecondary};
+      border: ${token.lineWidth}px ${token.lineType} ${token.colorBorderSecondary};
       border-radius: ${token.borderRadiusOuter};
       padding: 5px;
     `,
@@ -185,18 +384,18 @@ const useStyle = createStyles(({ token, css, cx }) => {
         max-width: 40px;
         max-height: 40px;
         background: transparent;
-        transition: background-color 300ms;
+        transition: background-color ${cssVar.motionDurationSlow};
         border-radius: ${token.borderRadiusOuter}px;
-        border: 1px solid transparent;
+        border: ${token.lineWidth}px ${token.lineType} transparent;
         box-sizing: border-box;
       }
       &:hover:before {
-        background: rgba(0, 0, 0, 0.04);
+        background: ${token.controlItemBgHover};
       }
     `,
     today: css`
       &:before {
-        border: 1px solid ${token.colorPrimary};
+        border: ${token.lineWidth}px ${token.lineType} ${token.colorPrimary};
       }
     `,
     text: css`
@@ -227,7 +426,7 @@ const useStyle = createStyles(({ token, css, cx }) => {
       border-radius: ${token.borderRadiusOuter}px;
       padding: 5px 0;
       &:hover {
-        background: rgba(0, 0, 0, 0.04);
+        background: ${token.controlItemBgHover};
       }
     `,
     monthCellCurrent: css`
@@ -244,15 +443,13 @@ const useStyle = createStyles(({ token, css, cx }) => {
 const App: React.FC = () => {
   const { styles } = useStyle({ test: true });
   const [selectDate, setSelectDate] = React.useState<Dayjs>(() => dayjs());
-  const [panelDateDate, setPanelDate] = React.useState<Dayjs>(() => dayjs());
+  const [panelDate, setPanelDate] = React.useState<Dayjs>(() => dayjs());
   const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>['mode']) => {
     console.log(value.format('YYYY-MM-DD'), mode);
     setPanelDate(value);
   };
-  const onDateChange: CalendarProps<Dayjs>['onSelect'] = (value, selectInfo) => {
-    if (selectInfo.source === 'date') {
-      setSelectDate(value);
-    }
+  const onDateChange: CalendarProps<Dayjs>['onSelect'] = (value) => {
+    setSelectDate(value);
   };
   const cellRender: CalendarProps<Dayjs>['fullCellRender'] = (date, info) => {
     const d = Lunar.fromDate(date.toDate());
@@ -264,16 +461,16 @@ const App: React.FC = () => {
     if (info.type === 'date') {
       return React.cloneElement(info.originNode, {
         ...(info.originNode as React.ReactElement<any>).props,
-        className: classNames(styles.dateCell, {
+        className: clsx(styles.dateCell, {
           [styles.current]: selectDate.isSame(date, 'date'),
           [styles.today]: date.isSame(dayjs(), 'date'),
         }),
         children: (
           <div className={styles.text}>
             <span
-              className={classNames({
+              className={clsx({
                 [styles.weekend]: isWeekend,
-                gray: !panelDateDate.isSame(date, 'month'),
+                gray: !panelDate.isSame(date, 'month'),
               })}
             >
               {date.get('date')}
@@ -292,7 +489,7 @@ const App: React.FC = () => {
       const month = d2.getMonthInChinese();
       return (
         <div
-          className={classNames(styles.monthCell, {
+          className={clsx(styles.monthCell, {
             [styles.monthCellCurrent]: selectDate.isSame(date, 'month'),
           })}
         >
@@ -320,10 +517,10 @@ const App: React.FC = () => {
         headerRender={({ value, type, onChange, onTypeChange }) => {
           const start = 0;
           const end = 12;
-          const monthOptions = [];
+          const monthOptions: DefaultOptionType[] = [];
           let current = value.clone();
           const localeData = value.localeData();
-          const months = [];
+          const months: dayjs.MonthNames[] = [];
           for (let i = 0; i < 12; i++) {
             current = current.month(i);
             months.push(localeData.monthsShort(current));
@@ -336,7 +533,7 @@ const App: React.FC = () => {
           }
           const year = value.year();
           const month = value.month();
-          const options = [];
+          const options: DefaultOptionType[] = [];
           for (let i = year - 10; i < year + 10; i += 1) {
             options.push({
               label: getYearLabel(i),
@@ -411,7 +608,7 @@ export default App;
 import React from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import { Calendar, Col, Radio, Row, Select, theme, Typography } from 'antd';
+import { Calendar, Flex, Radio, Select, theme, Typography } from 'antd';
 import type { CalendarProps } from 'antd';
 import type { Dayjs } from 'dayjs';
 import dayLocaleData from 'dayjs/plugin/localeData';
@@ -423,7 +620,7 @@ const App: React.FC = () => {
   };
   const wrapperStyle: React.CSSProperties = {
     width: 300,
-    border: `1px solid ${token.colorBorderSecondary}`,
+    border: `${token.lineWidth}px ${token.lineType} ${token.colorBorderSecondary}`,
     borderRadius: token.borderRadiusLG,
   };
   return (
@@ -431,81 +628,103 @@ const App: React.FC = () => {
       <Calendar
         fullscreen={false}
         headerRender={({ value, type, onChange, onTypeChange }) => {
-          const start = 0;
-          const end = 12;
-          const monthOptions = [];
-          let current = value.clone();
-          const localeData = value.localeData();
-          const months = [];
-          for (let i = 0; i < 12; i++) {
-            current = current.month(i);
-            months.push(localeData.monthsShort(current));
-          }
-          for (let i = start; i < end; i++) {
-            monthOptions.push(
-              <Select.Option key={i} value={i} className="month-item">
-                {months[i]}
-              </Select.Option>,
-            );
-          }
           const year = value.year();
           const month = value.month();
-          const options = [];
-          for (let i = year - 10; i < year + 10; i += 1) {
-            options.push(
-              <Select.Option key={i} value={i} className="year-item">
-                {i}
-              </Select.Option>,
-            );
-          }
+          const yearOptions = Array.from({ length: 20 }, (_, i) => {
+            const label = year - 10 + i;
+            return { label, value: label };
+          });
+          const monthOptions = value
+            .localeData()
+            .monthsShort()
+            .map((label, index) => ({
+              label,
+              value: index,
+            }));
           return (
             <div style={{ padding: 8 }}>
               <Typography.Title level={4}>Custom header</Typography.Title>
-              <Row gutter={8}>
-                <Col>
-                  <Radio.Group
-                    size="small"
-                    onChange={(e) => onTypeChange(e.target.value)}
-                    value={type}
-                  >
-                    <Radio.Button value="month">Month</Radio.Button>
-                    <Radio.Button value="year">Year</Radio.Button>
-                  </Radio.Group>
-                </Col>
-                <Col>
-                  <Select
-                    size="small"
-                    popupMatchSelectWidth={false}
-                    className="my-year-select"
-                    value={year}
-                    onChange={(newYear) => {
-                      const now = value.clone().year(newYear);
-                      onChange(now);
-                    }}
-                  >
-                    {options}
-                  </Select>
-                </Col>
-                <Col>
-                  <Select
-                    size="small"
-                    popupMatchSelectWidth={false}
-                    value={month}
-                    onChange={(newMonth) => {
-                      const now = value.clone().month(newMonth);
-                      onChange(now);
-                    }}
-                  >
-                    {monthOptions}
-                  </Select>
-                </Col>
-              </Row>
+              <Flex gap={8}>
+                <Radio.Group
+                  size="small"
+                  onChange={(e) => onTypeChange(e.target.value)}
+                  value={type}
+                >
+                  <Radio.Button value="month">Month</Radio.Button>
+                  <Radio.Button value="year">Year</Radio.Button>
+                </Radio.Group>
+                <Select
+                  size="small"
+                  popupMatchSelectWidth={false}
+                  value={year}
+                  options={yearOptions}
+                  onChange={(newYear) => {
+                    const now = value.clone().year(newYear);
+                    onChange(now);
+                  }}
+                />
+                <Select
+                  size="small"
+                  popupMatchSelectWidth={false}
+                  value={month}
+                  options={monthOptions}
+                  onChange={(newMonth) => {
+                    const now = value.clone().month(newMonth);
+                    onChange(now);
+                  }}
+                />
+              </Flex>
             </div>
           );
         }}
         onPanelChange={onPanelChange}
       />
     </div>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Calendar 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Calendar, Flex } from 'antd';
+import type { CalendarProps, GetProp } from 'antd';
+import { createStyles } from 'antd-style';
+import type { Dayjs } from 'dayjs';
+const useStyles = createStyles(({ token }) => ({
+  root: {
+    padding: 10,
+    backgroundColor: token.colorPrimaryBg,
+  },
+}));
+const stylesObject: CalendarProps<Dayjs>['styles'] = {
+  root: {
+    borderRadius: 8,
+    width: 600,
+  },
+};
+const stylesFunction: CalendarProps<Dayjs>['styles'] = (
+  info,
+): GetProp<CalendarProps<Dayjs>, 'styles', 'Return'> => {
+  if (info.props.fullscreen) {
+    return {
+      root: {
+        border: '2px solid #BDE3C3',
+        borderRadius: 10,
+        backgroundColor: 'rgba(189,227,195, 0.3)',
+      },
+    };
+  }
+};
+const App: React.FC = () => {
+  const { styles: classNames } = useStyles();
+  return (
+    <Flex vertical gap="medium">
+      <Calendar fullscreen={false} classNames={classNames} styles={stylesObject} />
+      <Calendar classNames={classNames} styles={stylesFunction} />
+    </Flex>
   );
 };
 export default App;

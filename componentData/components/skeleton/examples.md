@@ -33,14 +33,14 @@ export default App;
 import React, { useState } from 'react';
 import { DotChartOutlined } from '@ant-design/icons';
 import type { RadioChangeEvent } from 'antd';
-import { Flex, Divider, Form, Radio, Skeleton, Space, Switch } from 'antd';
-type SizeType = 'default' | 'small' | 'large';
+import { Divider, Flex, Form, Radio, Skeleton, Space, Switch } from 'antd';
+type SizeType = 'large' | 'medium' | 'small';
 type ButtonShapeType = 'circle' | 'square' | 'round' | 'default';
 type AvatarShapeType = 'circle' | 'square';
 const App: React.FC = () => {
   const [active, setActive] = useState(false);
   const [block, setBlock] = useState(false);
-  const [size, setSize] = useState<SizeType>('default');
+  const [size, setSize] = useState<SizeType>('medium');
   const [buttonShape, setButtonShape] = useState<ButtonShapeType>('default');
   const [avatarShape, setAvatarShape] = useState<AvatarShapeType>('circle');
   const handleActiveChange = (checked: boolean) => {
@@ -59,7 +59,7 @@ const App: React.FC = () => {
     setAvatarShape(e.target.value);
   };
   return (
-    <Flex gap="middle" vertical>
+    <Flex gap="medium" vertical>
       <Space>
         <Skeleton.Button active={active} size={size} shape={buttonShape} block={block} />
         <Skeleton.Avatar active={active} size={size} shape={avatarShape} />
@@ -85,8 +85,8 @@ const App: React.FC = () => {
           </Form.Item>
           <Form.Item label="Size">
             <Radio.Group value={size} onChange={handleSizeChange}>
-              <Radio.Button value="default">Default</Radio.Button>
               <Radio.Button value="large">Large</Radio.Button>
+              <Radio.Button value="medium">Medium</Radio.Button>
               <Radio.Button value="small">Small</Radio.Button>
             </Radio.Group>
           </Form.Item>
@@ -126,7 +126,7 @@ const App: React.FC = () => {
     }, 3000);
   };
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size={16}>
+    <Space vertical style={{ width: '100%' }} size={16}>
       <Skeleton loading={loading}>
         <h4 style={{ marginBottom: 16 }}>Ant Design, a design language</h4>
         <p>
@@ -150,15 +150,22 @@ export default App;
 import React, { useState } from 'react';
 import type Icon from '@ant-design/icons';
 import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
-import { Avatar, List, Skeleton, Switch } from 'antd';
+import { Avatar, Flex, Listy, Skeleton, Space, Switch, Typography } from 'antd';
 interface IconTextProps {
   icon: typeof Icon;
   text: React.ReactNode;
 }
-const listData = Array.from({ length: 3 }).map((_, i) => ({
+interface DataType {
+  href: string;
+  title: string;
+  avatar: string;
+  description: string;
+  content: string;
+}
+const listData = Array.from<any, DataType>({ length: 3 }, (_, i) => ({
   href: 'https://ant.design',
   title: `ant design part ${i + 1}`,
-  avatar: `https://api.dicebear.com/7.x/miniavs/svg?seed=${i}`,
+  avatar: `https://api.dicebear.com/10.x/lorelei/svg?seed=${i}`,
   description:
     'Ant Design, a design language for background applications, is refined by Ant UED Team.',
   content:
@@ -178,44 +185,104 @@ const App: React.FC = () => {
   return (
     <>
       <Switch checked={!loading} onChange={onChange} style={{ marginBottom: 16 }} />
-      <List
-        itemLayout="vertical"
-        size="large"
-        dataSource={listData}
-        renderItem={(item) => (
-          <List.Item
-            key={item.title}
-            actions={
-              !loading
-                ? [
-                    <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
-                    <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o" />,
-                    <IconText icon={MessageOutlined} text="2" key="list-vertical-message" />,
-                  ]
-                : undefined
-            }
-            extra={
-              !loading && (
-                <img
-                  width={272}
-                  alt="logo"
-                  src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-                />
-              )
-            }
-          >
-            <Skeleton loading={loading} active avatar>
-              <List.Item.Meta
-                avatar={<Avatar src={item.avatar} />}
-                title={<a href={item.href}>{item.title}</a>}
-                description={item.description}
+      <Listy<DataType>
+        items={listData}
+        rowKey="title"
+        styles={{ item: { padding: '16px 24px' } }}
+        itemRender={(item) => (
+          <Flex gap="large">
+            <Flex vertical flex="auto" gap="middle" style={{ minWidth: 0 }}>
+              <Skeleton loading={loading} active avatar>
+                <Flex gap="middle" align="flex-start">
+                  <Avatar src={item.avatar} />
+                  <Flex vertical>
+                    <a href={item.href}>{item.title}</a>
+                    <Typography.Text type="secondary">{item.description}</Typography.Text>
+                  </Flex>
+                </Flex>
+                {item.content}
+              </Skeleton>
+              {!loading && (
+                <Space separator={<Typography.Text type="secondary">|</Typography.Text>}>
+                  <IconText icon={StarOutlined} text="156" />
+                  <IconText icon={LikeOutlined} text="156" />
+                  <IconText icon={MessageOutlined} text="2" />
+                </Space>
+              )}
+            </Flex>
+            {!loading && (
+              <img
+                draggable={false}
+                width={272}
+                alt="logo"
+                src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
               />
-              {item.content}
-            </Skeleton>
-          </List.Item>
+            )}
+          </Flex>
         )}
       />
     </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象或者函数可以自定义 Skeleton 组件的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Skeleton } from 'antd';
+import type { GetProp, SkeletonProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classnames = createStaticStyles(({ css }) => ({
+  root: css`
+    border-radius: 10px;
+    padding: 12px;
+  `,
+  header: css`
+    margin-bottom: 12px;
+  `,
+}));
+const paragraphStyles = createStaticStyles(({ css }) => ({
+  paragraph: css`
+    & > li {
+      background-color: rgba(229, 243, 254, 0.5);
+    }
+  `,
+}));
+const styles: SkeletonProps['styles'] = {
+  avatar: {
+    border: '1px solid #aaa',
+  },
+  title: {
+    border: '1px solid #aaa',
+  },
+};
+const stylesFn: SkeletonProps['styles'] = (info): GetProp<SkeletonProps, 'styles', 'Return'> => {
+  if (info.props.active) {
+    return {
+      root: {
+        border: '1px solid rgba(229, 243, 254, 0.3)',
+      },
+      title: {
+        backgroundColor: 'rgba(229, 243, 254, 0.5)',
+        height: 20,
+        borderRadius: 20,
+      },
+    };
+  }
+  return {};
+};
+const App: React.FC = () => {
+  return (
+    <Flex gap="medium">
+      <Skeleton classNames={classnames} styles={styles} avatar paragraph={false} />
+      <Skeleton
+        classNames={{ ...classnames, paragraph: paragraphStyles.paragraph }}
+        styles={stylesFn}
+        active
+      />
+    </Flex>
   );
 };
 export default App;

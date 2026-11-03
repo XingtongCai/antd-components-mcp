@@ -13,7 +13,7 @@ const baseStyle: React.CSSProperties = {
 const App: React.FC = () => {
   const [value, setValue] = React.useState<string>('horizontal');
   return (
-    <Flex gap="middle" vertical>
+    <Flex gap="medium" vertical>
       <Radio.Group value={value} onChange={(e) => setValue(e.target.value)}>
         <Radio value="horizontal">horizontal</Radio>
         <Radio value="vertical">vertical</Radio>
@@ -54,7 +54,7 @@ const App: React.FC = () => {
   const [justify, setJustify] = React.useState<FlexProps['justify']>(justifyOptions[0]);
   const [alignItems, setAlignItems] = React.useState<FlexProps['align']>(alignOptions[0]);
   return (
-    <Flex gap="middle" align="start" vertical>
+    <Flex gap="medium" align="start" vertical>
       <p>Select justify :</p>
       <Segmented options={justifyOptions} onChange={setJustify} />
       <p>Select align :</p>
@@ -71,20 +71,19 @@ const App: React.FC = () => {
 export default App;
 ```
 ### 设置间隙
-使用 `gap` 设置元素之间的间距，预设了 `small`、`middle`、`large` 三种尺寸，也可以自定义间距。
+使用 `gap` 设置元素之间的间距，预设了 `small`、`medium`、`large` 三种尺寸，也可以自定义间距。
 
 ```tsx
 import React from 'react';
 import { Button, Flex, Radio, Slider } from 'antd';
-import type { ConfigProviderProps } from 'antd';
-type SizeType = ConfigProviderProps['componentSize'];
+import type { FlexProps } from 'antd';
 const App: React.FC = () => {
-  const [gapSize, setGapSize] = React.useState<SizeType | 'customize'>('small');
+  const [gapSize, setGapSize] = React.useState<FlexProps['gap']>('small');
   const [customGapSize, setCustomGapSize] = React.useState<number>(0);
   return (
-    <Flex gap="middle" vertical>
+    <Flex gap="medium" vertical>
       <Radio.Group value={gapSize} onChange={(e) => setGapSize(e.target.value)}>
-        {['small', 'middle', 'large', 'customize'].map((size) => (
+        {['small', 'medium', 'large', 'customize'].map((size) => (
           <Radio key={size} value={size}>
             {size}
           </Radio>
@@ -136,6 +135,7 @@ const App: React.FC = () => (
   <Card hoverable style={cardStyle} styles={{ body: { padding: 0, overflow: 'hidden' } }}>
     <Flex justify="space-between">
       <img
+        draggable={false}
         alt="avatar"
         src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
         style={imgStyle}
