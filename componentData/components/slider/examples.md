@@ -87,7 +87,7 @@ const DecimalStep: React.FC = () => {
   );
 };
 const App: React.FC = () => (
-  <Space style={{ width: '100%' }} direction="vertical">
+  <Space style={{ width: '100%' }} vertical>
     <IntegerStep />
     <DecimalStep />
   </Space>
@@ -100,23 +100,44 @@ export default App;
 ```tsx
 import React, { useState } from 'react';
 import { FrownOutlined, SmileOutlined } from '@ant-design/icons';
-import { Slider } from 'antd';
+import { Flex, Slider } from 'antd';
+import { createStyles } from 'antd-style';
+import { clsx } from 'clsx';
+const useStyles = createStyles((props) => {
+  const { css, iconPrefixCls, cssVar } = props;
+  return {
+    wrapper: css`
+      position: relative;
+      .${iconPrefixCls} {
+        color: ${cssVar.colorTextQuaternary};
+        font-size: ${cssVar.fontSizeLG};
+        transition: color ${cssVar.motionDurationFast} ${cssVar.motionEaseInOutCirc};
+        &.isActive {
+          color: ${cssVar.colorPrimary};
+        }
+      }
+    `,
+    slider: css`
+      flex: 1;
+      width: 100%;
+    `,
+  };
+});
 interface IconSliderProps {
   max: number;
   min: number;
 }
 const IconSlider: React.FC<IconSliderProps> = (props) => {
   const { max, min } = props;
+  const { styles } = useStyles();
   const [value, setValue] = useState(0);
   const mid = Number(((max - min) / 2).toFixed(5));
-  const preColorCls = value >= mid ? '' : 'icon-wrapper-active';
-  const nextColorCls = value >= mid ? 'icon-wrapper-active' : '';
   return (
-    <div className="icon-wrapper">
-      <FrownOutlined className={preColorCls} />
-      <Slider {...props} onChange={setValue} value={value} />
-      <SmileOutlined className={nextColorCls} />
-    </div>
+    <Flex justify="space-between" align="center" gap="small" className={styles.wrapper}>
+      <FrownOutlined className={clsx({ isActive: value < mid })} />
+      <Slider {...props} onChange={setValue} value={value} className={styles.slider} />
+      <SmileOutlined className={clsx({ isActive: value >= mid })} />
+    </Flex>
   );
 };
 const App: React.FC = () => <IconSlider min={0} max={20} />;
@@ -165,34 +186,38 @@ const App: React.FC = () => (
 export default App;
 ```
 ### 带标签的滑块
-使用 `marks` 属性标注分段式滑块，使用 `value` / `defaultValue` 指定滑块位置。当 `included=false` 时，表明不同标记间为并列关系。当 `step=null` 时，Slider 的可选值仅有 `marks` 标出来的部分。
+使用 `marks` 属性标注分段式滑块，使用 `value` / `defaultValue` 指定滑块位置。当 `included=false` 时，表明不同标记间为并列关系。当 `step=null` 时，Slider 的可选值仅有 `marks`、`min` 和 `max`。
 
 ```tsx
 import React from 'react';
 import { Slider } from 'antd';
 import type { SliderSingleProps } from 'antd';
+const style: React.CSSProperties = {
+  marginBottom: 16,
+};
+const sliderStyle: React.CSSProperties = {
+  marginBottom: 48,
+};
 const marks: SliderSingleProps['marks'] = {
   0: '0°C',
   26: '26°C',
   37: '37°C',
   100: {
-    style: {
-      color: '#f50',
-    },
+    style: { color: '#f50' },
     label: <strong>100°C</strong>,
   },
 };
 const App: React.FC = () => (
   <>
-    <h4>included=true</h4>
-    <Slider marks={marks} defaultValue={37} />
-    <Slider range marks={marks} defaultValue={[26, 37]} />
-    <h4>included=false</h4>
-    <Slider marks={marks} included={false} defaultValue={37} />
-    <h4>marks & step</h4>
-    <Slider marks={marks} step={10} defaultValue={37} />
-    <h4>step=null</h4>
-    <Slider marks={marks} step={null} defaultValue={37} />
+    <h4 style={style}>included=true</h4>
+    <Slider style={sliderStyle} marks={marks} defaultValue={37} />
+    <Slider style={sliderStyle} range marks={marks} defaultValue={[26, 37]} />
+    <h4 style={style}>included=false</h4>
+    <Slider style={sliderStyle} marks={marks} included={false} defaultValue={37} />
+    <h4 style={style}>marks & step</h4>
+    <Slider style={sliderStyle} marks={marks} step={10} defaultValue={37} />
+    <h4 style={style}>step=null</h4>
+    <Slider style={sliderStyle} marks={marks} step={null} defaultValue={37} />
   </>
 );
 export default App;
@@ -323,6 +348,122 @@ const App: React.FC = () => {
       value={value}
       onChange={setValue}
     />
+  );
+};
+export default App;
+```
+### 禁用指定滑块
+设置 `disabled` 为数组，可以单独禁用 range 模式下特定的 handle。禁用后该 handle 作为移动边界，其他 handle 无法越过。
+
+```tsx
+import React from 'react';
+import { Checkbox, Flex, Slider } from 'antd';
+const handleOptions = [
+  { key: 'start', label: 'Disabled Handle 1' },
+  { key: 'middle', label: 'Disabled Handle 2' },
+  { key: 'end', label: 'Disabled Handle 3' },
+];
+const App: React.FC = () => {
+  const [value, setValue] = React.useState([20, 50, 80]);
+  const [disabled, setDisabled] = React.useState<boolean[]>([false, false, false]);
+  const handleDisabledChange = (index: number, checked: boolean) => {
+    const newDisabled = [...disabled];
+    newDisabled[index] = checked;
+    setDisabled(newDisabled);
+  };
+  return (
+    <>
+      <Slider
+        range={{ draggableTrack: true, minCount: 2, maxCount: 5 }}
+        value={value}
+        onChange={setValue}
+        disabled={disabled}
+      />
+      <Flex gap="small" align="center" justify="flex-start" style={{ marginTop: 16 }}>
+        {handleOptions.map((handle, index) => {
+          return (
+            <Checkbox
+              key={`item-${handle.key}`}
+              checked={disabled[index]}
+              onChange={(e) => handleDisabledChange(index, e.target.checked)}
+            >
+              {handle.label}
+            </Checkbox>
+          );
+        })}
+      </Flex>
+    </>
+  );
+};
+export default App;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Sliders 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { Flex, Slider } from 'antd';
+import type { SliderSingleProps } from 'antd';
+import { createStyles } from 'antd-style';
+const useHorizontalStyles = createStyles(({ css }) => ({
+  root: css`
+    width: 300px;
+  `,
+}));
+const useVerticalStyles = createStyles(({ css, prefixCls, cssVar }) => ({
+  root: css`
+    width: 100px;
+    &:hover {
+      .${prefixCls}-slider-handle:after {
+        box-shadow: 0 0 0 ${cssVar.lineWidthBold} #722ed1;
+      }
+    }
+  `,
+  handle: css`
+    &.${prefixCls}-slider-handle:hover::after,
+      &.${prefixCls}-slider-handle:active::after,
+      &.${prefixCls}-slider-handle:focus::after,
+      &.${prefixCls}-slider-handle::after {
+      box-shadow: 0 0 0 ${cssVar.lineWidthBold} #722ed1;
+    }
+  `,
+}));
+const stylesObject: SliderSingleProps['styles'] = {
+  track: { backgroundImage: 'linear-gradient(180deg, #91caff, #1677ff)' },
+  handle: { borderColor: '#1677ff', boxShadow: '0 2px 8px #1677ff' },
+};
+const stylesFn: SliderSingleProps['styles'] = (info) => {
+  if (info.props.orientation === 'vertical') {
+    return {
+      root: { height: 300 },
+      track: { backgroundImage: 'linear-gradient(180deg, #722cc0, #722ed1)' },
+      handle: { borderColor: '#722ed1', boxShadow: '0 2px 8px #722ed1' },
+    };
+  }
+  return {};
+};
+const sharedProps: SliderSingleProps = {
+  defaultValue: 30,
+};
+const App: React.FC = () => {
+  const { styles: horizontalClassNames } = useHorizontalStyles();
+  const { styles: verticalClassNames } = useVerticalStyles();
+  return (
+    <Flex vertical gap="medium">
+      <Slider
+        {...sharedProps}
+        orientation="horizontal"
+        classNames={horizontalClassNames}
+        styles={stylesObject}
+      />
+      <Slider
+        {...sharedProps}
+        classNames={verticalClassNames}
+        orientation="vertical"
+        reverse
+        styles={stylesFn}
+      />
+    </Flex>
   );
 };
 export default App;

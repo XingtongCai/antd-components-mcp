@@ -24,7 +24,7 @@ import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
 import { Segmented } from 'antd';
 const Demo: React.FC = () => (
   <Segmented
-    vertical
+    orientation="vertical"
     options={[
       { value: 'List', icon: <BarsOutlined /> },
       { value: 'Kanban', icon: <AppstoreOutlined /> },
@@ -40,7 +40,7 @@ export default Demo;
 import React from 'react';
 import { Segmented } from 'antd';
 const Demo: React.FC = () => (
-  <Segmented options={[123, 456, 'longtext-longtext-longtext-longtext']} block />
+  <Segmented<string | number> options={[123, 456, 'longtext-longtext-longtext-longtext']} block />
 );
 export default Demo;
 ```
@@ -51,16 +51,13 @@ export default Demo;
 import React, { useState } from 'react';
 import { MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { Flex, Segmented } from 'antd';
-import type { SizeType } from '../../config-provider/SizeContext';
+import type { SegmentedProps } from 'antd';
+type SizeType = NonNullable<SegmentedProps['size']>;
 const Demo: React.FC = () => {
-  const [size, setSize] = useState<SizeType>('middle');
+  const [size, setSize] = useState<SizeType>('medium');
   return (
     <Flex gap="small" align="flex-start" vertical>
-      <Segmented
-        options={['small', 'middle', 'large']}
-        value={size}
-        onChange={(value) => setSize(value as SizeType)}
-      />
+      <Segmented<SizeType> options={['small', 'medium', 'large']} value={size} onChange={setSize} />
       <Segmented
         size={size}
         shape="round"
@@ -103,13 +100,19 @@ export default App;
 import React, { useState } from 'react';
 import { Segmented } from 'antd';
 const Demo: React.FC = () => {
-  const [value, setValue] = useState<string | number>('Map');
-  return <Segmented options={['Map', 'Transit', 'Satellite']} value={value} onChange={setValue} />;
+  const [value, setValue] = useState<string>('Map');
+  return (
+    <Segmented<string>
+      options={['Map', 'Transit', 'Satellite']}
+      value={value}
+      onChange={setValue}
+    />
+  );
 };
 export default Demo;
 ```
 ### 自定义渲染
-使用 ReactNode 自定义渲染每一个 Segmented Item。
+自定义渲染每一个 Segmented Item。
 
 ```tsx
 import React from 'react';
@@ -122,29 +125,34 @@ const App: React.FC = () => (
         {
           label: (
             <div style={{ padding: 4 }}>
-              <Avatar src="https://api.dicebear.com/7.x/miniavs/svg?seed=8" />
+              <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=8" alt="User 1" />
               <div>User 1</div>
             </div>
           ),
           value: 'user1',
+          tooltip: { title: 'hello user1', color: 'gold' },
         },
         {
           label: (
             <div style={{ padding: 4 }}>
-              <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
+              <Avatar style={{ backgroundColor: '#f56a00' }} alt="User 2">
+                K
+              </Avatar>
               <div>User 2</div>
             </div>
           ),
           value: 'user2',
+          tooltip: { title: 'hello user2', color: 'pink' },
         },
         {
           label: (
             <div style={{ padding: 4 }}>
-              <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
+              <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} alt="User 3" />
               <div>User 3</div>
             </div>
           ),
           value: 'user3',
+          tooltip: { title: 'hello user3', color: 'geekblue' },
         },
       ]}
     />
@@ -217,7 +225,7 @@ const Demo: React.FC = () => {
 export default Demo;
 ```
 ### 三种大小
-我们为 `<Segmented />` 组件定义了三种尺寸（大、默认、小），高度分别为 `40px`、`32px` 和 `24px`。
+我们为 `<Segmented />` 组件定义了三种尺寸（大、中、小），高度分别为 `40px`、`32px` 和 `24px`。
 
 ```tsx
 import React from 'react';
@@ -232,17 +240,34 @@ const App: React.FC = () => (
 export default App;
 ```
 ### 设置图标
-给 Segmented Item 设置 Icon。
+给 Segmented Item 设置 Icon。`icon` 也支持第三方图标库的裸 `<svg>` 元素，会自动与文字居中对齐。
 
 ```tsx
 import React from 'react';
 import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
 import { Segmented } from 'antd';
+// Icons from third-party libraries (e.g. lucide, react-icons) render as a bare `<svg>`
+// rather than an `.anticon` wrapper. It stays vertically centred with the label.
+const CalendarIcon: React.FC = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18" />
+  </svg>
+);
 const Demo: React.FC = () => (
   <Segmented
     options={[
       { label: 'List', value: 'List', icon: <BarsOutlined /> },
       { label: 'Kanban', value: 'Kanban', icon: <AppstoreOutlined /> },
+      { label: 'Calendar', value: 'Calendar', icon: <CalendarIcon /> },
     ]}
   />
 );
@@ -275,6 +300,75 @@ const Demo: React.FC = () => (
   <Segmented<string> options={['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']} name="group" />
 );
 export default Demo;
+```
+### 自定义语义结构的样式和类
+通过 `classNames` 和 `styles` 传入对象/函数可以自定义 Segmented 的[语义化结构](#semantic-dom)样式。
+
+```tsx
+import React from 'react';
+import { CloudOutlined, RocketOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { Flex, Segmented } from 'antd';
+import type { GetProp, SegmentedProps } from 'antd';
+import { createStaticStyles } from 'antd-style';
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    padding: 2px;
+  `,
+}));
+const styleFn: SegmentedProps['styles'] = (info): GetProp<SegmentedProps, 'styles', 'Return'> => {
+  if (info.props.vertical) {
+    return {
+      root: {
+        border: '1px solid #77BEF0',
+        padding: 4,
+        width: 100,
+      },
+      icon: {
+        color: '#77BEF0',
+      },
+      item: {
+        textAlign: 'start',
+      },
+    };
+  }
+  return {};
+};
+const styles: SegmentedProps['styles'] = {
+  root: {
+    padding: 4,
+    width: 260,
+  },
+};
+const options: SegmentedProps['options'] = [
+  {
+    label: 'Boost',
+    value: 'boost',
+    icon: <RocketOutlined />,
+  },
+  {
+    label: 'Stream',
+    value: 'stream',
+    icon: <ThunderboltOutlined />,
+  },
+  {
+    label: 'Cloud',
+    value: 'cloud',
+    icon: <CloudOutlined />,
+  },
+];
+const App: React.FC = () => {
+  const segmentedSharedProps: SegmentedProps = {
+    options,
+    classNames,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <Segmented {...segmentedSharedProps} styles={styles} />
+      <Segmented {...segmentedSharedProps} styles={styleFn} vertical />
+    </Flex>
+  );
+};
+export default App;
 ```
 ### 受控同步模式
 测试受控模式下两个 Segmented 同步 state。
@@ -314,7 +408,7 @@ const App: React.FC = () => (
     </div>
     <div>
       <Segmented
-        size="middle"
+        size="medium"
         style={{ marginInlineEnd: 6 }}
         options={['Daily', 'Weekly', 'Monthly']}
       />
@@ -326,9 +420,13 @@ const App: React.FC = () => (
         style={{ marginInlineEnd: 6 }}
         options={['Daily', 'Weekly', 'Monthly']}
       />
-      <Select size="small" defaultValue="lucy" style={{ width: 150 }}>
-        <Select.Option value="lucy">Lucy</Select.Option>
-      </Select>
+      <Select
+        size="small"
+        defaultValue="lucy"
+        aria-label="select"
+        style={{ width: 150 }}
+        options={[{ label: 'Lucy', value: 'lucy' }]}
+      />
     </div>
   </Flex>
 );
@@ -341,22 +439,41 @@ export default App;
 import React from 'react';
 import { ConfigProvider, Segmented } from 'antd';
 const Demo: React.FC = () => (
-  <ConfigProvider
-    theme={{
-      components: {
-        Segmented: {
-          itemColor: '#222',
-          itemHoverColor: '#333',
-          itemHoverBg: 'rgba(0, 0, 0, 0.06)',
-          itemSelectedBg: '#aaa',
-          itemActiveBg: '#ccc',
-          itemSelectedColor: '#fff',
+  <>
+    <ConfigProvider
+      theme={{
+        components: {
+          Segmented: {
+            itemColor: '#222',
+            itemHoverColor: '#333',
+            itemHoverBg: 'rgba(0, 0, 0, 0.06)',
+            itemSelectedBg: '#aaa',
+            itemActiveBg: '#ccc',
+            itemSelectedColor: '#fff',
+          },
         },
-      },
-    }}
-  >
-    <Segmented options={['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']} />
-  </ConfigProvider>
+      }}
+    >
+      <Segmented options={['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']} />
+    </ConfigProvider>
+    &nbsp;&nbsp;
+    <ConfigProvider
+      theme={{
+        components: {
+          Segmented: {
+            itemColor: '#222',
+            itemHoverColor: '#333',
+            itemHoverBg: 'rgba(0, 0, 0, 0.06)',
+            itemSelectedBg: 'linear-gradient(225deg, #c200ff 0%, #00ffff 100%)',
+            itemActiveBg: '#ccc',
+            itemSelectedColor: '#fff',
+          },
+        },
+      }}
+    >
+      <Segmented options={['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']} />
+    </ConfigProvider>
+  </>
 );
 export default Demo;
 ```
